@@ -1,0 +1,5 @@
+const CACHE_NAME="qrmanut-static-7.6.1.3";
+const STATIC_ASSETS=["./equip_formulario.html","./manifest.webmanifest","./qrmanut-180.png","./qrmanut-192.png","./qrmanut-512.png"];
+self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(STATIC_ASSETS)).then(()=>self.skipWaiting())));
+self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("qrmanut-static-")&&k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;const u=new URL(e.request.url);if(e.request.mode==="navigate"||u.pathname.endsWith("/equip_formulario.html")){e.respondWith(fetch(e.request).then(r=>{const x=r.clone();caches.open(CACHE_NAME).then(c=>c.put("./equip_formulario.html",x));return r}).catch(()=>caches.match("./equip_formulario.html")));return}if(u.origin===self.location.origin)e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(r=>{const x=r.clone();caches.open(CACHE_NAME).then(cc=>cc.put(e.request,x));return r})))});
