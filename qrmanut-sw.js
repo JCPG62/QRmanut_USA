@@ -1,10 +1,10 @@
 /* ============================================================
  * QRManut USA - Service Worker
- * Version 7.6.2.0 Multi-School
+ * Version 7.6.2.1
  * ============================================================ */
 
 const CACHE_PREFIX = "qrmanut-usa-";
-const CACHE_NAME = "qrmanut-usa-v7.6.2.0";
+const CACHE_NAME = "qrmanut-usa-v7.6.2.1";
 
 const APP_SHELL = [
   "./",
@@ -37,7 +37,6 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
