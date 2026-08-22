@@ -17,6 +17,7 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:#111827;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.container{max-width:960px;margin:auto;padding:16px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 5px 15px rgba(0,0,0,.05)}h1{margin:0 0 5px;font-size:1.35rem}h2{margin-top:0;font-size:1.1rem}h3{font-size:1rem;margin-top:18px}.hidden{display:none!important}.muted{color:#6b7280}.badge{display:inline-block;background:#e8eef8;color:#1f4e78;padding:5px 9px;border-radius:999px;font-size:.8rem;font-weight:700;margin-top:6px}.section{border-top:1px solid #e5e7eb;margin-top:18px;padding-top:14px}.pair{padding:7px 0;border-bottom:1px dashed #eee}.pair:last-child{border-bottom:0}.actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;margin-top:20px}.chip,.btn-preventive,.btn-search{display:inline-flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:11px 17px;border-radius:999px;font-weight:700;cursor:pointer}.chip{background:#dc2626;color:#fff;border:0}.btn-preventive{background:#047857;color:#fff;border:0}.btn-search{background:#fff;color:#1f4e78;border:1px solid #1f4e78}.status-card{margin-top:16px;border-radius:13px;padding:13px;border:1px solid #e5e7eb}.status-card.ok{background:#ecfdf5}.status-card.critico{background:#fef2f2}.status-card.atendimento{background:#fffbeb}.status-card.aguardando{background:#fff7ed}.status-title{font-weight:800}.status-info{margin-top:5px;font-size:.86rem;color:#6b7280}.search-title{color:#1f4e78;font-size:1.45rem;font-weight:800}
 .system-access-info{margin:12px 0;padding:10px 12px;border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:10px;font-size:.84rem}.system-access-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.menu-locked-card{margin-top:18px;text-align:center;padding:22px}.menu-locked-card .btn{margin-top:12px}.system-login-note{font-size:.84rem;color:#6b7280;line-height:1.45;margin-top:8px}
+.global-school-scope{margin:10px 0 14px;padding:12px 14px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:12px}.global-school-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.global-school-label{font-weight:800;color:#1e3a8a;white-space:nowrap}.global-school-row select{width:auto;min-width:280px;max-width:100%;padding:9px 11px;background:#fff}.global-school-hint{margin-top:6px;font-size:.8rem;color:#475569}.global-school-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#dbeafe;color:#1e3a8a;font-size:.76rem;font-weight:800}@media(max-width:700px){.global-school-row{display:grid;grid-template-columns:1fr}.global-school-row select{width:100%;min-width:0}}
 .install-app-button{margin-top:12px;border:0;background:#0b315e;color:#fff;border-radius:999px;padding:10px 15px;font-weight:800;cursor:pointer}
 .install-hint{margin-top:10px;padding:10px 12px;border:1px solid #bfdbfe;background:#eff6ff;color:#1e3a8a;border-radius:10px;font-size:.84rem;line-height:1.45}.menu-busca{display:grid;grid-template-columns:repeat(11,1fr);gap:10px;margin:18px 0}.menu-button{border:1px solid #d1d5db;background:#fff;border-radius:12px;padding:13px;font-weight:700;cursor:pointer}.menu-button.active{background:#1f4e78;color:#fff}.menu-button.preventive.active{background:#047857;border-color:#047857}.menu-button.documents.active{background:#7c3aed;border-color:#7c3aed}.menu-button.reports.active{background:#0f766e;border-color:#0f766e}.menu-button.users.active{background:#4338ca;border-color:#4338ca}.user-card{margin-top:10px;border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}.user-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.auth-link{border:0;background:none;color:#1f4e78;text-decoration:underline;padding:6px 0;cursor:pointer}.password-rules{font-size:.8rem;color:#6b7280;line-height:1.45;margin-top:6px}.password-wrap{position:relative}.password-wrap input{padding-right:48px}.password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:transparent;color:#374151;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}.password-toggle:hover{background:#f3f4f6}.password-toggle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.menu-button.audit.active{background:#374151;border-color:#374151}.menu-button.company.active{background:#7c2d12;border-color:#7c2d12}.menu-button.providers-admin.active{background:#1d4ed8;border-color:#1d4ed8}.admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end}.admin-grid .full{grid-column:1/-1}.provider-admin-card{margin-top:10px;border:1px solid #dbeafe;border-left:5px solid #1d4ed8;border-radius:12px;padding:12px;background:#fff}.company-preview{margin-top:12px;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb}.company-logo-preview{max-width:180px;max-height:90px;display:block;margin-top:8px}.switch-row{display:flex;align-items:center;gap:8px;margin-top:10px}.switch-row input{width:auto}.audit-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end}.audit-filters label{min-width:0}.audit-filters input,.audit-filters select{width:100%;min-width:0;max-width:100%;box-sizing:border-box}.audit-search-field{grid-column:1 / -1}.audit-card{margin-top:10px;border:1px solid #e5e7eb;border-left:5px solid #374151;border-radius:12px;padding:12px;background:#fff}.audit-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.audit-meta{margin-top:7px;line-height:1.55;color:#4b5563;font-size:.86rem}.audit-detail{margin-top:8px;padding:8px;border-radius:8px;background:#f9fafb;font-size:.82rem;white-space:pre-wrap;word-break:break-word}.audit-result{padding:4px 8px;border-radius:999px;font-size:.74rem;font-weight:800}.audit-result.success{background:#dcfce7;color:#166534}.audit-result.fail{background:#fee2e2;color:#991b1b}.audit-result.blocked{background:#ffedd5;color:#9a3412}.search-help{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:12px;color:#1e3a8a;line-height:1.5}.search-help strong{display:block;margin-bottom:4px}.search-help ul{margin:6px 0 0 20px;padding:0}.search-box{display:flex;gap:8px}.search-box input{flex:1}.search-box button{border:0;background:#1f4e78;color:#fff;border-radius:9px;padding:0 18px}.back-asset-wrap{margin-bottom:12px;text-align:left}.back-asset-btn{border:1px solid #1f4e78;background:#fff;color:#1f4e78;border-radius:10px;padding:10px 13px;font-weight:700;cursor:pointer}.pending-filters{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end}.pending-filter-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pending-access-note{margin-bottom:10px;padding:9px 11px;border-radius:10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:.84rem;color:#4b5563}.document-filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:end}.occ-report-filters{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end}.occ-report-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.occ-report-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.occ-report-summary-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:11px;text-align:center}.occ-report-summary-card strong{display:block;font-size:1.25rem}.occ-category-summary{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 16px}.occ-category-chip{background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;border-radius:999px;padding:6px 10px;font-size:.8rem;font-weight:700}.occ-report-card{margin-top:11px;padding:14px;border:1px solid #e5e7eb;border-left:5px solid #0f766e;border-radius:13px;background:#fff}.occ-report-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.occ-report-meta{margin-top:8px;line-height:1.55;color:#4b5563;font-size:.86rem}.occ-report-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.occ-report-links a{font-weight:700}.occ-pdf-box{margin-top:18px;padding:14px;border:1px solid #99f6e4;background:#f0fdfa;border-radius:12px}.occ-pdf-link{display:inline-flex;margin-top:8px;padding:10px 14px;border-radius:9px;background:#0f766e;color:#fff;text-decoration:none;font-weight:700}.document-card{margin-top:11px;padding:14px;border:1px solid #e5e7eb;border-left:5px solid #7c3aed;border-radius:13px;background:#fff}.document-title{font-weight:800}.document-meta{margin-top:7px;line-height:1.55;color:#4b5563;font-size:.86rem}.document-open{display:inline-flex;align-items:center;justify-content:center;margin-top:10px;padding:10px 14px;border-radius:9px;background:#7c3aed;color:#fff;text-decoration:none;font-weight:700}.document-empty{margin-top:14px;padding:15px;border:1px dashed #d1d5db;border-radius:12px;text-align:center;color:#6b7280}.asset-document-list{display:grid;gap:10px}.asset-document-card{padding:12px;border:1px solid #ddd6fe;border-left:5px solid #7c3aed;border-radius:12px;background:#faf5ff}.asset-document-card .document-open{margin-top:8px}.search-result,.pending-card,.control-item,.history-card,.preventive-card{margin-top:11px;padding:14px;border:1px solid #e5e7eb;border-radius:13px;background:#fff}.search-result-id{font-size:.8rem;font-weight:800;color:#1f4e78}.search-result-name{font-weight:700}.search-result-data{margin-top:8px;line-height:1.55;color:#4b5563;font-size:.86rem}.open-button{display:block;margin-top:10px;padding:10px;border-radius:9px;background:#1f4e78;color:#fff;text-align:center;text-decoration:none;font-weight:700}.pending-summary,.control-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.pending-number,.control-summary-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:11px;text-align:center}.pending-number strong,.control-summary-card strong{display:block;font-size:1.3rem}.preventive-login-info{margin-bottom:13px;padding:10px;background:#ecfdf5;border-radius:10px;color:#065f46;font-size:.85rem}.control-header{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.control-field{flex:1;min-width:180px}.progress-box{margin-top:14px;padding:13px;border:1px solid #e5e7eb;border-radius:12px}.progress-head{display:flex;justify-content:space-between;font-weight:700}.progress-track{height:13px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px}.progress-fill{height:100%;width:0;background:#059669}.control-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}.control-tab{padding:8px 12px;border:1px solid #d1d5db;border-radius:999px;background:#fff;font-weight:700}.control-tab.active{background:#111827;color:#fff}.control-item.pending{border-left:5px solid #dc2626}.control-item.done{border-left:5px solid #059669}.control-head{display:flex;justify-content:space-between;gap:10px}.control-status{padding:5px 8px;border-radius:999px;font-size:.75rem;font-weight:800}.control-status.pending{background:#fee2e2;color:#991b1b}.control-status.done{background:#dcfce7;color:#166534}.provider-card{margin-top:8px;padding:10px;border:1px solid #e5e7eb;border-radius:10px}.report-action-box{margin-top:20px;padding:15px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:13px;text-align:center}.report-action-box button{margin-top:8px}label{display:grid;gap:5px;margin-top:12px;font-weight:600}input,select,textarea{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:9px;font:inherit}textarea{resize:vertical}button{font:inherit}.btn{border:0;border-radius:9px;padding:11px 15px;background:#111827;color:#fff;cursor:pointer}.btn-green{background:#047857}.btn-blue{background:#1f4e78}.btn-secondary{background:#e5e7eb;color:#111827}button:disabled{opacity:.55;cursor:not-allowed}.requirements-box{margin-top:13px;padding:11px;border-radius:11px;background:#f9fafb;border:1px solid #e5e7eb}.requirement{margin:5px 0;font-size:.85rem}.required-yes{color:#991b1b;font-weight:700}.required-no{color:#047857}.signature-box{margin-top:14px;padding:12px;border:1px solid #d1d5db;border-radius:12px;background:#f9fafb}.signature-title{font-weight:800}.signature-help{margin-top:3px;font-size:.8rem;color:#6b7280}.signature-canvas-wrap{margin-top:10px;border:2px dashed #9ca3af;background:#fff;border-radius:9px;overflow:hidden}#signatureCanvas{width:100%;height:180px;display:block;touch-action:none}.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.45);z-index:999}.modal-box{width:min(700px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:15px;padding:17px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.photo-preview{display:none;max-width:100%;max-height:280px;margin-top:10px}.message{display:none;margin-top:12px;padding:10px;border-radius:8px;line-height:1.5}.message.error{display:block;background:#fee2e2;color:#991b1b}.message.loading{display:block;background:#fef3c7;color:#92400e}.message.success{display:block;background:#d1fae5;color:#065f46}.preventive-info{padding:11px;border:1px solid #a7f3d0;border-radius:10px;background:#ecfdf5;line-height:1.6}.tag{display:inline-block;padding:4px 8px;margin:5px 4px 5px 0;background:#eef2ff;border-radius:999px;font-size:.75rem}.preventive-card{background:#f0fdf4}.preventive-id{color:#047857;font-weight:800}.footer{margin-top:20px;text-align:center;color:#9ca3af;font-size:.72rem}iframe{display:none}@media(max-width:700px){.menu-busca{grid-template-columns:1fr}.document-filters,.occ-report-filters,.pending-filters{grid-template-columns:1fr}.pending-summary,.control-summary,.occ-report-summary{grid-template-columns:1fr 1fr}.search-box{display:grid}.search-box button{padding:12px}.actions{flex-direction:column}.chip,.btn-preventive,.btn-search{width:min(100%,380px)}.modal-actions{flex-direction:column-reverse}.modal-actions button{width:100%}}
 .photo-source-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.photo-source-actions .btn{flex:1;min-width:145px}.photo-source-hidden{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}.menu-button.upload-doc.active{background:#0369a1;border-color:#0369a1}.document-upload-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end}.document-upload-grid .full{grid-column:1/-1}.upload-file-box{margin-top:12px;padding:14px;border:2px dashed #94a3b8;border-radius:12px;background:#f8fafc}.upload-file-name{margin-top:7px;font-size:.86rem;color:#475569}.upload-success-card{margin-top:12px;padding:12px;border:1px solid #86efac;border-radius:12px;background:#f0fdf4}@media(max-width:700px){.document-upload-grid{grid-template-columns:1fr}.document-upload-grid .full{grid-column:auto}}.qr-language-switcher{display:flex;justify-content:flex-end;gap:7px;margin:0 0 10px 0;flex-wrap:wrap}.qr-language-switcher button{border:1px solid #cbd5e1;background:#fff;color:#1f2937;border-radius:999px;padding:7px 11px;font-weight:700;cursor:pointer}.qr-language-switcher button.active{background:#0b315e;color:#fff;border-color:#0b315e}
@@ -318,6 +319,14 @@ html,body{max-width:100%;overflow-x:hidden}
   <button id="installAppButton" type="button" class="install-app-button hidden">📲 Instalar QRManut no celular</button>
   <div id="iosInstallHint" class="install-hint hidden"><b>Instalar no iPhone:</b> toque em Compartilhar e escolha <b>Adicionar à Tela de Início</b>.</div>
   <div id="systemAccessInfo" class="system-access-info hidden"><div class="system-access-row"><div id="systemAccessText"></div><button id="systemLogoutButton" class="btn btn-secondary" type="button">Sair do Menu</button></div></div>
+  <div id="globalSchoolScope" class="global-school-scope hidden">
+    <div class="global-school-row">
+      <span id="globalSchoolLabel" class="global-school-label">School / Unit</span>
+      <select id="globalSchoolSelect"></select>
+      <span id="globalSchoolMode" class="global-school-badge"></span>
+    </div>
+    <div id="globalSchoolHint" class="global-school-hint"></div>
+  </div>
   <div id="menuLockedCard" class="card menu-locked-card hidden"><h2>🔐 Menu Principal protegido</h2><div class="muted">A ficha do equipamento e o registro de ocorrências continuam disponíveis pelo QR Code. Para acessar a Gestão Rápida, identifique-se.</div><button id="openSystemLoginButton" class="btn btn-blue" type="button">Entrar no Menu Principal</button></div>
   <div id="mainMenuButtons" class="menu-busca">
     <button id="tabSearch" class="menu-button active">🔎 Buscar ativos</button>
@@ -817,7 +826,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.2.1</div>
+<div class="footer">QRManut USA • Version 7.6.2.2</div>
 </div>
 <script>
 /* ============================================================
@@ -942,12 +951,22 @@ if("serviceWorker" in navigator){
 
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#039;")}
 function normalizeId(v){return String(v||"").trim().toUpperCase()}
+function activeSchoolId7622(){
+  if(!systemSession)return "";
+  if(systemSession.perfil==="GESTOR")return String(systemSession.idEscola||"").trim();
+  if(systemSession.perfil==="MASTER")return String(systemSession.scopeSchoolId||"").trim();
+  return String(systemSession.idEscola||"").trim();
+}
+
 function sessionAllowsAssetSchool7620(asset){
   if(!systemSession)return false;
-  if(systemSession.perfil==="MASTER")return true;
-  if(!systemSession.idEscola)return systemSession.perfil!=="GESTOR";
+  const scope=activeSchoolId7622();
+  if(!scope){
+    if(systemSession.perfil==="GESTOR")return false;
+    return true;
+  }
   const assetSchool=String(asset?.school_id||asset?.idEscola||"").trim().toLowerCase();
-  return assetSchool===String(systemSession.idEscola||"").trim().toLowerCase();
+  return assetSchool===scope.toLowerCase();
 }
 function getId(){return normalizeId(new URLSearchParams(location.search).get("id"))}function formatDate(v){if(!v)return"";const d=new Date(v);const loc=(typeof qrLanguage!=="undefined"&&qrLanguage==="en-US")?"en-US":"pt-BR";return isNaN(d)?v:d.toLocaleString(loc)}function currentCompetence(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 function pairs(items){return items.filter(x=>x[1]!==""&&x[1]!==null&&x[1]!==undefined).map(x=>`<div class="pair"><b>${esc(x[0])}:</b> ${esc(x[1])}</div>`).join("")}
@@ -967,11 +986,138 @@ function renderSystemAccess(){
     `${t("Acesso","Access")}: <b>${esc(systemSession.nome||systemSession.usuario)}</b> • `+
     `${t("Perfil","Role")}: <b>${esc(systemSession.perfil)}</b>`+
     `${systemSession.escola?` • ${t("Colégio","School")}: <b>${esc(systemSession.escola)}</b>`:""}`+
+    `${systemSession.perfil==="MASTER"&&systemSession.scopeSchoolName?` • ${t("Escopo","Scope")}: <b>${esc(systemSession.scopeSchoolName)}</b>`:""}`+
     `${systemSession.prestador?` • ${t("Prestador","Service Provider")}: <b>${esc(systemSession.prestador)}</b>`:""}`;
 }
+async function loadGlobalSchoolScope7622(){
+  const box=$("globalSchoolScope"),select=$("globalSchoolSelect"),hint=$("globalSchoolHint"),mode=$("globalSchoolMode");
+  if(!box||!select||!hint||!mode||!systemSession){if(box)hide("globalSchoolScope");return;}
+
+  if(!["MASTER","GESTOR"].includes(systemSession.perfil)){
+    hide("globalSchoolScope");
+    return;
+  }
+
+  show("globalSchoolScope");
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+
+  try{
+    const r=await api({action:"schools",systemSession:systemSession.systemSessionToken});
+    if(!r.ok)throw new Error(r.detail||t("Erro ao carregar colégios.","Unable to load schools."));
+    const schools=r.schools||[];
+
+    if(systemSession.perfil==="MASTER"){
+      const current=String(systemSession.scopeSchoolId||"");
+      select.disabled=false;
+      select.innerHTML=`<option value="">${t("Todos os colégios","All Schools")}</option>`+
+        schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
+      select.value=[...select.options].some(o=>o.value===current)?current:"";
+      mode.textContent=t("MASTER – filtro global","MASTER – global filter");
+      hint.textContent=select.value
+        ?t("Todas as telas operacionais estão limitadas ao colégio selecionado.","All operational screens are limited to the selected school.")
+        :t("Visualizando a rede inteira. Selecione um colégio para filtrar todas as telas.","Viewing the entire network. Select a school to filter all operational screens.");
+    }else{
+      const fixed=String(systemSession.idEscola||"");
+      select.innerHTML=schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
+      select.value=fixed;
+      select.disabled=true;
+      mode.textContent=t("GESTOR – escopo fixo","MANAGER – fixed scope");
+      hint.textContent=t("Seu usuário está limitado a este colégio.","Your account is restricted to this school.");
+    }
+  }catch(e){
+    select.innerHTML="";
+    hint.textContent=e.message;
+  }
+}
+
+function resetSchoolScopedData7622(){
+  occurrenceReportData=null;
+  preventiveControlData=null;
+  if($("controlProvider")){
+    $("controlProvider").innerHTML=`<option value="">${qrLanguage==="en-US"?"All service providers":"Todos"}</option>`;
+    $("controlProvider").value="";
+  }
+  occurrenceReportFiltersLoaded=false;
+  documentFiltersLoaded=false;
+  pendingFiltersLoaded=false;
+  if(typeof documentUploadMetaLoaded!=="undefined")documentUploadMetaLoaded=false;
+  $("occReportSummary").innerHTML="";
+  $("occCategorySummary").innerHTML="";
+  $("occReportResults").innerHTML="";
+  $("pendingSummary").innerHTML="";
+  $("pendingResults").innerHTML="";
+  $("documentResults").innerHTML="";
+}
+
+async function refreshCurrentSchoolScopedView7622(){
+  resetSchoolScopedData7622();
+
+  if(!$("pendingArea").classList.contains("hidden")){
+    await loadPendingFilters();
+    await loadPending();
+    return;
+  }
+  if(!$("occurrenceReportArea").classList.contains("hidden")){
+    await loadOccurrenceReportFilters();
+    await loadOccurrenceReport();
+    return;
+  }
+  if(!$("preventiveControlArea").classList.contains("hidden")){
+    await loadPreventiveControl();
+    return;
+  }
+  if(!$("documentsArea").classList.contains("hidden")){
+    await loadDocumentFilters();
+    await searchDocuments();
+    return;
+  }
+  if(!$("maintenancePendingArea").classList.contains("hidden")){
+    await loadMaintenancePending();
+    return;
+  }
+  if(!$("assetManagementPanel").classList.contains("hidden")){
+    await loadAssets760();
+    return;
+  }
+
+  // Search screen: repeat the search only when there is an actual query.
+  const q=String($("searchInput")?.value||"").trim();
+  $("searchResults").innerHTML="";
+  if(q.length>=2)await searchAssets();
+  else $("searchStatus").textContent=qrLanguage==="en-US"
+    ?"School scope updated. Enter at least 2 characters to search."
+    :"Escopo do colégio atualizado. Digite pelo menos 2 caracteres para buscar.";
+}
+
+async function changeGlobalSchoolScope7622(){
+  if(!systemSession||systemSession.perfil!=="MASTER")return;
+  const select=$("globalSchoolSelect");
+  const schoolId=String(select?.value||"");
+  if(select)select.disabled=true;
+  try{
+    const r=await apiPost({
+      action:"setActiveSchool",
+      systemSessionToken:systemSession.systemSessionToken,
+      schoolId
+    });
+    if(!r.ok)throw new Error(r.detail||"Unable to update school scope.");
+    systemSession.scopeSchoolId=r.scopeSchoolId||"";
+    systemSession.scopeSchoolName=r.scopeSchoolName||"";
+    saveSystemSession(systemSession);
+    renderSystemAccess();
+    await loadGlobalSchoolScope7622();
+    await refreshCurrentSchoolScopedView7622();
+  }catch(e){
+    alert(e.message);
+    await loadGlobalSchoolScope7622();
+  }finally{
+    if(select&&systemSession?.perfil==="MASTER")select.disabled=false;
+  }
+}
+
 function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement")}
-function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea"].forEach(hide);hide("systemAccessInfo");show("menuLockedCard")}
-function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
+function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
+function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
 async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;fn()}else openMainMenu()}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
 async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;showMenuGate()}
@@ -3006,8 +3152,9 @@ function assetFillManagementOptions7610(){
     const schools=o.schools||[];
     school.innerHTML=`<option value="">${qrLanguage==="en-US"?"Select school...":"Selecione o colégio..."}</option>`+
       schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.display||((x.idEscola||"")+" – "+(x.escola||"")))}</option>`).join("");
-    if(systemSession?.perfil==="GESTOR"){
-      school.value=systemSession.idEscola||"";
+    const activeScope=activeSchoolId7622();
+    if(systemSession?.perfil==="GESTOR"||activeScope){
+      school.value=activeScope||systemSession.idEscola||"";
       school.disabled=true;
     }else{
       school.disabled=false;
@@ -3125,7 +3272,7 @@ function openAssetModal760(a){
   $("assetName").value=a?.nome||"";
   assetSetAssistedValue7610("assetStatus",null,a?.status||"Ativo");
   if($("assetSchool")){
-    $("assetSchool").value=(systemSession?.perfil==="GESTOR"?(systemSession.idEscola||""):(a?.idEscola||""));
+    $("assetSchool").value=activeSchoolId7622()||(a?.idEscola||"");
   }
   $("assetBuilding").value=a?.building||"";
   $("assetRoom").value=a?.room||"";
@@ -3183,7 +3330,7 @@ async function saveAsset760(){
   if(!name)return alert(qrLanguage==="en-US"?"Enter the asset name.":"Informe o nome do equipamento.");
   if(!existing&&!$("assetTypeCode").value)return alert(qrLanguage==="en-US"?"Select the asset type/code before saving.":"Selecione o tipo/sigla do ativo antes de salvar.");
   if(!existing&&(!id||id==="—"))return alert(qrLanguage==="en-US"?"Generate the asset ID before saving.":"Gere o ID do ativo antes de salvar.");
-  const schoolId=systemSession?.perfil==="GESTOR"?(systemSession.idEscola||""):String($("assetSchool")?.value||"");
+  const schoolId=activeSchoolId7622()||String($("assetSchool")?.value||"");
   if(!schoolId)return alert(qrLanguage==="en-US"?"Select the school/unit.":"Selecione o colégio/unidade.");
 
   const provider=assetProviderPayload7610();
@@ -4519,6 +4666,7 @@ function qrApplyLanguage(lang){
 
   if(systemSession){
     renderSystemAccess();
+    loadGlobalSchoolScope7622().catch(()=>{});
   }
 
   qrTranslateRoutineScreens();
@@ -4648,7 +4796,7 @@ document.getElementById("qrLangEn").addEventListener("click",function(){
   qrTranslateRoutineScreens();
 });
 
-$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").onchange=changeGlobalSchoolScope7622;$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=function(){if(currentAsset?.id)setOriginAsset(currentAsset.id);requireSystemLogin(()=>{hide("assetScreen");show("searchScreen");openMainMenu();focusBackAssetButton()})};
 $("backAssetButton").onclick=function(){const id=getOriginAsset();if(!id)return;clearOriginAsset();location.href="?id="+encodeURIComponent(id)};
 $("occReportRefresh").onclick=loadOccurrenceReport;$("occReportPdf").onclick=generateOccurrenceReportPdf;["occReportStart","occReportEnd","occReportProvider","occReportCategory","occReportComponent","occReportFloor","occReportLocation"].forEach(id=>$(id).onchange=markOccurrenceReportDirty);$("controlRefresh").onclick=refreshPreventiveControl;$("controlCompetence").onchange=loadPreventiveControl;$("controlProvider").onchange=()=>{if(["MASTER","GESTOR"].includes(systemSession?.perfil))loadPreventiveControl();else renderControlList()};$("controlAll").onclick=()=>setControlMode("all");$("controlPending").onclick=()=>setControlMode("pending");$("controlDone").onclick=()=>setControlMode("done");$("sendMonthlyReport").onclick=sendMonthlyPreventiveReport;
@@ -4696,7 +4844,7 @@ $("assetFloorOther").addEventListener("input",()=>assetRefreshLocations7610(""))
 $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLocation","assetLocationOther"));
 
 
-// QRManut USA 7.6.2.1 - Multi-School translation corrections.
+// QRManut USA 7.6.2.2 - Global School / Unit scope for MASTER.
 </script>
 
 </body>
