@@ -1,5 +1,86 @@
-const CACHE_NAME="qrmanut-static-7.6.1.3";
-const STATIC_ASSETS=["./equip_formulario.html","./manifest.webmanifest","./qrmanut-180.png","./qrmanut-192.png","./qrmanut-512.png"];
-self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(STATIC_ASSETS)).then(()=>self.skipWaiting())));
-self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("qrmanut-static-")&&k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;const u=new URL(e.request.url);if(e.request.mode==="navigate"||u.pathname.endsWith("/equip_formulario.html")){e.respondWith(fetch(e.request).then(r=>{const x=r.clone();caches.open(CACHE_NAME).then(c=>c.put("./equip_formulario.html",x));return r}).catch(()=>caches.match("./equip_formulario.html")));return}if(u.origin===self.location.origin)e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(r=>{const x=r.clone();caches.open(CACHE_NAME).then(cc=>cc.put(e.request,x));return r})))});
+/* ============================================================
+ * QRManut USA - Service Worker
+ * Version 7.6.1.5
+ *
+ * - Atualiza o cache da aplicação para a versão 7.6.1.5
+ * - Usa network-first para reduzir risco de exibir HTML antigo
+ * - Mantém fallback offline para o shell principal
+ * ============================================================ */
+
+const CACHE_PREFIX = "qrmanut-usa-";
+const CACHE_NAME = "qrmanut-usa-v7.6.1.5";
+
+const APP_SHELL = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./qrmanut-180.png",
+  "./qrmanut-192.png",
+  "./qrmanut-512.png"
+];
+
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch", event => {
+  const request = event.request;
+
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put("./index.html", copy))
+              .catch(() => {});
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME);
+          return (await cache.match("./index.html")) || (await cache.match("./"));
+        })
+    );
+    return;
+  }
+
+  event.respondWith(
+    fetch(request)
+      .then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put(request, copy))
+            .catch(() => {});
+        }
+        return response;
+      })
+      .catch(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        return cache.match(request);
+      })
+  );
+});
