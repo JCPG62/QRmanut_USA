@@ -826,7 +826,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.2.6</div>
+<div class="footer">QRManut USA • Version 7.6.2.7</div>
 </div>
 <script>
 /* ============================================================
@@ -1667,7 +1667,7 @@ async function searchAssets(){
         :activeSchoolId7622();
 
     const d=await menuApi({
-      action:"search",
+      action:"searchschool",
       q,
       schoolId:selectedSchoolId
     });
@@ -1699,8 +1699,27 @@ async function searchAssets(){
       renderSystemAccess();
     }
 
-    const items=d.results||[];
-    $("searchStatus").textContent=qrLanguage==="en-US"?`${items.length} result(s)`:`${items.length} resultado(s)`;
+    let items=d.results||[];
+
+    // 7.6.2.7 - segunda barreira: nunca exibe ativo de outra escola.
+    if(selectedSchoolId){
+      items=items.filter(item=>
+        String(item.idEscola||"").trim().toUpperCase()===
+        String(selectedSchoolId||"").trim().toUpperCase()
+      );
+    }
+
+    const selectedSchoolText=(()=>{
+      if(!selectedSchoolId)return qrLanguage==="en-US"?"All Schools":"Todos os colégios";
+      const sel=$("globalSchoolSelect");
+      const opt=sel?.options?.[sel.selectedIndex];
+      return String(opt?.textContent||systemSession?.scopeSchoolName||selectedSchoolId).trim();
+    })();
+
+    $("searchStatus").textContent=qrLanguage==="en-US"
+      ?`${items.length} result(s) • School: ${selectedSchoolText}`
+      :`${items.length} resultado(s) • Colégio: ${selectedSchoolText}`;
+
     $("searchResults").innerHTML=items.map(item=>`
       <div class="search-result">
         <div class="search-result-id">${esc(item.id)}</div>
@@ -5081,6 +5100,8 @@ $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLoca
 // QRManut USA 7.6.2.5 - Deterministic School -> Asset -> Search flow.
 
 // QRManut USA 7.6.2.6 - Sticky School selection captured before Search-field focus.
+
+// QRManut USA 7.6.2.7 - Dedicated School-filtered asset search.
 </script>
 
 </body>
