@@ -826,7 +826,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.2.3</div>
+<div class="footer">QRManut USA • Version 7.6.2.4</div>
 </div>
 <script>
 /* ============================================================
@@ -838,6 +838,33 @@ html,body{max-width:100%;overflow-x:hidden}
 const API_URL="https://script.google.com/macros/s/AKfycbw3LRRcmSLHN71jZvV1odXk_ySncmjs6F_Sfofcdz86jludpL6_7rwbSkdjwB5DKTl7ig/exec";
 const TOKEN="";const SYSTEM_SESSION_KEY="qrmanut_system_session";const RESPONSIBLE_KEY="qrmanut_responsavel";const PREVENTIVE_SESSION_KEY="qrmanut_preventive_session";const ORIGIN_ASSET_KEY="qrmanut_origin_asset";const MAX_DIM=1280;const QUALITY=.72;
 let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[];
+let globalSchoolScopeLoadSeq7624=0;
+const GLOBAL_SCHOOL_SCOPE_KEY_7624="qrmanut_global_school_scope_7624";
+
+function saveGlobalSchoolScopeLocal7624(){
+  if(!systemSession?.systemSessionToken || systemSession.perfil!=="MASTER")return;
+  try{
+    localStorage.setItem(GLOBAL_SCHOOL_SCOPE_KEY_7624,JSON.stringify({
+      token:systemSession.systemSessionToken,
+      schoolId:String(systemSession.scopeSchoolId||""),
+      schoolName:String(systemSession.scopeSchoolName||"")
+    }));
+  }catch(e){}
+}
+
+function restoreGlobalSchoolScopeLocal7624(){
+  if(!systemSession?.systemSessionToken || systemSession.perfil!=="MASTER")return;
+  try{
+    const raw=localStorage.getItem(GLOBAL_SCHOOL_SCOPE_KEY_7624);
+    if(!raw)return;
+    const saved=JSON.parse(raw);
+    if(saved?.token!==systemSession.systemSessionToken)return;
+    if(!String(systemSession.scopeSchoolId||"") && String(saved.schoolId||"")){
+      systemSession.scopeSchoolId=String(saved.schoolId||"");
+      systemSession.scopeSchoolName=String(saved.schoolName||"");
+    }
+  }catch(e){}
+}
 const $=id=>document.getElementById(id);
 
 const qrNativeAlert=window.alert.bind(window);
@@ -972,10 +999,51 @@ function getId(){return normalizeId(new URLSearchParams(location.search).get("id
 function pairs(items){return items.filter(x=>x[1]!==""&&x[1]!==null&&x[1]!==undefined).map(x=>`<div class="pair"><b>${esc(x[0])}:</b> ${esc(x[1])}</div>`).join("")}
 async function api(params){const r=await fetch(API_URL+"?"+new URLSearchParams({...params}));return r.json()}async function apiPost(params){const body=new URLSearchParams({...params});const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:body.toString()});return r.json()}
 function getSavedResponsible(){try{return localStorage.getItem(RESPONSIBLE_KEY)||""}catch(e){return""}}function saveResponsible(n){if(!n)return;try{localStorage.setItem(RESPONSIBLE_KEY,n)}catch(e){}}
-function savePreventiveSession(d){preventiveSession=d;sessionStorage.setItem(PREVENTIVE_SESSION_KEY,JSON.stringify(d))}function readPreventiveSession(){try{const raw=sessionStorage.getItem(PREVENTIVE_SESSION_KEY);preventiveSession=raw?JSON.parse(raw):null}catch(e){preventiveSession=null}}function clearPreventiveSession(){preventiveSession=null;sessionStorage.removeItem(PREVENTIVE_SESSION_KEY)}function saveSystemSession(d){systemSession=d;preventiveSession=d;try{localStorage.setItem(SYSTEM_SESSION_KEY,JSON.stringify(d))}catch(e){}}
-function readSystemSession(){try{const raw=localStorage.getItem(SYSTEM_SESSION_KEY);systemSession=raw?JSON.parse(raw):null}catch(e){systemSession=null}}
-function clearSystemSession(){systemSession=null;preventiveSession=null;try{localStorage.removeItem(SYSTEM_SESSION_KEY)}catch(e){}}
-async function systemSessionIsValid(){if(!systemSession?.systemSessionToken)return false;try{const r=await api({action:"systemsession",systemSession:systemSession.systemSessionToken});if(!r.ok){clearSystemSession();return false}if(r.session){systemSession={...systemSession,...r.session};saveSystemSession(systemSession)}return true}catch(e){clearSystemSession();return false}}
+function savePreventiveSession(d){preventiveSession=d;sessionStorage.setItem(PREVENTIVE_SESSION_KEY,JSON.stringify(d))}function readPreventiveSession(){try{const raw=sessionStorage.getItem(PREVENTIVE_SESSION_KEY);preventiveSession=raw?JSON.parse(raw):null}catch(e){preventiveSession=null}}function clearPreventiveSession(){preventiveSession=null;sessionStorage.removeItem(PREVENTIVE_SESSION_KEY)}function saveSystemSession(d){
+  systemSession=d;
+  preventiveSession=d;
+  try{localStorage.setItem(SYSTEM_SESSION_KEY,JSON.stringify(d))}catch(e){}
+  saveGlobalSchoolScopeLocal7624();
+}
+function readSystemSession(){
+  try{
+    const raw=localStorage.getItem(SYSTEM_SESSION_KEY);
+    systemSession=raw?JSON.parse(raw):null;
+    restoreGlobalSchoolScopeLocal7624();
+  }catch(e){
+    systemSession=null;
+  }
+}
+function clearSystemSession(){
+  systemSession=null;
+  preventiveSession=null;
+  globalSchoolScopeLoadSeq7624++;
+  try{
+    localStorage.removeItem(SYSTEM_SESSION_KEY);
+    localStorage.removeItem(GLOBAL_SCHOOL_SCOPE_KEY_7624);
+  }catch(e){}
+}
+async function systemSessionIsValid(){
+  if(!systemSession?.systemSessionToken)return false;
+  try{
+    const localScopeId=String(systemSession.scopeSchoolId||"");
+    const localScopeName=String(systemSession.scopeSchoolName||"");
+    const r=await api({action:"systemsession",systemSession:systemSession.systemSessionToken});
+    if(!r.ok){clearSystemSession();return false}
+    if(r.session){
+      systemSession={...systemSession,...r.session};
+      if(systemSession.perfil==="MASTER" && localScopeId && !String(r.session.scopeSchoolId||"")){
+        systemSession.scopeSchoolId=localScopeId;
+        systemSession.scopeSchoolName=localScopeName;
+      }
+      saveSystemSession(systemSession);
+    }
+    return true;
+  }catch(e){
+    clearSystemSession();
+    return false;
+  }
+}
 function menuApi(params){if(!systemSession?.systemSessionToken)return Promise.reject(new Error("Faça login no Menu Principal."));return api({...params,systemSession:systemSession.systemSessionToken})}
 function menuApiPost(params){if(!systemSession?.systemSessionToken)return Promise.reject(new Error("Faça login no Menu Principal."));return apiPost({...params,systemSessionToken:systemSession.systemSessionToken})}
 function renderSystemAccess(){
@@ -990,6 +1058,7 @@ function renderSystemAccess(){
     `${systemSession.prestador?` • ${t("Prestador","Service Provider")}: <b>${esc(systemSession.prestador)}</b>`:""}`;
 }
 async function loadGlobalSchoolScope7622(){
+  const loadSeq=++globalSchoolScopeLoadSeq7624;
   const box=$("globalSchoolScope"),select=$("globalSchoolSelect"),hint=$("globalSchoolHint"),mode=$("globalSchoolMode");
   if(!box||!select||!hint||!mode||!systemSession){if(box)hide("globalSchoolScope");return;}
 
@@ -1003,6 +1072,7 @@ async function loadGlobalSchoolScope7622(){
 
   try{
     const r=await api({action:"schools",systemSession:systemSession.systemSessionToken});
+    if(loadSeq!==globalSchoolScopeLoadSeq7624)return;
     if(!r.ok)throw new Error(r.detail||t("Erro ao carregar colégios.","Unable to load schools."));
     const schools=r.schools||[];
 
@@ -1025,6 +1095,7 @@ async function loadGlobalSchoolScope7622(){
       hint.textContent=t("Seu usuário está limitado a este colégio.","Your account is restricted to this school.");
     }
   }catch(e){
+    if(loadSeq!==globalSchoolScopeLoadSeq7624)return;
     select.innerHTML="";
     hint.textContent=e.message;
   }
@@ -1091,6 +1162,7 @@ async function refreshCurrentSchoolScopedView7622(){
 
 async function changeGlobalSchoolScope7622(){
   if(!systemSession||systemSession.perfil!=="MASTER")return;
+  globalSchoolScopeLoadSeq7624++;
   const select=$("globalSchoolSelect");
   const schoolId=String(select?.value||"");
   if(select)select.disabled=true;
@@ -1104,8 +1176,12 @@ async function changeGlobalSchoolScope7622(){
     systemSession.scopeSchoolId=r.scopeSchoolId||"";
     systemSession.scopeSchoolName=r.scopeSchoolName||"";
     saveSystemSession(systemSession);
+    saveGlobalSchoolScopeLocal7624();
     renderSystemAccess();
-    await loadGlobalSchoolScope7622();
+    if(select){
+      const confirmed=String(systemSession.scopeSchoolId||"");
+      if([...select.options].some(o=>o.value===confirmed))select.value=confirmed;
+    }
     await refreshCurrentSchoolScopedView7622();
   }catch(e){
     alert(e.message);
@@ -4862,6 +4938,8 @@ $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLoca
 // QRManut USA 7.6.2.2 - Global School / Unit scope for MASTER.
 
 // QRManut USA 7.6.2.3 - Dynamic language message fix.
+
+// QRManut USA 7.6.2.4 - Persist active School / Unit scope and ignore stale selector reloads.
 </script>
 
 </body>
