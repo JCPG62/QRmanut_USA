@@ -1,10 +1,10 @@
 /* ============================================================
  * QRManut USA - Service Worker
- * Version 7.6.2.8
+ * Version 7.6.2.9
  * ============================================================ */
 
 const CACHE_PREFIX = "qrmanut-usa-";
-const CACHE_NAME = "qrmanut-usa-v7.6.2.8";
+const CACHE_NAME = "qrmanut-usa-v7.6.2.9";
 
 const APP_SHELL = [
   "./",
