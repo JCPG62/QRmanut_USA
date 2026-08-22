@@ -1,10 +1,10 @@
 /* ============================================================
- * QRManut USA - Service Worker
- * Version 7.6.2.9
+ * QRmanutUSA - Service Worker
+ * Version 7.6.3.0
  * ============================================================ */
 
 const CACHE_PREFIX = "qrmanut-usa-";
-const CACHE_NAME = "qrmanut-usa-v7.6.2.9";
+const CACHE_NAME = "qrmanut-usa-v7.6.3.0";
 
 const APP_SHELL = [
   "./",
@@ -36,46 +36,49 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  const request = event.request;
-  if (request.method !== "GET") return;
+  const request=event.request;
 
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
+  if(request.method!=="GET")return;
 
-  if (request.mode === "navigate") {
+  const url=new URL(request.url);
+  if(url.origin!==self.location.origin)return;
+
+  // Navegação: rede primeiro. Isso reduz o risco de abrir HTML antigo.
+  if(request.mode==="navigate"){
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          if (response && response.ok) {
-            const copy = response.clone();
+      fetch(request,{cache:"no-store"})
+        .then(response=>{
+          if(response&&response.ok){
+            const copy=response.clone();
             caches.open(CACHE_NAME)
-              .then(cache => cache.put("./index.html", copy))
-              .catch(() => {});
+              .then(cache=>cache.put("./index.html",copy))
+              .catch(()=>{});
           }
           return response;
         })
-        .catch(async () => {
-          const cache = await caches.open(CACHE_NAME);
-          return (await cache.match("./index.html")) || (await cache.match("./"));
+        .catch(async()=>{
+          const cache=await caches.open(CACHE_NAME);
+          return (await cache.match("./index.html"))||(await cache.match("./"));
         })
     );
     return;
   }
 
+  // Recursos estáticos: mostra cache imediatamente e atualiza em paralelo.
   event.respondWith(
-    fetch(request)
-      .then(response => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(request, copy))
-            .catch(() => {});
-        }
-        return response;
-      })
-      .catch(async () => {
-        const cache = await caches.open(CACHE_NAME);
-        return cache.match(request);
-      })
+    caches.open(CACHE_NAME).then(async cache=>{
+      const cached=await cache.match(request);
+
+      const network=fetch(request)
+        .then(response=>{
+          if(response&&response.ok){
+            cache.put(request,response.clone()).catch(()=>{});
+          }
+          return response;
+        })
+        .catch(()=>cached);
+
+      return cached||network;
+    })
   );
 });
