@@ -1,14 +1,10 @@
 /* ============================================================
  * QRManut USA - Service Worker
- * Version 7.6.1.5
- *
- * - Atualiza o cache da aplicação para a versão 7.6.1.5
- * - Usa network-first para reduzir risco de exibir HTML antigo
- * - Mantém fallback offline para o shell principal
+ * Version 7.6.2.0 Multi-School
  * ============================================================ */
 
 const CACHE_PREFIX = "qrmanut-usa-";
-const CACHE_NAME = "qrmanut-usa-v7.6.1.5";
+const CACHE_NAME = "qrmanut-usa-v7.6.2.0";
 
 const APP_SHELL = [
   "./",
