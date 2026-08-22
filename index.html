@@ -826,7 +826,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.2.7</div>
+<div class="footer">QRManut USA • Version 7.6.2.8</div>
 </div>
 <script>
 /* ============================================================
@@ -1035,7 +1035,42 @@ function sessionAllowsAssetSchool7620(asset){
 }
 function getId(){return normalizeId(new URLSearchParams(location.search).get("id"))}function formatDate(v){if(!v)return"";const d=new Date(v);const loc=(typeof qrLanguage!=="undefined"&&qrLanguage==="en-US")?"en-US":"pt-BR";return isNaN(d)?v:d.toLocaleString(loc)}function currentCompetence(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 function pairs(items){return items.filter(x=>x[1]!==""&&x[1]!==null&&x[1]!==undefined).map(x=>`<div class="pair"><b>${esc(x[0])}:</b> ${esc(x[1])}</div>`).join("")}
-async function api(params){const r=await fetch(API_URL+"?"+new URLSearchParams({...params}));return r.json()}async function apiPost(params){const body=new URLSearchParams({...params});const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:body.toString()});return r.json()}
+async function api(params){
+  const req={...params};
+
+  // 7.6.2.8 - todo GET autenticado carrega o School / Unit ativo.
+  if(
+    systemSession?.systemSessionToken &&
+    !Object.prototype.hasOwnProperty.call(req,"schoolId")
+  ){
+    req.schoolId=selectedSchoolId7626();
+  }
+
+  const r=await fetch(
+    API_URL+"?"+new URLSearchParams(req)
+  );
+  return r.json();
+}
+
+async function apiPost(params){
+  const req={...params};
+
+  // 7.6.2.8 - todo POST autenticado carrega o School / Unit ativo.
+  if(
+    systemSession?.systemSessionToken &&
+    !Object.prototype.hasOwnProperty.call(req,"schoolId")
+  ){
+    req.schoolId=selectedSchoolId7626();
+  }
+
+  const body=new URLSearchParams(req);
+  const r=await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+    body:body.toString()
+  });
+  return r.json();
+}
 function getSavedResponsible(){try{return localStorage.getItem(RESPONSIBLE_KEY)||""}catch(e){return""}}function saveResponsible(n){if(!n)return;try{localStorage.setItem(RESPONSIBLE_KEY,n)}catch(e){}}
 function savePreventiveSession(d){preventiveSession=d;sessionStorage.setItem(PREVENTIVE_SESSION_KEY,JSON.stringify(d))}function readPreventiveSession(){try{const raw=sessionStorage.getItem(PREVENTIVE_SESSION_KEY);preventiveSession=raw?JSON.parse(raw):null}catch(e){preventiveSession=null}}function clearPreventiveSession(){preventiveSession=null;sessionStorage.removeItem(PREVENTIVE_SESSION_KEY)}function saveSystemSession(d){
   systemSession=d;
@@ -1082,8 +1117,27 @@ async function systemSessionIsValid(){
     return false;
   }
 }
-function menuApi(params){if(!systemSession?.systemSessionToken)return Promise.reject(new Error("Faça login no Menu Principal."));return api({...params,systemSession:systemSession.systemSessionToken})}
-function menuApiPost(params){if(!systemSession?.systemSessionToken)return Promise.reject(new Error("Faça login no Menu Principal."));return apiPost({...params,systemSessionToken:systemSession.systemSessionToken})}
+function menuApi(params){
+  if(!systemSession?.systemSessionToken){
+    return Promise.reject(new Error("Faça login no Menu Principal."));
+  }
+  return api({
+    ...params,
+    systemSession:systemSession.systemSessionToken,
+    schoolId:selectedSchoolId7626()
+  });
+}
+
+function menuApiPost(params){
+  if(!systemSession?.systemSessionToken){
+    return Promise.reject(new Error("Faça login no Menu Principal."));
+  }
+  return apiPost({
+    ...params,
+    systemSessionToken:systemSession.systemSessionToken,
+    schoolId:selectedSchoolId7626()
+  });
+}
 function renderSystemAccess(){
   if(!systemSession){hide("systemAccessInfo");return}
   show("systemAccessInfo");
@@ -1200,8 +1254,8 @@ async function refreshCurrentSchoolScopedView7622(){
   // select school -> type asset -> press Search.
   $("searchResults").innerHTML="";
   $("searchStatus").textContent=qrLanguage==="en-US"
-    ?"School selected. Type an asset and press Search."
-    :"Colégio selecionado. Digite um equipamento e pressione Buscar.";
+    ?"School selected. This scope now applies to all routines. Type an asset and press Search."
+    :"Colégio selecionado. Este filtro agora vale para todas as rotinas. Digite um equipamento e pressione Buscar.";
 }
 
 async function changeGlobalSchoolScope7622(requestedSchoolId){
@@ -3300,6 +3354,7 @@ function assetApi760(action,payload={}){
   return apiPost({
     action,
     systemSessionToken:systemSession.systemSessionToken,
+    schoolId:selectedSchoolId7626(),
     ...payload
   });
 }
@@ -4898,14 +4953,14 @@ function qrApplyLanguage(lang){
       "Escopo do colégio atualizado. Digite pelo menos 2 caracteres para buscar.",
       "School scope updated. Enter at least 2 characters to search.",
       "School scope updated. Type at least 2 characters to search.",
-      "Colégio selecionado. Digite um equipamento e pressione Buscar.",
-      "School selected. Type an asset and press Search."
+      "Colégio selecionado. Este filtro agora vale para todas as rotinas. Digite um equipamento e pressione Buscar.",
+      "School selected. This scope now applies to all routines. Type an asset and press Search."
     ];
 
     if(scopeMessages.includes(currentSearchStatus)){
       $("searchStatus").textContent=qrLanguage==="en-US"
-        ?"School selected. Type an asset and press Search."
-        :"Colégio selecionado. Digite um equipamento e pressione Buscar.";
+        ?"School selected. This scope now applies to all routines. Type an asset and press Search."
+        :"Colégio selecionado. Este filtro agora vale para todas as rotinas. Digite um equipamento e pressione Buscar.";
     }
   }
 
@@ -5102,6 +5157,8 @@ $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLoca
 // QRManut USA 7.6.2.6 - Sticky School selection captured before Search-field focus.
 
 // QRManut USA 7.6.2.7 - Dedicated School-filtered asset search.
+
+// QRManut USA 7.6.2.8 - Global School / Unit scope on all authenticated routines.
 </script>
 
 </body>
