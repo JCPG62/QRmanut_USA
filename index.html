@@ -814,9 +814,15 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.1.4</div>
+<div class="footer">QRManut USA • Version 7.6.1.5</div>
 </div>
 <script>
+/* ============================================================
+ * QRManut USA 7.6.1.5
+ * - Completa a tradução EN-US da tela de manutenção preventiva
+ * - Traduz requisitos, histórico, providências e mensagens de validação
+ * - Mantém valores internos em português para compatibilidade com o backend
+ * ============================================================ */
 const API_URL="https://script.google.com/macros/s/AKfycbw3LRRcmSLHN71jZvV1odXk_ySncmjs6F_Sfofcdz86jludpL6_7rwbSkdjwB5DKTl7ig/exec";
 const TOKEN="";const SYSTEM_SESSION_KEY="qrmanut_system_session";const RESPONSIBLE_KEY="qrmanut_responsavel";const PREVENTIVE_SESSION_KEY="qrmanut_preventive_session";const ORIGIN_ASSET_KEY="qrmanut_origin_asset";const MAX_DIM=1280;const QUALITY=.72;
 let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[];
@@ -954,7 +960,7 @@ async function sessionIsValid(){return systemSessionIsValid()}
 function getOriginAsset(){try{return sessionStorage.getItem(ORIGIN_ASSET_KEY)||""}catch(e){return""}}function setOriginAsset(id){try{sessionStorage.setItem(ORIGIN_ASSET_KEY,normalizeId(id))}catch(e){}}function clearOriginAsset(){try{sessionStorage.removeItem(ORIGIN_ASSET_KEY)}catch(e){}}
 function updateBackAssetButton(){const id=getOriginAsset();if(id){show("backAssetWrap");$("backAssetButton").textContent=qrLanguage==="en-US"?"← Back to "+id:"← Voltar para "+id}else hide("backAssetWrap")}
 function focusSearchInput(){setTimeout(()=>{try{$("searchInput").focus()}catch(e){}},80)}function focusBackAssetButton(){setTimeout(()=>{try{if(!$("backAssetWrap").classList.contains("hidden"))$("backAssetButton").focus()}catch(e){}},100)}
-async function requirePreventiveLogin(nextAction,provider){await requireSystemLogin(()=>{if(systemSession?.perfil==="CONSULTA"){alert("Seu perfil possui acesso somente leitura.");return}if(systemSession?.perfil==="PRESTADOR"&&provider&&String(systemSession.prestador||"").trim().toLowerCase()!==String(provider).trim().toLowerCase()){alert("Este equipamento não pertence ao escopo do seu prestador.");return}nextAction()})}
+async function requirePreventiveLogin(nextAction,provider){await requireSystemLogin(()=>{if(systemSession?.perfil==="CONSULTA"){alert(qrLanguage==="en-US"?"Your role has read-only access.":"Seu perfil possui acesso somente leitura.");return}if(systemSession?.perfil==="PRESTADOR"&&provider&&String(systemSession.prestador||"").trim().toLowerCase()!==String(provider).trim().toLowerCase()){alert(qrLanguage==="en-US"?"This asset is outside your service provider scope.":"Este equipamento não pertence ao escopo do seu prestador.");return}nextAction()})}
 function processPhoto(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>MAX_DIM||h>MAX_DIM){if(w>h){h=Math.round(h*MAX_DIM/w);w=MAX_DIM}else{w=Math.round(w*MAX_DIM/h);h=MAX_DIM}}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);const url=c.toDataURL("image/jpeg",QUALITY);resolve({base64:url.split(",")[1],dataUrl:url,mime:"image/jpeg",name:"foto_"+Date.now()+".jpg"})};img.src=e.target.result};reader.onerror=reject;reader.readAsDataURL(file)})}
 function setupSignatureCanvas(){const c=$("signatureCanvas"),rect=c.getBoundingClientRect(),ratio=window.devicePixelRatio||1;c.width=Math.floor(rect.width*ratio);c.height=Math.floor(180*ratio);signatureCtx=c.getContext("2d");signatureCtx.scale(ratio,ratio);signatureCtx.lineWidth=2;signatureCtx.lineCap="round";signatureCtx.lineJoin="round";clearSignatureCanvas()}function clearSignatureCanvas(){const c=$("signatureCanvas");if(!signatureCtx)return;signatureCtx.save();signatureCtx.setTransform(1,0,0,1,0,0);signatureCtx.fillStyle="#fff";signatureCtx.fillRect(0,0,c.width,c.height);signatureCtx.restore();signatureDirty=false}function signaturePoint(e){const r=$("signatureCanvas").getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}function signatureStart(e){e.preventDefault();signatureDrawing=true;const p=signaturePoint(e);signatureCtx.beginPath();signatureCtx.moveTo(p.x,p.y);signatureDirty=true}function signatureMove(e){if(!signatureDrawing)return;e.preventDefault();const p=signaturePoint(e);signatureCtx.lineTo(p.x,p.y);signatureCtx.stroke()}function signatureEnd(){signatureDrawing=false}function getSignatureData(){if(!signatureDirty)return null;const u=$("signatureCanvas").toDataURL("image/png");return{base64:u.split(",")[1],mime:"image/png"}}
 function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabPending","tabOccurrenceReport","tabPreventive","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
@@ -1894,18 +1900,86 @@ async function uploadPreventiveDocuments7606(registro){
 
 
 function requestPreventive(){requirePreventiveLogin(async()=>{await openPreventive();loadPreventiveHistory()},currentAsset.prestador)}
-async function openPreventive(){preventivePhotoData=null;resetPreventiveDocuments7606();signatureDirty=false;$("preventivePhotoInput").value="";$("preventivePhotoPreview").style.display="none";$("preventiveMessage").className="message";$("preventiveAsset").textContent=currentAsset.id+" – "+currentAsset.nome_do_equipamento;$("preventivePeriodicity").textContent=currentAsset.periodicidade||"Não informada";$("preventiveProvider").textContent=currentAsset.prestador||"Não informado";$("preventiveCompetence").textContent=currentCompetence();$("preventiveResponsible").value=getSavedResponsible();$("preventiveObservation").value="";$("preventiveNeedsAction").checked=false;hide("preventiveActionFields");$("preventiveActionType").value="";$("preventiveActionDescription").value="";$("preventiveActionPriority").value="Média";$("preventiveActionMaterial").value="";$("preventiveActionQuantity").value="";$("preventiveActionOperation").value="";const r=await api({action:"preventiverequirements",id:currentAsset.id,systemSession:systemSession.systemSessionToken});if(!r.ok){alert(r.detail||"Não foi possível carregar as regras.");return}preventiveRequirements=r.data;renderPreventiveRequirements();$("preventiveModal").style.display="flex";if(!$("signatureBox").classList.contains("hidden"))requestAnimationFrame(setupSignatureCanvas)}
-function renderPreventiveRequirements(){const r=preventiveRequirements;$("preventiveRequirements").innerHTML=`<b>Requisitos deste registro</b><div class="requirement ${r.exigirAssinatura?"required-yes":"required-no"}">${r.exigirAssinatura?"● Assinatura obrigatória":"✓ Assinatura não obrigatória"}</div><div class="requirement ${r.fotoObrigatoria?"required-yes":"required-no"}">${r.fotoObrigatoria?"● Foto obrigatória":"✓ Foto opcional"}</div><div class="requirement ${r.observacaoObrigatoria?"required-yes":"required-no"}">${r.observacaoObrigatoria?"● Observação obrigatória":"✓ Observação opcional"}</div>`;if(r.exigirAssinatura){show("signatureBox");$("signatureRequiredText").textContent=" * obrigatório"}else hide("signatureBox")}
+async function openPreventive(){
+  preventivePhotoData=null;
+  resetPreventiveDocuments7606();
+  signatureDirty=false;
+  $("preventivePhotoInput").value="";
+  $("preventivePhotoPreview").style.display="none";
+  $("preventiveMessage").className="message";
+  $("preventiveAsset").textContent=currentAsset.id+" – "+currentAsset.nome_do_equipamento;
+  $("preventivePeriodicity").textContent=currentAsset.periodicidade
+    ?(qrLanguage==="en-US"?qrTranslateExactText(currentAsset.periodicidade):currentAsset.periodicidade)
+    :(qrLanguage==="en-US"?"Not specified":"Não informada");
+  $("preventiveProvider").textContent=currentAsset.prestador||(qrLanguage==="en-US"?"Not specified":"Não informado");
+  $("preventiveCompetence").textContent=currentCompetence();
+  $("preventiveResponsible").value=getSavedResponsible();
+  $("preventiveObservation").value="";
+  $("preventiveNeedsAction").checked=false;
+  hide("preventiveActionFields");
+  $("preventiveActionType").value="";
+  $("preventiveActionDescription").value="";
+  $("preventiveActionPriority").value="Média";
+  $("preventiveActionMaterial").value="";
+  $("preventiveActionQuantity").value="";
+  $("preventiveActionOperation").value="";
+
+  const r=await api({
+    action:"preventiverequirements",
+    id:currentAsset.id,
+    systemSession:systemSession.systemSessionToken
+  });
+
+  if(!r.ok){
+    alert(r.detail||(qrLanguage==="en-US"
+      ?"Unable to load preventive maintenance requirements."
+      :"Não foi possível carregar as regras."));
+    return;
+  }
+
+  preventiveRequirements=r.data;
+  renderPreventiveRequirements();
+  refreshPreventiveDocumentsUi7606();
+  qrTranslateRoutineScreens();
+  $("preventiveModal").style.display="flex";
+
+  if(!$("signatureBox").classList.contains("hidden")){
+    requestAnimationFrame(setupSignatureCanvas);
+  }
+}
+
+function renderPreventiveRequirements(){
+  const r=preventiveRequirements;
+  if(!r)return;
+
+  const en=qrLanguage==="en-US";
+  const requirement=(required,yesPt,yesEn,noPt,noEn)=>
+    `<div class="requirement ${required?"required-yes":"required-no"}">${required?"● "+(en?yesEn:yesPt):"✓ "+(en?noEn:noPt)}</div>`;
+
+  $("preventiveRequirements").innerHTML=
+    `<b>${en?"Requirements for this record":"Requisitos deste registro"}</b>`+
+    requirement(r.exigirAssinatura,"Assinatura obrigatória","Signature required","Assinatura não obrigatória","Signature not required")+
+    requirement(r.fotoObrigatoria,"Foto obrigatória","Photo required","Foto opcional","Photo optional")+
+    requirement(r.observacaoObrigatoria,"Observação obrigatória","Notes required","Observação opcional","Notes optional");
+
+  if(r.exigirAssinatura){
+    show("signatureBox");
+    $("signatureRequiredText").textContent=en?" * required":" * obrigatório";
+  }else{
+    hide("signatureBox");
+  }
+}
+
 async function savePreventive(){
   if(preventivePosting)return;
 
   const responsible=$("preventiveResponsible").value.trim();
   const observation=$("preventiveObservation").value.trim();
 
-  if(!responsible)return showPreventiveError("Informe o responsável pela preventiva.");
-  if(preventiveRequirements.observacaoObrigatoria&&!observation)return showPreventiveError("A observação é obrigatória.");
-  if(preventiveRequirements.fotoObrigatoria&&!preventivePhotoData)return showPreventiveError("A foto é obrigatória.");
-  if(preventiveRequirements.exigirAssinatura&&!signatureDirty)return showPreventiveError("A assinatura é obrigatória.");
+  if(!responsible)return showPreventiveError(qrLanguage==="en-US"?"Enter the preventive maintenance technician.":"Informe o responsável pela preventiva.");
+  if(preventiveRequirements.observacaoObrigatoria&&!observation)return showPreventiveError(qrLanguage==="en-US"?"Notes are required.":"A observação é obrigatória.");
+  if(preventiveRequirements.fotoObrigatoria&&!preventivePhotoData)return showPreventiveError(qrLanguage==="en-US"?"A photo is required.":"A foto é obrigatória.");
+  if(preventiveRequirements.exigirAssinatura&&!signatureDirty)return showPreventiveError(qrLanguage==="en-US"?"A signature is required.":"A assinatura é obrigatória.");
   if($("preventiveNeedsAction").checked){
     if(!$("preventiveActionType").value)return showPreventiveError(qrLanguage==="en-US"?"Select the required action type.":"Informe o tipo de providência necessária.");
     if(!$("preventiveActionDescription").value.trim())return showPreventiveError(qrLanguage==="en-US"?"Describe the required action.":"Descreva a providência necessária.");
@@ -1945,7 +2019,7 @@ async function savePreventive(){
       preventiveLanguage:qrLanguage
     });
 
-    if(!r.ok)throw new Error(r.detail||"Não foi possível registrar a preventiva.");
+    if(!r.ok)throw new Error(r.detail||(qrLanguage==="en-US"?"Unable to save the preventive maintenance record.":"Não foi possível registrar a preventiva."));
 
     const documentResult=await uploadPreventiveDocuments7606(r.registro);
 
@@ -3603,8 +3677,44 @@ const QR_ROUTINE_PT_EN={
   "Convite pendente":"Invite pending",
   "Executada:":"Completed:",
   "Observação da preventiva:":"Preventive maintenance note:",
-  "Consultando trilha de auditoria...":"Loading audit trail...",
-  "Nenhum evento encontrado.":"No events found."
+  "Consultando trilha de auditoria...":"Loading audit trail.",
+  "Nenhum evento encontrado.":"No events found.",
+
+  // QRManut USA 7.6.1.5 - Preventive Maintenance
+  "🛠️ Histórico de Preventivas":"🛠️ Preventive Maintenance History",
+  "Login necessário para visualizar.":"Sign in to view.",
+  "Requisitos deste registro":"Requirements for this record",
+  "Assinatura obrigatória":"Signature required",
+  "Assinatura não obrigatória":"Signature not required",
+  "Foto opcional":"Photo optional",
+  "Observação opcional":"Notes optional",
+  "* obrigatório":"* required",
+  "Não informada":"Not specified",
+  "Não informado":"Not specified",
+  "Foi identificada alguma necessidade de providência?":"Was any follow-up action identified?",
+  "📌 Providência necessária":"📌 Required action",
+  "Tipo de providência *":"Action type *",
+  "Compra de material/peça":"Purchase material/part",
+  "Serviço especializado":"Specialized service",
+  "Intervenção corretiva":"Corrective intervention",
+  "Inspeção aprofundada":"Detailed inspection",
+  "Orçamento":"Quote",
+  "Substituição de componente":"Component replacement",
+  "Descrição da necessidade *":"Required action description *",
+  "Prioridade *":"Priority *",
+  "Material / peça":"Material / part",
+  "Quantidade":"Quantity",
+  "Condição de operação":"Operating condition",
+  "Pode continuar operando":"May continue operating",
+  "Pode operar com restrição":"May operate with restrictions",
+  "Não deve operar":"Must not operate",
+  "Ao salvar a preventiva, esta necessidade será registrada em Pendências / Providências e comunicada aos responsáveis.":"When the preventive maintenance is saved, this need will be registered under Pending Actions and communicated to the responsible users.",
+  "📎 Documentos da preventiva (opcional)":"📎 Preventive maintenance documents (optional)",
+  "Anexe relatório do prestador, checklist, laudo ou outra evidência em PDF.":"Attach a service provider report, checklist, technical assessment or other PDF evidence.",
+  "📎 Anexar documento PDF":"📎 Attach PDF document",
+  "Nenhum documento anexado.":"No document attached.",
+  "Tipo de documento":"Document type",
+  "Descrição (opcional)":"Description (optional)"
 
 
 };
@@ -4224,6 +4334,21 @@ function qrApplyLanguage(lang){
   if($("preventiveNeedsActionLabel"))$("preventiveNeedsActionLabel").textContent=qrLanguage==="en-US"?"Was any follow-up action identified?":"Foi identificada alguma necessidade de providência?";
   if($("preventiveActionHeading"))$("preventiveActionHeading").textContent=qrLanguage==="en-US"?"📌 Required action":"📌 Providência necessária";
   if($("preventiveActionNotice"))$("preventiveActionNotice").textContent=qrLanguage==="en-US"?"When the preventive maintenance is saved, this need will be registered under Pending Actions and communicated to the responsible users.":"Ao salvar a preventiva, esta necessidade será registrada em Pendências / Providências e comunicada aos responsáveis.";
+
+  // 7.6.1.5: refreshes dynamic preventive-maintenance content immediately.
+  if(preventiveRequirements)renderPreventiveRequirements();
+  refreshPreventiveDocumentsUi7606();
+  const preventiveHistoryHeading=document.querySelector("#preventiveHistorySection h3");
+  if(preventiveHistoryHeading){
+    preventiveHistoryHeading.textContent=qrLanguage==="en-US"
+      ?"🛠️ Preventive Maintenance History"
+      :"🛠️ Histórico de Preventivas";
+  }
+  if($("preventiveHistoryStatus")&&!systemSession){
+    $("preventiveHistoryStatus").textContent=qrLanguage==="en-US"
+      ?"Sign in to view."
+      :"Login necessário para visualizar.";
+  }
 
 }
 
