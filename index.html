@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>QRManut USA</title>
 <meta name="theme-color" content="#0b315e">
-<meta name="application-name" content="QRManut USA">
+<meta name="application-name" content="QRmanutUSA">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="QRManut USA">
+<meta name="apple-mobile-web-app-title" content="QRmanutUSA">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="./qrmanut-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="./qrmanut-512.png">
@@ -316,8 +316,8 @@ html,body{max-width:100%;overflow-x:hidden}
 <div id="searchScreen" class="hidden">
   <div class="search-title">QRManut USA</div>
   <div id="qrAppSubtitle" class="muted">Gestão rápida de manutenção</div>
-  <button id="installAppButton" type="button" class="install-app-button hidden">📲 Instalar QRManut no celular</button>
-  <div id="iosInstallHint" class="install-hint hidden"><b>Instalar no iPhone:</b> toque em Compartilhar e escolha <b>Adicionar à Tela de Início</b>.</div>
+  <button id="installAppButton" type="button" class="install-app-button hidden">📲 Instalar QRmanutUSA no celular</button>
+  <div id="iosInstallHint" class="install-hint hidden"><b>Instalar QRmanutUSA no iPhone:</b> toque em Compartilhar e escolha <b>Adicionar à Tela de Início</b>.</div>
   <div id="systemAccessInfo" class="system-access-info hidden"><div class="system-access-row"><div id="systemAccessText"></div><button id="systemLogoutButton" class="btn btn-secondary" type="button">Sair do Menu</button></div></div>
   <div id="globalSchoolScope" class="global-school-scope hidden">
     <div class="global-school-row">
@@ -826,7 +826,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.2.9</div>
+<div class="footer">QRManut USA • Version 7.6.3.0</div>
 </div>
 <script>
 /* ============================================================
@@ -984,7 +984,7 @@ async function installQRManut(){
   }finally{
     deferredInstallPrompt=null;
     btn.disabled=false;
-    btn.textContent=qrLanguage==="en-US"?"📲 Install QRManut":"📲 Instalar QRManut no celular";
+    btn.textContent=qrLanguage==="en-US"?"📲 Install QRmanutUSA":"📲 Instalar QRmanutUSA no celular";
     hide("installAppButton");
   }
 }
@@ -4116,7 +4116,7 @@ const QR_ROUTINE_PT_EN={
   "Aguardando peça":"Waiting for part",
   "Concluída":"Completed",
   "Cancelada":"Cancelled",
-  "Instalar QRManut no celular":"Install QRManut on this device",
+  "Instalar QRmanutUSA no celular":"Install QRmanutUSA on this device",
   "Menu Principal protegido":"Protected Main Menu",
   "A ficha do equipamento e o registro de ocorrências continuam disponíveis pelo QR Code. Para acessar a Gestão Rápida, identifique-se.":"The equipment record and work order reporting remain available through the QR Code. Sign in to access the Main Menu.",
   "Entrar no Menu Principal":"Sign In to Main Menu",
@@ -4948,8 +4948,8 @@ function qrApplyLanguage(lang){
 
   if($("installAppButton") && !$("installAppButton").disabled){
     $("installAppButton").textContent=qrLanguage==="en-US"
-      ?"📲 Install QRManut"
-      :"📲 Instalar QRManut no celular";
+      ?"📲 Install QRmanutUSA"
+      :"📲 Instalar QRmanutUSA no celular";
   }
 
   if($("systemLogoutButton")){
@@ -5178,6 +5178,8 @@ $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLoca
 // QRManut USA 7.6.2.8 - Global School / Unit scope on all authenticated routines.
 
 // QRManut USA 7.6.2.9 - User Management remains global for MASTER.
+
+// QRManut USA 7.6.3.0 - Performance release + QRmanutUSA installation label.
 </script>
 
 </body>
