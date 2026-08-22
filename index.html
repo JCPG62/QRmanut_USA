@@ -826,7 +826,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.2.5</div>
+<div class="footer">QRManut USA • Version 7.6.2.6</div>
 </div>
 <script>
 /* ============================================================
@@ -841,6 +841,36 @@ let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAsset
 let globalSchoolScopeLoadSeq7624=0;
 const GLOBAL_SCHOOL_SCOPE_KEY_7624="qrmanut_global_school_scope_7624";
 let schoolScopeUpdatePromise7625=Promise.resolve();
+let stickySchoolId7626="";
+let stickySchoolName7626="";
+
+function captureSchoolSelection7626(select){
+  if(!select || systemSession?.perfil!=="MASTER")return "";
+
+  stickySchoolId7626=String(select.value||"").trim();
+
+  const opt=select.options[select.selectedIndex];
+  stickySchoolName7626=stickySchoolId7626
+    ?String(opt?.textContent||"").replace(/^\s*[^–-]+\s*[–-]\s*/,"").trim()
+    :"";
+
+  if(systemSession){
+    systemSession.scopeSchoolId=stickySchoolId7626;
+    systemSession.scopeSchoolName=stickySchoolName7626;
+    saveSystemSession(systemSession);
+  }
+
+  return stickySchoolId7626;
+}
+
+function selectedSchoolId7626(){
+  if(systemSession?.perfil!=="MASTER")return activeSchoolId7622();
+
+  const select=$("globalSchoolSelect");
+  const visible=String(select?.value||"").trim();
+
+  return stickySchoolId7626 || visible || String(systemSession?.scopeSchoolId||"").trim();
+}
 
 function saveGlobalSchoolScopeLocal7624(){
   if(!systemSession?.systemSessionToken || systemSession.perfil!=="MASTER")return;
@@ -858,11 +888,18 @@ function restoreGlobalSchoolScopeLocal7624(){
   try{
     const raw=localStorage.getItem(GLOBAL_SCHOOL_SCOPE_KEY_7624);
     if(!raw)return;
+
     const saved=JSON.parse(raw);
     if(saved?.token!==systemSession.systemSessionToken)return;
-    if(!String(systemSession.scopeSchoolId||"") && String(saved.schoolId||"")){
-      systemSession.scopeSchoolId=String(saved.schoolId||"");
-      systemSession.scopeSchoolName=String(saved.schoolName||"");
+
+    const savedId=String(saved.schoolId||"");
+    const savedName=String(saved.schoolName||"");
+
+    if(savedId){
+      stickySchoolId7626=savedId;
+      stickySchoolName7626=savedName;
+      systemSession.scopeSchoolId=savedId;
+      systemSession.scopeSchoolName=savedName;
     }
   }catch(e){}
 }
@@ -1078,11 +1115,18 @@ async function loadGlobalSchoolScope7622(){
     const schools=r.schools||[];
 
     if(systemSession.perfil==="MASTER"){
-      const current=String(systemSession.scopeSchoolId||"");
+      const current=String(stickySchoolId7626||systemSession.scopeSchoolId||"");
       select.disabled=false;
       select.innerHTML=`<option value="">${t("Todos os colégios","All Schools")}</option>`+
         schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
       select.value=[...select.options].some(o=>o.value===current)?current:"";
+
+      if(select.value){
+        stickySchoolId7626=select.value;
+        const opt=select.options[select.selectedIndex];
+        stickySchoolName7626=String(opt?.textContent||"").replace(/^\s*[^–-]+\s*[–-]\s*/,"").trim();
+      }
+
       mode.textContent=t("MASTER – filtro global","MASTER – global filter");
       hint.textContent=select.value
         ?t("Todas as telas operacionais estão limitadas ao colégio selecionado.","All operational screens are limited to the selected school.")
@@ -1160,12 +1204,35 @@ async function refreshCurrentSchoolScopedView7622(){
     :"Colégio selecionado. Digite um equipamento e pressione Buscar.";
 }
 
-async function changeGlobalSchoolScope7622(){
+async function changeGlobalSchoolScope7622(requestedSchoolId){
   if(!systemSession||systemSession.perfil!=="MASTER")return;
+
   globalSchoolScopeLoadSeq7624++;
+
   const select=$("globalSchoolSelect");
-  const schoolId=String(select?.value||"");
-  if(select)select.disabled=true;
+  const schoolId=String(
+    requestedSchoolId!==undefined
+      ?requestedSchoolId
+      :selectedSchoolId7626()
+  ).trim();
+
+  // Mantém a escolha local imediatamente. Clicar no campo Search não pode
+  // devolver o dropdown para All Schools.
+  stickySchoolId7626=schoolId;
+
+  if(select){
+    if([...select.options].some(o=>o.value===schoolId)){
+      select.value=schoolId;
+    }
+    const opt=select.options[select.selectedIndex];
+    stickySchoolName7626=schoolId
+      ?String(opt?.textContent||"").replace(/^\s*[^–-]+\s*[–-]\s*/,"").trim()
+      :"";
+  }
+
+  systemSession.scopeSchoolId=schoolId;
+  systemSession.scopeSchoolName=stickySchoolName7626;
+  saveSystemSession(systemSession);
   try{
     const r=await apiPost({
       action:"setActiveSchool",
@@ -1173,21 +1240,37 @@ async function changeGlobalSchoolScope7622(){
       schoolId
     });
     if(!r.ok)throw new Error(r.detail||"Unable to update school scope.");
-    systemSession.scopeSchoolId=r.scopeSchoolId||"";
-    systemSession.scopeSchoolName=r.scopeSchoolName||"";
+    // 7.6.2.6: the school chosen by the user is authoritative for the UI.
+    // The backend still validates it. A delayed response cannot reset it to ALL.
+    const responseId=String(r.scopeSchoolId||"").trim();
+
+    if(responseId===schoolId || (!schoolId && !responseId)){
+      systemSession.scopeSchoolId=schoolId;
+      systemSession.scopeSchoolName=String(r.scopeSchoolName||stickySchoolName7626||"");
+    }else{
+      systemSession.scopeSchoolId=schoolId;
+      systemSession.scopeSchoolName=stickySchoolName7626||"";
+    }
+
+    stickySchoolId7626=schoolId;
+    stickySchoolName7626=String(systemSession.scopeSchoolName||stickySchoolName7626||"");
+
     saveSystemSession(systemSession);
     saveGlobalSchoolScopeLocal7624();
     renderSystemAccess();
-    if(select){
-      const confirmed=String(systemSession.scopeSchoolId||"");
-      if([...select.options].some(o=>o.value===confirmed))select.value=confirmed;
+
+    if(select && [...select.options].some(o=>o.value===schoolId)){
+      select.value=schoolId;
     }
+
     await refreshCurrentSchoolScopedView7622();
   }catch(e){
-    alert(e.message);
-    await loadGlobalSchoolScope7622();
-  }finally{
-    if(select&&systemSession?.perfil==="MASTER")select.disabled=false;
+    // Mantém a escola escolhida no campo. A busca 7.6.2.5 envia o School ID
+    // explicitamente ao backend e fará a validação novamente.
+    if(select && [...select.options].some(o=>o.value===schoolId)){
+      select.value=schoolId;
+    }
+    console.warn("School scope synchronization warning:",e);
   }
 }
 
@@ -1580,7 +1663,7 @@ async function searchAssets(){
   try{
     const selectedSchoolId=
       systemSession?.perfil==="MASTER"
-        ?String($("globalSchoolSelect")?.value||systemSession.scopeSchoolId||"").trim()
+        ?selectedSchoolId7626()
         :activeSchoolId7622();
 
     const d=await menuApi({
@@ -1593,14 +1676,26 @@ async function searchAssets(){
 
     // O backend devolve o escopo efetivamente usado. Mantemos a UI sincronizada.
     if(systemSession?.perfil==="MASTER" && Object.prototype.hasOwnProperty.call(d,"scopeSchoolId")){
-      systemSession.scopeSchoolId=String(d.scopeSchoolId||"");
-      systemSession.scopeSchoolName=String(d.scopeSchoolName||"");
+      const requestedId=String(selectedSchoolId||"");
+      const returnedId=String(d.scopeSchoolId||"");
+
+      // The Search request itself carried the selected School ID. Preserve that
+      // value visually even if another async response arrives at the same time.
+      stickySchoolId7626=requestedId;
+      systemSession.scopeSchoolId=requestedId;
+
+      if(returnedId===requestedId){
+        stickySchoolName7626=String(d.scopeSchoolName||stickySchoolName7626||"");
+        systemSession.scopeSchoolName=stickySchoolName7626;
+      }
+
       saveSystemSession(systemSession);
 
       const schoolSelect=$("globalSchoolSelect");
-      if(schoolSelect && [...schoolSelect.options].some(o=>o.value===systemSession.scopeSchoolId)){
-        schoolSelect.value=systemSession.scopeSchoolId;
+      if(schoolSelect && [...schoolSelect.options].some(o=>o.value===requestedId)){
+        schoolSelect.value=requestedId;
       }
+
       renderSystemAccess();
     }
 
@@ -4922,8 +5017,13 @@ document.getElementById("qrLangEn").addEventListener("click",function(){
   qrTranslateRoutineScreens();
 });
 
-$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").onchange=()=>{
-  schoolScopeUpdatePromise7625=changeGlobalSchoolScope7622();
+$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
+  captureSchoolSelection7626(this);
+};
+
+$("globalSchoolSelect").onchange=function(){
+  const schoolId=captureSchoolSelection7626(this);
+  schoolScopeUpdatePromise7625=changeGlobalSchoolScope7622(schoolId);
 };$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=function(){if(currentAsset?.id)setOriginAsset(currentAsset.id);requireSystemLogin(()=>{hide("assetScreen");show("searchScreen");openMainMenu();focusBackAssetButton()})};
 $("backAssetButton").onclick=function(){const id=getOriginAsset();if(!id)return;clearOriginAsset();location.href="?id="+encodeURIComponent(id)};
@@ -4979,6 +5079,8 @@ $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLoca
 // QRManut USA 7.6.2.4 - Persist active School / Unit scope and ignore stale selector reloads.
 
 // QRManut USA 7.6.2.5 - Deterministic School -> Asset -> Search flow.
+
+// QRManut USA 7.6.2.6 - Sticky School selection captured before Search-field focus.
 </script>
 
 </body>
