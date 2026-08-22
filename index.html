@@ -817,7 +817,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.2.0</div>
+<div class="footer">QRManut USA • Version 7.6.2.1</div>
 </div>
 <script>
 /* ============================================================
@@ -900,7 +900,7 @@ async function installQRManut(){
 
   const btn=$("installAppButton");
   btn.disabled=true;
-  btn.textContent="Abrindo instalação...";
+  btn.textContent=qrLanguage==="en-US"?"Opening installation...":"Abrindo instalação...";
 
   try{
     deferredInstallPrompt.prompt();
@@ -910,7 +910,7 @@ async function installQRManut(){
   }finally{
     deferredInstallPrompt=null;
     btn.disabled=false;
-    btn.textContent="📲 Instalar QRManut no celular";
+    btn.textContent=qrLanguage==="en-US"?"📲 Install QRManut":"📲 Instalar QRManut no celular";
     hide("installAppButton");
   }
 }
@@ -3680,6 +3680,16 @@ const QR_ROUTINE_PT_EN={
   "A ficha do equipamento e o registro de ocorrências continuam disponíveis pelo QR Code. Para acessar a Gestão Rápida, identifique-se.":"The equipment record and work order reporting remain available through the QR Code. Sign in to access the Main Menu.",
   "Entrar no Menu Principal":"Sign In to Main Menu",
   "Sair do Menu":"Sign Out",
+  "Colégio":"School",
+  "Colégio:":"School:",
+  "Hidráulica":"Plumbing",
+  "Climatização":"HVAC",
+  "Elétrica":"Electrical",
+  "Refrigeração":"Refrigeration",
+  "Sanitário":"Plumbing Fixtures",
+  "Utilidades":"Utilities",
+  "Segurança":"Safety",
+  "Mobiliário":"Furniture",
   "Acesso":"Access",
   "Perfil":"Role",
   "Previstas":"Planned",
@@ -3999,7 +4009,8 @@ function qrTranslateCompositeText(text){
       ["Realizadas:","Completed:"],
       ["Pendentes:","Pending:"],
       ["Acesso:","Access:"],
-      ["Perfil:","Role:"]
+      ["Perfil:","Role:"],
+      ["Colégio:","School:"]
     ];
 
     for(const [pt,en] of prefixes){
@@ -4487,6 +4498,29 @@ function qrApplyLanguage(lang){
 
   document.documentElement.lang=qrLanguage==="en-US"?"en":"pt-BR";
 
+  // 7.6.2.1 - Global translation fixes.
+  if($("qrAppSubtitle")){
+    $("qrAppSubtitle").textContent=qrLanguage==="en-US"
+      ?"Quick Maintenance Management"
+      :"Gestão rápida de manutenção";
+  }
+
+  if($("installAppButton") && !$("installAppButton").disabled){
+    $("installAppButton").textContent=qrLanguage==="en-US"
+      ?"📲 Install QRManut"
+      :"📲 Instalar QRManut no celular";
+  }
+
+  if($("systemLogoutButton")){
+    $("systemLogoutButton").textContent=qrLanguage==="en-US"
+      ?"Log Out"
+      :"Sair do Menu";
+  }
+
+  if(systemSession){
+    renderSystemAccess();
+  }
+
   qrTranslateRoutineScreens();
   qrRefreshLocalizedDateControls();
 
@@ -4586,6 +4620,12 @@ function qrApplyLanguage(lang){
       :"Login necessário para visualizar.";
   }
 
+  // 7.6.2.1 - Translate dynamic content already rendered on screen.
+  ["pendingResults","pendingSummary","searchResults","maintenancePendingResults"].forEach(id=>{
+    const el=$(id);
+    if(el)qrTranslateElementTree(el);
+  });
+
 }
 
 function qrLoadLanguage(){
@@ -4655,6 +4695,8 @@ $("assetFloor").addEventListener("change",()=>{
 $("assetFloorOther").addEventListener("input",()=>assetRefreshLocations7610(""));
 $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLocation","assetLocationOther"));
 
+
+// QRManut USA 7.6.2.1 - Multi-School translation corrections.
 </script>
 
 </body>
