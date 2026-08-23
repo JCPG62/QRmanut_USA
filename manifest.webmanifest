@@ -1,7 +1,7 @@
 {
   "name": "QRmanutUSA",
   "short_name": "QRmanutUSA",
-  "description": "QRmanutUSA - Equipment maintenance and inspection",
+  "description": "QRmanutUSA - Equipment maintenance, preventive checklists and inspections",
   "start_url": "./?id=EQBUSCA",
   "scope": "./",
   "display": "standalone",
