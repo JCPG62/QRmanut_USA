@@ -1,7 +1,7 @@
 {
   "name": "QRmanutUSA",
   "short_name": "QRmanutUSA",
-  "description": "QRmanutUSA - Multi-school maintenance, executive dashboard and preventive management",
+  "description": "QRmanutUSA - Executive dashboard, problem assets and multi-school maintenance management",
   "start_url": "./?id=EQBUSCA",
   "scope": "./",
   "display": "standalone",
