@@ -1,10 +1,10 @@
 /* ============================================================
  * QRmanutUSA - Service Worker
- * Version 7.6.5.0
+ * Version 7.6.5.1
  * ============================================================ */
 
 const CACHE_PREFIX = "qrmanut-usa-";
-const CACHE_NAME = "qrmanut-usa-v7.6.5.0";
+const CACHE_NAME = "qrmanut-usa-v7.6.5.1";
 
 const APP_SHELL = [
   "./",
@@ -65,7 +65,6 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     caches.open(CACHE_NAME).then(async cache=>{
       const cached=await cache.match(request);
-
       const network=fetch(request)
         .then(response=>{
           if(response&&response.ok){
