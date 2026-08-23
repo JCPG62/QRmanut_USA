@@ -305,6 +305,588 @@ html,body{max-width:100%;overflow-x:hidden}
 @media(max-width:720px){.asset-form-grid,.asset-form-grid.three{grid-template-columns:1fr}.asset-form-grid .full{grid-column:auto}}
 
 
+
+/* ============================================================
+ * PREVENTIVE CHECKLIST – 7.6.4.0
+ * ============================================================ */
+
+function checklistT7640(pt,en){
+  return qrLanguage==="en-US"?en:pt;
+}
+
+function checklistScopeLabel7640(scope){
+  const s=String(scope||"").toUpperCase();
+  const en=qrLanguage==="en-US";
+
+  return {
+    ASSET:en?"Specific Asset":"Ativo específico",
+    TYPE:en?"Equipment Type":"Tipo de equipamento",
+    AREA:en?"Area / Environment":"Área / ambiente",
+    SCHOOL:en?"School / General":"Escola / geral"
+  }[s]||s;
+}
+
+function checklistStatusLabel7640(status){
+  const s=String(status||"").toUpperCase();
+
+  if(s==="OK")return "OK";
+  if(s==="ATTENTION")return qrLanguage==="en-US"?"Needs Attention":"Atenção";
+  if(s==="NA")return "N/A";
+
+  return "";
+}
+
+function renderPreventiveChecklist7640(data){
+  preventiveChecklistData7640=data||null;
+
+  const box=$("preventiveChecklistBox");
+  const itemsBox=$("preventiveChecklistItems");
+
+  if(!box||!itemsBox)return;
+
+  if(!data||!(data.itens||[]).length){
+    hide("preventiveChecklistBox");
+    itemsBox.innerHTML="";
+    return;
+  }
+
+  show("preventiveChecklistBox");
+
+  $("preventiveChecklistTitle").textContent=
+    "📋 "+(qrLanguage==="en-US"?(data.nomeEn||data.nomePt):(data.nomePt||data.nomeEn));
+
+  $("preventiveChecklistHelp").textContent=
+    checklistT7640(
+      "Responda todos os itens obrigatórios. Itens em Atenção devem gerar uma providência.",
+      "Complete all required items. Items marked Needs Attention must generate a follow-up action."
+    );
+
+  $("preventiveChecklistScopeBadge").textContent=
+    checklistScopeLabel7640(data.escopo)+
+    (data.valorEscopo?": "+data.valorEscopo:"");
+
+  itemsBox.innerHTML=(data.itens||[]).map((item,index)=>{
+    const text=qrLanguage==="en-US"?(item.textoEn||item.textoPt):(item.textoPt||item.textoEn);
+    const guidance=qrLanguage==="en-US"?(item.orientacaoEn||item.orientacaoPt):(item.orientacaoPt||item.orientacaoEn);
+
+    return `<div class="preventive-checklist-item" data-checklist-item="${esc(item.idItem)}">
+      <div class="preventive-checklist-item-title">
+        ${index+1}. ${esc(text)}
+        ${item.obrigatorio?` <span class="preventive-checklist-item-required">*</span>`:""}
+      </div>
+      ${guidance?`<div class="muted" style="margin-top:3px">${esc(guidance)}</div>`:""}
+      <div class="preventive-checklist-row">
+        <select class="preventive-checklist-status" data-item-id="${esc(item.idItem)}">
+          <option value="">${checklistT7640("Selecione...","Select...")}</option>
+          <option value="OK">✅ OK</option>
+          <option value="ATTENTION">⚠️ ${checklistT7640("Atenção","Needs Attention")}</option>
+          ${item.permiteNa?`<option value="NA">N/A</option>`:""}
+        </select>
+        <input
+          class="preventive-checklist-note"
+          data-item-id="${esc(item.idItem)}"
+          placeholder="${checklistT7640("Observação do item (opcional)","Item note (optional)")}"
+        >
+      </div>
+    </div>`;
+  }).join("");
+
+  itemsBox.querySelectorAll(".preventive-checklist-status").forEach(sel=>{
+    sel.onchange=()=>syncPreventiveChecklistState7640();
+  });
+
+  syncPreventiveChecklistState7640();
+}
+
+function syncPreventiveChecklistState7640(){
+  if(!preventiveChecklistData7640)return;
+
+  let hasAttention=false;
+
+  document.querySelectorAll("#preventiveChecklistItems .preventive-checklist-item").forEach(card=>{
+    card.classList.remove("checklist-ok","checklist-attention","checklist-na");
+
+    const sel=card.querySelector(".preventive-checklist-status");
+    const status=String(sel?.value||"");
+
+    if(status==="OK")card.classList.add("checklist-ok");
+    if(status==="ATTENTION"){
+      card.classList.add("checklist-attention");
+      hasAttention=true;
+    }
+    if(status==="NA")card.classList.add("checklist-na");
+  });
+
+  if(hasAttention){
+    $("preventiveNeedsAction").checked=true;
+    show("preventiveActionFields");
+
+    if(!$("preventiveActionType").value){
+      $("preventiveActionType").value="Intervenção corretiva";
+    }
+  }
+}
+
+function collectPreventiveChecklist7640(){
+  if(!preventiveChecklistData7640)return {
+    ok:true,
+    payload:null,
+    hasAttention:false
+  };
+
+  const responses=[];
+  let missing=false;
+  let hasAttention=false;
+
+  (preventiveChecklistData7640.itens||[]).forEach(item=>{
+    const statusEl=document.querySelector(
+      `#preventiveChecklistItems .preventive-checklist-status[data-item-id="${CSS.escape(item.idItem)}"]`
+    );
+    const noteEl=document.querySelector(
+      `#preventiveChecklistItems .preventive-checklist-note[data-item-id="${CSS.escape(item.idItem)}"]`
+    );
+
+    const status=String(statusEl?.value||"");
+    const observacao=String(noteEl?.value||"").trim();
+
+    if(item.obrigatorio&&!status)missing=true;
+    if(status==="ATTENTION")hasAttention=true;
+
+    if(status){
+      responses.push({
+        idItem:item.idItem,
+        status,
+        observacao
+      });
+    }
+  });
+
+  if(missing){
+    return {
+      ok:false,
+      error:checklistT7640(
+        "Responda todos os itens obrigatórios do checklist.",
+        "Complete all required checklist items."
+      )
+    };
+  }
+
+  return {
+    ok:true,
+    hasAttention,
+    payload:{
+      idChecklist:preventiveChecklistData7640.idChecklist,
+      respostas:responses
+    }
+  };
+}
+
+function checklistHistoryHtml7640(c){
+  if(!c)return "";
+
+  const t=checklistT7640;
+  const name=qrLanguage==="en-US"?(c.nomeEn||c.nomePt):(c.nomePt||c.nomeEn);
+
+  return `<div style="margin-top:10px;padding:10px;border:1px solid #dbeafe;border-radius:10px;background:#f8fbff">
+    <b>📋 ${esc(name||t("Checklist","Checklist"))}</b>
+    <div class="muted" style="margin-top:4px">
+      ✅ ${Number(c.ok||0)} •
+      ⚠️ ${Number(c.attention||0)} •
+      N/A ${Number(c.na||0)}
+    </div>
+    ${(c.itens||[]).map((item,index)=>{
+      const text=qrLanguage==="en-US"?(item.textoEn||item.textoPt):(item.textoPt||item.textoEn);
+      const icon=item.status==="OK"?"✅":item.status==="ATTENTION"?"⚠️":"➖";
+
+      return `<div style="margin-top:6px">
+        ${icon} ${index+1}. ${esc(text)}
+        ${item.observacao?`<div class="muted" style="margin-left:22px">${esc(item.observacao)}</div>`:""}
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+
+/* ---------------- ADMIN ---------------- */
+
+async function showPreventiveChecklistAdminTab7640(){
+  if(!["MASTER","GESTOR"].includes(systemSession?.perfil)){
+    return alert(checklistT7640(
+      "Seu perfil não possui permissão para configurar checklists.",
+      "Your profile does not have permission to configure checklists."
+    ));
+  }
+
+  clearTabs();
+  $("tabPreventiveChecklists").classList.add("active");
+  showOnly("preventiveChecklistAdminArea");
+
+  await loadPreventiveChecklistsAdmin7640();
+}
+
+async function loadPreventiveChecklistsAdmin7640(){
+  $("preventiveChecklistAdminStatus").textContent=
+    checklistT7640("Carregando checklists...","Loading checklists...");
+
+  const r=await menuApi({action:"preventivechecklistsadmin"});
+
+  if(!r.ok){
+    $("preventiveChecklistAdminStatus").textContent=r.detail||r.error||"";
+    return;
+  }
+
+  preventiveChecklistAdminData7640=r.data||{
+    checklists:[],
+    schools:[],
+    suggestions:{types:[],areas:[]}
+  };
+
+  renderPreventiveChecklistAdmin7640();
+}
+
+function renderPreventiveChecklistAdmin7640(){
+  const d=preventiveChecklistAdminData7640||{checklists:[]};
+  const items=d.checklists||[];
+
+  $("preventiveChecklistAdminTitle").textContent=
+    checklistT7640("📋 Checklists de Preventiva","📋 Preventive Checklists");
+
+  $("preventiveChecklistAdminHelp").textContent=
+    checklistT7640(
+      "Configure os itens executados durante a preventiva. A prioridade é: ativo específico → tipo de equipamento → área → checklist geral da escola.",
+      "Configure the items performed during preventive maintenance. Priority is: specific asset → equipment type → area → school/general checklist."
+    );
+
+  $("newPreventiveChecklist").textContent=
+    checklistT7640("+ Novo checklist","+ New Checklist");
+
+  $("preventiveChecklistAdminStatus").textContent=
+    checklistT7640(
+      `${items.length} checklist(s) disponível(is).`,
+      `${items.length} checklist(s) available.`
+    );
+
+  $("preventiveChecklistAdminList").innerHTML=items.length
+    ? items.map(c=>{
+        const name=qrLanguage==="en-US"?(c.nomeEn||c.nomePt):(c.nomePt||c.nomeEn);
+        const schoolName=(d.schools||[]).find(x=>x.idEscola===c.idEscola)?.escola||c.idEscola||"";
+        const scope=checklistScopeLabel7640(c.escopo);
+        const active=c.ativo;
+
+        return `<div class="checklist-admin-card">
+          <div class="checklist-admin-head">
+            <div>
+              <div style="font-weight:900">${esc(name)}</div>
+              <div class="checklist-admin-tags">
+                <span class="tag">${esc(scope)}${c.valorEscopo?`: ${esc(c.valorEscopo)}`:""}</span>
+                <span class="tag">🏫 ${esc(schoolName||checklistT7640("Global","Global"))}</span>
+                <span class="tag">${active?"✅ "+checklistT7640("Ativo","Active"):"⛔ "+checklistT7640("Inativo","Inactive")}</span>
+                <span class="tag">📋 ${(c.itens||[]).length} ${checklistT7640("itens","items")}</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${c.canEdit?`
+                <button class="btn btn-secondary" type="button" onclick="editPreventiveChecklist7640('${esc(c.idChecklist)}')">
+                  ${checklistT7640("Editar","Edit")}
+                </button>
+                <button class="btn btn-secondary" type="button" onclick="togglePreventiveChecklist7640('${esc(c.idChecklist)}',${!active})">
+                  ${active?checklistT7640("Inativar","Deactivate"):checklistT7640("Ativar","Activate")}
+                </button>
+              `:""}
+            </div>
+          </div>
+
+          ${c.observacoes?`<div class="muted" style="margin-top:8px">${esc(c.observacoes)}</div>`:""}
+
+          ${!c.canEdit?`
+            <div class="checklist-readonly-note">
+              ${checklistT7640(
+                "Modelo padrão/global somente leitura para este perfil. Para personalizar, crie um checklist específico para sua escola com o mesmo escopo.",
+                "Standard/global read-only model for this profile. To customize it, create a school-specific checklist with the same scope."
+              )}
+            </div>
+          `:""}
+        </div>`;
+      }).join("")
+    : `<div class="muted">${checklistT7640("Nenhum checklist encontrado.","No checklist found.")}</div>`;
+}
+
+function resetPreventiveChecklistModal7640(){
+  preventiveChecklistAdminEditing7640=null;
+
+  $("preventiveChecklistId").value="";
+  $("preventiveChecklistNamePt").value="";
+  $("preventiveChecklistNameEn").value="";
+  $("preventiveChecklistScope").value="TYPE";
+  $("preventiveChecklistScopeValue").value="";
+  $("preventiveChecklistActive").checked=true;
+  $("preventiveChecklistNotes").value="";
+  $("preventiveChecklistItemsEditor").innerHTML="";
+  $("preventiveChecklistAdminMessage").className="message";
+  $("preventiveChecklistAdminMessage").textContent="";
+
+  fillPreventiveChecklistSchools7640("");
+  syncPreventiveChecklistScope7640();
+  addPreventiveChecklistItem7640();
+}
+
+function fillPreventiveChecklistSchools7640(selected){
+  const sel=$("preventiveChecklistSchool");
+  const schools=preventiveChecklistAdminData7640?.schools||[];
+
+  if(systemSession?.perfil==="GESTOR"){
+    const own=String(systemSession.idEscola||systemSession.scopeSchoolId||"");
+    sel.innerHTML=schools
+      .filter(x=>x.idEscola===own)
+      .map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`)
+      .join("");
+    sel.value=own;
+    sel.disabled=true;
+    return;
+  }
+
+  sel.disabled=false;
+  sel.innerHTML=
+    `<option value="">${checklistT7640("Global – todas as escolas","Global – all schools")}</option>`+
+    schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
+
+  sel.value=selected||"";
+}
+
+function openNewPreventiveChecklist7640(){
+  resetPreventiveChecklistModal7640();
+
+  $("preventiveChecklistModalTitle").textContent=
+    checklistT7640("📋 Novo Checklist de Preventiva","📋 New Preventive Checklist");
+
+  $("preventiveChecklistAdminModal").style.display="flex";
+}
+
+function editPreventiveChecklist7640(id){
+  const c=(preventiveChecklistAdminData7640?.checklists||[]).find(x=>x.idChecklist===id);
+  if(!c||!c.canEdit)return;
+
+  preventiveChecklistAdminEditing7640=c;
+
+  $("preventiveChecklistModalTitle").textContent=
+    checklistT7640("📋 Editar Checklist de Preventiva","📋 Edit Preventive Checklist");
+
+  $("preventiveChecklistId").value=c.idChecklist||"";
+  $("preventiveChecklistNamePt").value=c.nomePt||"";
+  $("preventiveChecklistNameEn").value=c.nomeEn||"";
+  $("preventiveChecklistScope").value=c.escopo||"TYPE";
+  $("preventiveChecklistScopeValue").value=c.valorEscopo||"";
+  $("preventiveChecklistActive").checked=!!c.ativo;
+  $("preventiveChecklistNotes").value=c.observacoes||"";
+
+  fillPreventiveChecklistSchools7640(c.idEscola||"");
+  syncPreventiveChecklistScope7640();
+
+  $("preventiveChecklistItemsEditor").innerHTML="";
+
+  (c.itens||[]).forEach(item=>addPreventiveChecklistItem7640(item));
+
+  if(!(c.itens||[]).length)addPreventiveChecklistItem7640();
+
+  $("preventiveChecklistAdminMessage").className="message";
+  $("preventiveChecklistAdminMessage").textContent="";
+  $("preventiveChecklistAdminModal").style.display="flex";
+}
+
+function syncPreventiveChecklistScope7640(){
+  const scope=$("preventiveChecklistScope").value;
+  const input=$("preventiveChecklistScopeValue");
+  const label=$("preventiveChecklistScopeValueLabel");
+  const list=$("preventiveChecklistScopeSuggestions");
+
+  if(scope==="SCHOOL"){
+    input.value="";
+    input.disabled=true;
+    label.style.opacity=".55";
+    list.innerHTML="";
+    return;
+  }
+
+  input.disabled=false;
+  label.style.opacity="1";
+
+  const suggestions=scope==="AREA"
+    ? (preventiveChecklistAdminData7640?.suggestions?.areas||[])
+    : scope==="TYPE"
+      ? (preventiveChecklistAdminData7640?.suggestions?.types||[])
+      : [];
+
+  list.innerHTML=suggestions.map(v=>`<option value="${esc(v)}"></option>`).join("");
+
+  if(scope==="ASSET"){
+    input.placeholder=checklistT7640("Ex.: EQ001","Example: EQ001");
+  }else if(scope==="TYPE"){
+    input.placeholder=checklistT7640("Ex.: Boiler | HVAC","Example: Boiler | HVAC");
+  }else{
+    input.placeholder=checklistT7640("Ex.: Kitchen | Boiler Room","Example: Kitchen | Boiler Room");
+  }
+}
+
+function addPreventiveChecklistItem7640(item={}){
+  const wrap=document.createElement("div");
+  wrap.className="checklist-admin-item-editor";
+  wrap.dataset.itemId=item.idItem||"";
+
+  const index=$("preventiveChecklistItemsEditor").children.length+1;
+
+  wrap.innerHTML=`
+    <div class="checklist-admin-item-top">
+      <b>${checklistT7640("Item","Item")} <span class="checklist-item-number">${index}</span></b>
+      <button type="button" class="btn btn-secondary checklist-remove-item">${checklistT7640("Remover","Remove")}</button>
+    </div>
+
+    <div class="checklist-admin-item-grid">
+      <label>${checklistT7640("Texto em português *","Portuguese text *")}
+        <input class="checklist-item-pt" value="${esc(item.textoPt||"")}">
+      </label>
+
+      <label>${checklistT7640("Texto em inglês","English text")}
+        <input class="checklist-item-en" value="${esc(item.textoEn||"")}">
+      </label>
+
+      <label>${checklistT7640("Orientação em português","Portuguese guidance")}
+        <input class="checklist-item-guide-pt" value="${esc(item.orientacaoPt||"")}">
+      </label>
+
+      <label>${checklistT7640("Orientação em inglês","English guidance")}
+        <input class="checklist-item-guide-en" value="${esc(item.orientacaoEn||"")}">
+      </label>
+    </div>
+
+    <div class="checklist-admin-item-actions">
+      <label>
+        <input type="checkbox" class="checklist-item-required" ${item.obrigatorio!==false?"checked":""}>
+        ${checklistT7640("Obrigatório","Required")}
+      </label>
+      <label>
+        <input type="checkbox" class="checklist-item-na" ${item.permiteNa!==false?"checked":""}>
+        ${checklistT7640("Permite N/A","Allow N/A")}
+      </label>
+    </div>
+  `;
+
+  wrap.querySelector(".checklist-remove-item").onclick=()=>{
+    wrap.remove();
+    renumberPreventiveChecklistItems7640();
+  };
+
+  $("preventiveChecklistItemsEditor").appendChild(wrap);
+  renumberPreventiveChecklistItems7640();
+}
+
+function renumberPreventiveChecklistItems7640(){
+  [...$("preventiveChecklistItemsEditor").children].forEach((el,i)=>{
+    const n=el.querySelector(".checklist-item-number");
+    if(n)n.textContent=i+1;
+  });
+}
+
+function collectChecklistAdminItems7640(){
+  return [...$("preventiveChecklistItemsEditor").children].map(el=>({
+    idItem:el.dataset.itemId||"",
+    textoPt:el.querySelector(".checklist-item-pt").value.trim(),
+    textoEn:el.querySelector(".checklist-item-en").value.trim(),
+    orientacaoPt:el.querySelector(".checklist-item-guide-pt").value.trim(),
+    orientacaoEn:el.querySelector(".checklist-item-guide-en").value.trim(),
+    obrigatorio:el.querySelector(".checklist-item-required").checked?"Sim":"Não",
+    permiteNa:el.querySelector(".checklist-item-na").checked?"Sim":"Não"
+  }));
+}
+
+async function savePreventiveChecklistAdmin7640(){
+  const btn=$("savePreventiveChecklist");
+  const msg=$("preventiveChecklistAdminMessage");
+
+  const namePt=$("preventiveChecklistNamePt").value.trim();
+  const scope=$("preventiveChecklistScope").value;
+  const scopeValue=$("preventiveChecklistScopeValue").value.trim();
+  const items=collectChecklistAdminItems7640();
+
+  if(!namePt){
+    msg.className="message error";
+    msg.textContent=checklistT7640("Informe o nome do checklist.","Enter the checklist name.");
+    return;
+  }
+
+  if(scope!=="SCHOOL"&&!scopeValue){
+    msg.className="message error";
+    msg.textContent=checklistT7640("Informe o valor do escopo.","Enter the scope value.");
+    return;
+  }
+
+  if(!items.length||items.some(x=>!x.textoPt)){
+    msg.className="message error";
+    msg.textContent=checklistT7640(
+      "Inclua pelo menos um item e preencha o texto em português de todos os itens.",
+      "Add at least one item and complete the Portuguese text for every item."
+    );
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent=checklistT7640("Salvando...","Saving...");
+
+  try{
+    const r=await menuApiPost({
+      action:"savepreventivechecklist",
+      checklistId:$("preventiveChecklistId").value,
+      checklistNamePt:namePt,
+      checklistNameEn:$("preventiveChecklistNameEn").value.trim(),
+      checklistScope:scope,
+      checklistScopeValue:scopeValue,
+      checklistSchoolId:$("preventiveChecklistSchool").value,
+      checklistActive:$("preventiveChecklistActive").checked?"Sim":"Não",
+      checklistNotes:$("preventiveChecklistNotes").value.trim(),
+      checklistItemsJson:JSON.stringify(items)
+    });
+
+    if(!r.ok)throw new Error(r.detail||r.error||"");
+
+    msg.className="message success";
+    msg.textContent=checklistT7640("Checklist salvo com sucesso.","Checklist saved successfully.");
+
+    setTimeout(async()=>{
+      $("preventiveChecklistAdminModal").style.display="none";
+      await loadPreventiveChecklistsAdmin7640();
+    },600);
+
+  }catch(e){
+    msg.className="message error";
+    msg.textContent=e.message||checklistT7640("Erro ao salvar checklist.","Unable to save checklist.");
+  }finally{
+    btn.disabled=false;
+    btn.textContent=checklistT7640("Salvar checklist","Save Checklist");
+  }
+}
+
+async function togglePreventiveChecklist7640(id,active){
+  if(!confirm(
+    active
+      ? checklistT7640("Ativar este checklist?","Activate this checklist?")
+      : checklistT7640("Inativar este checklist?","Deactivate this checklist?")
+  ))return;
+
+  try{
+    const r=await menuApiPost({
+      action:"setpreventivechecklistactive",
+      checklistId:id,
+      checklistActive:active?"Sim":"Não"
+    });
+
+    if(!r.ok)throw new Error(r.detail||r.error||"");
+
+    await loadPreventiveChecklistsAdmin7640();
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+
 /* ============================================================
  * CONTEXTUAL HELP – 7.6.3.1
  * ============================================================ */
@@ -476,6 +1058,174 @@ html,body{max-width:100%;overflow-x:hidden}
   }
 }
 
+
+/* ============================================================
+ * PREVENTIVE CHECKLIST – 7.6.4.0
+ * ============================================================ */
+
+.preventive-checklist-box{
+  margin-top:14px;
+  padding:14px;
+  border:1px solid #bfdbfe;
+  border-radius:14px;
+  background:#f8fbff;
+}
+
+.preventive-checklist-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.preventive-checklist-name{
+  font-weight:900;
+  color:#0b315e;
+}
+
+.preventive-checklist-scope{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:4px 9px;
+  background:#e8f1fb;
+  color:#294f74;
+  font-size:12px;
+  font-weight:800;
+}
+
+.preventive-checklist-item{
+  margin-top:10px;
+  padding:11px;
+  border:1px solid #dbe5ef;
+  border-radius:11px;
+  background:#fff;
+}
+
+.preventive-checklist-item-title{
+  font-weight:750;
+  line-height:1.35;
+}
+
+.preventive-checklist-item-required{
+  color:#b91c1c;
+  font-weight:900;
+}
+
+.preventive-checklist-row{
+  display:grid;
+  grid-template-columns:minmax(140px,190px) 1fr;
+  gap:9px;
+  margin-top:9px;
+}
+
+.preventive-checklist-row select,
+.preventive-checklist-row input{
+  margin-top:0;
+}
+
+.checklist-attention{
+  border-color:#f59e0b;
+  background:#fffbeb;
+}
+
+.checklist-ok{
+  border-color:#86efac;
+  background:#f0fdf4;
+}
+
+.checklist-na{
+  border-color:#cbd5e1;
+  background:#f8fafc;
+}
+
+.checklist-admin-list{
+  margin-top:14px;
+  display:grid;
+  gap:10px;
+}
+
+.checklist-admin-card{
+  border:1px solid #dbe5ef;
+  border-radius:13px;
+  padding:13px;
+  background:#fff;
+}
+
+.checklist-admin-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.checklist-admin-tags{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  margin-top:7px;
+}
+
+.checklist-admin-item-editor{
+  margin-top:10px;
+  padding:11px;
+  border:1px solid #dbe5ef;
+  border-radius:11px;
+  background:#f8fafc;
+}
+
+.checklist-admin-item-top{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:center;
+}
+
+.checklist-admin-item-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px 10px;
+  margin-top:8px;
+}
+
+.checklist-admin-item-actions{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.checklist-admin-item-actions label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin:0;
+}
+
+.checklist-admin-item-actions input{
+  width:auto;
+  margin:0;
+}
+
+.checklist-readonly-note{
+  margin-top:8px;
+  padding:8px 10px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  border-radius:9px;
+  color:#9a3412;
+  font-size:12px;
+}
+
+@media(max-width:640px){
+  .preventive-checklist-row,
+  .checklist-admin-item-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -505,6 +1255,7 @@ html,body{max-width:100%;overflow-x:hidden}
     <button id="tabPending" class="menu-button">⚠️ OCs pendentes</button>
     <button id="tabOccurrenceReport" class="menu-button reports">📊 Relatório de OCs</button>
     <button id="tabPreventive" class="menu-button preventive">🛠️ Status das Preventivas</button>
+    <button id="tabPreventiveChecklists" class="menu-button hidden">📋 Checklists de Preventiva</button>
     <button id="tabDocuments" class="menu-button documents">📄 Documentos Técnicos</button>
     <button id="tabOccurrenceCatalog" class="menu-button hidden">🧩 Categorias e Componentes</button>
     <button id="tabMaintenancePending" class="menu-button hidden">📌 Pendências / Providências</button>
@@ -755,6 +1506,27 @@ html,body{max-width:100%;overflow-x:hidden}
       <div class="report-action-box"><strong>📧 Relatório da competência</strong><div class="muted" style="margin-top:5px">Gera um PDF com as preventivas realizadas e pendentes e envia o arquivo por e-mail.</div><button id="sendMonthlyReport" type="button" class="btn btn-blue">📧 Enviar relatório da competência</button><div id="monthlyReportMessage" class="message"></div></div>
     </div>
   </div>
+
+  <div id="preventiveChecklistAdminArea" class="hidden">
+    <div class="card">
+      <div class="back-asset-wrap">
+        <button id="preventiveChecklistBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div>
+          <h2 id="preventiveChecklistAdminTitle" style="margin-bottom:5px">📋 Checklists de Preventiva</h2>
+          <div id="preventiveChecklistAdminHelp" class="muted">
+            Configure os itens executados durante a manutenção preventiva. Checklists padrão globais podem ser complementados por checklists específicos de cada escola.
+          </div>
+        </div>
+        <button id="newPreventiveChecklist" class="btn btn-blue" type="button">+ Novo checklist</button>
+      </div>
+
+      <div id="preventiveChecklistAdminStatus" class="muted" style="margin-top:12px"></div>
+      <div id="preventiveChecklistAdminList" class="checklist-admin-list"></div>
+    </div>
+  </div>
 </div>
 
 <div id="assetScreen" class="hidden">
@@ -938,9 +1710,85 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <div id="userModal" class="modal"><div class="modal-box"><h2>👤 Novo usuário</h2><label>Nome *<input id="userName"></label><label>Usuário/Login *<input id="userLogin"></label><label>E-mail *<input id="userEmail" type="email"></label><label>Perfil *<select id="userProfile"><option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option></select></label><label id="userSchoolLabel">Colégio / Unidade<select id="userSchool"><option value="">Todas / sem vínculo específico</option></select></label><div id="userSchoolHelp" class="system-login-note">GESTOR deve estar vinculado a um colégio. MASTER mantém acesso a todas as unidades.</div><label>Prestador<select id="userProvider"><option value="">Vínculo interno / sem prestador</option></select></label><div id="userMessage" class="message"></div><div class="modal-actions"><button id="cancelUser" class="btn btn-secondary">Cancelar</button><button id="saveUser" class="btn btn-blue">Criar e enviar convite</button></div></div></div>
 
+
+<div id="preventiveChecklistAdminModal" class="modal">
+  <div class="modal-box" style="max-width:930px">
+    <h2 id="preventiveChecklistModalTitle">📋 Checklist de Preventiva</h2>
+
+    <input id="preventiveChecklistId" type="hidden">
+
+    <div class="admin-grid">
+      <label>Nome em português *
+        <input id="preventiveChecklistNamePt">
+      </label>
+
+      <label>Name in English
+        <input id="preventiveChecklistNameEn">
+      </label>
+
+      <label>Escopo *
+        <select id="preventiveChecklistScope">
+          <option value="TYPE">Tipo de equipamento</option>
+          <option value="ASSET">Ativo específico</option>
+          <option value="AREA">Área / ambiente</option>
+          <option value="SCHOOL">Escola / geral</option>
+        </select>
+      </label>
+
+      <label id="preventiveChecklistScopeValueLabel">Valor do escopo *
+        <input id="preventiveChecklistScopeValue" list="preventiveChecklistScopeSuggestions">
+        <datalist id="preventiveChecklistScopeSuggestions"></datalist>
+      </label>
+
+      <label id="preventiveChecklistSchoolLabel">School / Unit
+        <select id="preventiveChecklistSchool">
+          <option value="">Global – todas as escolas</option>
+        </select>
+      </label>
+
+      <label class="switch-row">
+        <input id="preventiveChecklistActive" type="checkbox" checked>
+        <span id="preventiveChecklistActiveLabel">Ativo</span>
+      </label>
+
+      <label class="full">Observações
+        <textarea id="preventiveChecklistNotes" rows="3"></textarea>
+      </label>
+    </div>
+
+    <div class="section" style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+        <h3 id="preventiveChecklistItemsHeading" style="margin:0">Itens do checklist</h3>
+        <button id="addPreventiveChecklistItem" type="button" class="btn btn-secondary">+ Adicionar item</button>
+      </div>
+      <div id="preventiveChecklistItemsEditor"></div>
+    </div>
+
+    <div id="preventiveChecklistAdminMessage" class="message"></div>
+
+    <div class="modal-actions">
+      <button id="cancelPreventiveChecklist" class="btn btn-secondary">Cancelar</button>
+      <button id="savePreventiveChecklist" class="btn btn-blue">Salvar checklist</button>
+    </div>
+  </div>
+</div>
+
 <div id="preventiveLoginModal" class="modal hidden"><div class="modal-box"><h2>🔐 Acesso às Preventivas</h2><div id="loginProviderInfo" class="preventive-info hidden"></div><label>Usuário<input id="preventiveUsername" autocomplete="username"></label><label>Senha<div class="password-wrap"><input id="preventivePassword" type="password" autocomplete="current-password"><button type="button" class="password-toggle" data-password-target="preventivePassword" aria-label="Mostrar senha" title="Mostrar senha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></button></div></label><div id="loginMessage" class="message"></div><div class="modal-actions"><button id="cancelLogin" class="btn btn-secondary">Cancelar</button><button id="sendLogin" class="btn btn-green">Entrar</button></div></div></div>
 
-<div id="preventiveModal" class="modal"><div class="modal-box"><h2>🛠️ Registrar Manutenção Preventiva</h2><div class="preventive-info"><div><b>Ativo:</b> <span id="preventiveAsset"></span></div><div><b>Periodicidade:</b> <span id="preventivePeriodicity"></span></div><div><b>Prestador:</b> <span id="preventiveProvider"></span></div><div><b>Competência:</b> <span id="preventiveCompetence"></span></div></div><div id="preventiveRequirements" class="requirements-box"></div><label>Responsável pela preventiva *<input id="preventiveResponsible"></label><label>Observação<textarea id="preventiveObservation" rows="5"></textarea></label>
+<div id="preventiveModal" class="modal"><div class="modal-box"><h2>🛠️ Registrar Manutenção Preventiva</h2><div class="preventive-info"><div><b>Ativo:</b> <span id="preventiveAsset"></span></div><div><b>Periodicidade:</b> <span id="preventivePeriodicity"></span></div><div><b>Prestador:</b> <span id="preventiveProvider"></span></div><div><b>Competência:</b> <span id="preventiveCompetence"></span></div></div><div id="preventiveRequirements" class="requirements-box"></div>
+
+<div id="preventiveChecklistBox" class="preventive-checklist-box hidden">
+  <div class="preventive-checklist-head">
+    <div>
+      <div id="preventiveChecklistTitle" class="preventive-checklist-name">📋 Checklist</div>
+      <div id="preventiveChecklistHelp" class="muted" style="margin-top:3px">Responda todos os itens obrigatórios.</div>
+    </div>
+    <span id="preventiveChecklistScopeBadge" class="preventive-checklist-scope"></span>
+  </div>
+  <div id="preventiveChecklistItems"></div>
+</div>
+
+<label>Responsável pela preventiva *<input id="preventiveResponsible"></label><label>Observação<textarea id="preventiveObservation" rows="5"></textarea></label>
 <label class="switch-row" style="margin-top:12px">
   <input id="preventiveNeedsAction" type="checkbox">
   <span id="preventiveNeedsActionLabel">Foi identificada alguma necessidade de providência?</span>
@@ -998,7 +1846,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.3.2</div>
+<div class="footer">QRManut USA • Version 7.6.4.0</div>
 </div>
 <script>
 /* ============================================================
@@ -1010,6 +1858,10 @@ html,body{max-width:100%;overflow-x:hidden}
 const API_URL="https://script.google.com/macros/s/AKfycbw3LRRcmSLHN71jZvV1odXk_ySncmjs6F_Sfofcdz86jludpL6_7rwbSkdjwB5DKTl7ig/exec";
 const TOKEN="";const SYSTEM_SESSION_KEY="qrmanut_system_session";const RESPONSIBLE_KEY="qrmanut_responsavel";const PREVENTIVE_SESSION_KEY="qrmanut_preventive_session";const ORIGIN_ASSET_KEY="qrmanut_origin_asset";const MAX_DIM=1280;const QUALITY=.72;
 let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[];
+let preventiveChecklistData7640=null;
+let preventiveChecklistAdminData7640=null;
+let preventiveChecklistAdminEditing7640=null;
+
 let globalSchoolScopeLoadSeq7624=0;
 const GLOBAL_SCHOOL_SCOPE_KEY_7624="qrmanut_global_school_scope_7624";
 let schoolScopeUpdatePromise7625=Promise.resolve();
@@ -1500,8 +2352,8 @@ async function changeGlobalSchoolScope7622(requestedSchoolId){
   }
 }
 
-function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement")}
-function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
+function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement")}
+function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
 async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;fn()}else openMainMenu()}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
@@ -1530,7 +2382,7 @@ async function requirePreventiveLogin(nextAction,provider){
 }
 function processPhoto(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>MAX_DIM||h>MAX_DIM){if(w>h){h=Math.round(h*MAX_DIM/w);w=MAX_DIM}else{w=Math.round(w*MAX_DIM/h);h=MAX_DIM}}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);const url=c.toDataURL("image/jpeg",QUALITY);resolve({base64:url.split(",")[1],dataUrl:url,mime:"image/jpeg",name:"foto_"+Date.now()+".jpg"})};img.src=e.target.result};reader.onerror=reject;reader.readAsDataURL(file)})}
 function setupSignatureCanvas(){const c=$("signatureCanvas"),rect=c.getBoundingClientRect(),ratio=window.devicePixelRatio||1;c.width=Math.floor(rect.width*ratio);c.height=Math.floor(180*ratio);signatureCtx=c.getContext("2d");signatureCtx.scale(ratio,ratio);signatureCtx.lineWidth=2;signatureCtx.lineCap="round";signatureCtx.lineJoin="round";clearSignatureCanvas()}function clearSignatureCanvas(){const c=$("signatureCanvas");if(!signatureCtx)return;signatureCtx.save();signatureCtx.setTransform(1,0,0,1,0,0);signatureCtx.fillStyle="#fff";signatureCtx.fillRect(0,0,c.width,c.height);signatureCtx.restore();signatureDirty=false}function signaturePoint(e){const r=$("signatureCanvas").getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}function signatureStart(e){e.preventDefault();signatureDrawing=true;const p=signaturePoint(e);signatureCtx.beginPath();signatureCtx.moveTo(p.x,p.y);signatureDirty=true}function signatureMove(e){if(!signatureDrawing)return;e.preventDefault();const p=signaturePoint(e);signatureCtx.lineTo(p.x,p.y);signatureCtx.stroke()}function signatureEnd(){signatureDrawing=false}function getSignatureData(){if(!signatureDirty)return null;const u=$("signatureCanvas").toDataURL("image/png");return{base64:u.split(",")[1],mime:"image/png"}}
-function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabPending","tabOccurrenceReport","tabPreventive","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
+function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
 async function showAuditTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode consultar a auditoria.");return}clearTabs();$("tabAudit").classList.add("active");showOnly("auditArea");setDefaultAuditDates();await loadAuditFilters();await loadAudit()}
 
 function isoDateLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -2068,10 +2920,10 @@ function qrYN7612(v){return v?qrT7612("Sim","Yes"):qrT7612("Não","No");}
 function qrReq7612(v){return v?qrT7612("Obrigatória","Required"):qrT7612("Opcional","Optional");}
 function qrStatus7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {"Ativo":"Active","Inativo":"Inactive","Convite pendente":"Invite pending","Pendente":"Pending","Em andamento":"In Progress","Resolvida":"Resolved"}[s]||s;}
 function qrCompetence7612(v,fallback){const m=String(v||"").match(/^(\d{4})-(\d{2})$/);if(m){const d=new Date(+m[1],+m[2]-1,1,12);return new Intl.DateTimeFormat(qrLanguage==="en-US"?"en-US":"pt-BR",{month:"long",year:"numeric"}).format(d);}if(qrLanguage!=="en-US")return fallback||v||"";let x=String(fallback||"");const M={janeiro:"January",fevereiro:"February",março:"March",abril:"April",maio:"May",junho:"June",julho:"July",agosto:"August",setembro:"September",outubro:"October",novembro:"November",dezembro:"December"};Object.keys(M).forEach(k=>x=x.replace(new RegExp(k,"ig"),M[k]));return x;}
-const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated"};
+const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated"};
 function qrAuditAction7612(v){const s=String(v||"");return qrLanguage==="en-US"?(QR_AUDIT_EN_7612[s]||s):s;}
 function qrAuditResult7612(v){const s=String(v||"");return qrLanguage==="en-US"?({SUCESSO:"Success",FALHA:"Failed",BLOQUEADO:"Blocked"}[s]||s):s;}
-function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component"}[s]||s;}
+function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component",CHECKLIST_PREVENTIVA:"Preventive Checklist"}[s]||s;}
 
 function renderPreventiveControl(){
   const d=preventiveControlData,s=d.summary,t=qrT7612;
@@ -2090,7 +2942,7 @@ function renderControlList(){
   if(!preventiveControlData)return;const t=qrT7612;
   let items=preventiveControlMode==="pending"?preventiveControlData.pendentes.map(x=>({...x,state:"pending"})):preventiveControlMode==="done"?preventiveControlData.realizadas.map(x=>({...x,state:"done"})):[...preventiveControlData.pendentes.map(x=>({...x,state:"pending"})),...preventiveControlData.realizadas.map(x=>({...x,state:"done"}))];
   $("controlListStatus").textContent=`${items.length} ${t("equipamento(s)","equipment item(s)")}`;
-  $("controlResults").innerHTML=items.map(item=>`<div class="control-item ${item.state}"><div class="control-head"><div><b>${esc(item.id)}</b><div>${esc(item.nome)}</div></div><span class="control-status ${item.state}">${item.state==="done"?t("✅ Realizada","✅ Completed"):t("🔴 Pendente","🔴 Pending")}</span></div><div class="search-result-data"><b>${t("Prestador","Service Provider")}:</b> ${esc(item.prestador)}<br><b>${t("Pavimento","Floor")}:</b> ${esc(item.pavimento)}<br><b>${t("Localização","Location")}:</b> ${esc(item.localizacao)}${item.observacaoEquipamento?`<br><br><b>${t("Observação do equipamento","Equipment note")}:</b><br>${esc(item.observacaoEquipamento)}`:""}${item.ultimoRegistro?`<br><br><b>${t("Executada","Completed")}:</b> ${esc(formatDate(item.ultimoRegistro.data))}<br><b>${t("Responsável","Responsible")}:</b> ${esc(item.ultimoRegistro.responsavel)}${item.ultimoRegistro.observacao?`<br><b>${t("Observação da preventiva","Preventive maintenance note")}:</b> ${esc(item.ultimoRegistro.observacao)}`:""}`:""}</div><a class="open-button" href="?id=${encodeURIComponent(normalizeId(item.id))}">${t("Abrir ficha","Open record")}</a></div>`).join("");
+  $("controlResults").innerHTML=items.map(item=>`<div class="control-item ${item.state}"><div class="control-head"><div><b>${esc(item.id)}</b><div>${esc(item.nome)}</div></div><span class="control-status ${item.state}">${item.state==="done"?t("✅ Realizada","✅ Completed"):t("🔴 Pendente","🔴 Pending")}</span></div><div class="search-result-data"><b>${t("Prestador","Service Provider")}:</b> ${esc(item.prestador)}<br><b>${t("Pavimento","Floor")}:</b> ${esc(item.pavimento)}<br><b>${t("Localização","Location")}:</b> ${esc(item.localizacao)}${item.observacaoEquipamento?`<br><br><b>${t("Observação do equipamento","Equipment note")}:</b><br>${esc(item.observacaoEquipamento)}`:""}${item.ultimoRegistro?`<br><br><b>${t("Executada","Completed")}:</b> ${esc(formatDate(item.ultimoRegistro.data))}<br><b>${t("Responsável","Responsible")}:</b> ${esc(item.ultimoRegistro.responsavel)}${item.ultimoRegistro.observacao?`<br><b>${t("Observação da preventiva","Preventive maintenance note")}:</b> ${esc(item.ultimoRegistro.observacao)}`:""}${item.ultimoRegistro.checklist?`<br><b>Checklist:</b> ✅ ${Number(item.ultimoRegistro.checklist.ok||0)} • ⚠️ ${Number(item.ultimoRegistro.checklist.attention||0)} • N/A ${Number(item.ultimoRegistro.checklist.na||0)}`:""}`:""}</div><a class="open-button" href="?id=${encodeURIComponent(normalizeId(item.id))}">${t("Abrir ficha","Open record")}</a></div>`).join("");
 }
 
 async function sendMonthlyPreventiveReport(){if(!preventiveSession)return;const competencia=$("controlCompetence").value,provider=["MASTER","GESTOR"].includes(systemSession.perfil)?$("controlProvider").value:systemSession.prestador,s=preventiveControlData?.summary||{previstas:0,realizadas:0,pendentes:0},txt=$("controlTitle").textContent.replace("Preventivas – ",""),escopo=provider||"Todos os prestadores";if(!confirm(`Enviar relatório de ${txt}?\n\nEscopo: ${escopo}\n\nPrevistas: ${s.previstas}\nRealizadas: ${s.realizadas}\nPendentes: ${s.pendentes}`))return;const btn=$("sendMonthlyReport"),msg=$("monthlyReportMessage");btn.disabled=true;btn.textContent="Enviando relatório...";msg.className="message loading";msg.textContent="Gerando o PDF e enviando o relatório...";try{const r=await apiPost({action:"sendPreventiveReport",systemSessionToken:systemSession.systemSessionToken,competencia,reportProvider:provider||""});if(!r.ok)throw new Error(r.detail||"Não foi possível enviar o relatório.");msg.className="message success";msg.innerHTML=`✅ Relatório de <b>${esc(r.competenciaDescricao)}</b> enviado com sucesso.<br><br><b>Escopo:</b> ${esc(r.escopo)}<br><b>Destino:</b> ${esc(r.email)}<br><br><b>Previstas:</b> ${r.summary.previstas} • <b>Realizadas:</b> ${r.summary.realizadas} • <b>Pendentes:</b> ${r.summary.pendentes} • <b>Conclusão:</b> ${r.summary.percentual}%`}catch(e){msg.className="message error";msg.textContent=e.message}finally{btn.disabled=false;btn.textContent="📧 Enviar relatório da competência"}}
@@ -2376,6 +3228,7 @@ async function loadPreventiveHistory(){
         docs.map(d=>`<div style="margin-top:4px"><a href="${esc(d.linkDrive)}" target="_blank" rel="noopener">📄 ${esc(qrLanguage==="en-US"?preventiveDocumentTypeLabel7606(d.tipo):d.tipo)}${d.nomeArquivo?` — ${esc(d.nomeArquivo)}`:""}</a>${d.descricao?`<div class="muted">${esc(d.descricao)}</div>`:""}</div>`).join("")+
         `</div>`
       :"";
+    const checklistHtml=checklistHistoryHtml7640(item.checklist);
 
     return `<div class="preventive-card">
       <div class="preventive-id">${esc(item.registro)}</div>
@@ -2388,6 +3241,7 @@ async function loadPreventiveHistory(){
       ${item.observacao?`<div style="margin-top:8px"><b>${t("Observação da preventiva","Preventive maintenance note")}:</b><br>${esc(item.observacao)}</div>`:""}
       ${item.foto?`<div style="margin-top:8px"><a href="${esc(item.foto)}" target="_blank" rel="noopener">📷 ${t("Ver evidência","View evidence")}</a></div>`:""}
       ${item.assinatura?`<div style="margin-top:8px"><a href="${esc(item.assinatura)}" target="_blank" rel="noopener">✍️ ${t("Ver assinatura","View signature")}</a></div>`:""}
+      ${checklistHtml}
       ${docsHtml}
     </div>`;
   }).join("");
@@ -2587,6 +3441,7 @@ async function uploadPreventiveDocuments7606(registro){
 
 function requestPreventive(){requirePreventiveLogin(async()=>{await openPreventive();loadPreventiveHistory()},currentAsset.prestador)}
 async function openPreventive(){
+  preventiveChecklistData7640=null;
   preventivePhotoData=null;
   resetPreventiveDocuments7606();
   signatureDirty=false;
@@ -2625,6 +3480,7 @@ async function openPreventive(){
 
   preventiveRequirements=r.data;
   renderPreventiveRequirements();
+  renderPreventiveChecklist7640(preventiveRequirements?.checklist||null);
   refreshPreventiveDocumentsUi7606();
   qrTranslateRoutineScreens();
   $("preventiveModal").style.display="flex";
@@ -2661,6 +3517,16 @@ async function savePreventive(){
 
   const responsible=$("preventiveResponsible").value.trim();
   const observation=$("preventiveObservation").value.trim();
+  const checklist7640=collectPreventiveChecklist7640();
+
+  if(!checklist7640.ok){
+    return showPreventiveError(checklist7640.error);
+  }
+
+  if(checklist7640.hasAttention){
+    $("preventiveNeedsAction").checked=true;
+    show("preventiveActionFields");
+  }
 
   if(!responsible)return showPreventiveError(qrLanguage==="en-US"?"Enter the preventive maintenance technician.":"Informe o responsável pela preventiva.");
   if(preventiveRequirements.observacaoObrigatoria&&!observation)return showPreventiveError(qrLanguage==="en-US"?"Notes are required.":"A observação é obrigatória.");
@@ -2702,6 +3568,7 @@ async function savePreventive(){
       preventiveActionMaterial:$("preventiveActionMaterial").value.trim(),
       preventiveActionQuantity:$("preventiveActionQuantity").value.trim(),
       preventiveActionOperation:$("preventiveActionOperation").value,
+      preventiveChecklistJson:checklist7640.payload?JSON.stringify(checklist7640.payload):"",
       preventiveLanguage:qrLanguage
     });
 
@@ -2718,6 +3585,12 @@ async function savePreventive(){
       :(qrLanguage==="en-US"
         ?`✅ Preventive maintenance <b>${esc(r.registro)}</b> saved successfully.`
         :`✅ Preventiva <b>${esc(r.registro)}</b> registrada com sucesso.`);
+
+    if(r.checklist){
+      baseMessage+=qrLanguage==="en-US"
+        ?`<br>📋 Checklist: ${Number(r.checklist.ok||0)} OK • ${Number(r.checklist.attention||0)} attention • ${Number(r.checklist.na||0)} N/A.`
+        :`<br>📋 Checklist: ${Number(r.checklist.ok||0)} OK • ${Number(r.checklist.attention||0)} atenção • ${Number(r.checklist.na||0)} N/A.`;
+    }
 
     if(documentResult.total){
       if(documentResult.ok){
@@ -4014,6 +4887,7 @@ const QR_TEXT={
     tabPending:"⚠️ OCs Pendentes",
     tabOccurrenceReport:"📊 Relatório de OCs",
     tabPreventive:"🛠️ Status das Preventivas",
+    tabPreventiveChecklists:"📋 Checklists de Preventiva",
     tabDocuments:"📄 Documentos Técnicos",
     tabOccurrenceCatalog:"🧩 Categorias e Componentes",
     tabMaintenancePending:"📌 Pendências / Providências",
@@ -4056,6 +4930,7 @@ const QR_TEXT={
     tabPending:"⚠️ Pending Work Orders",
     tabOccurrenceReport:"📊 Work Order Report",
     tabPreventive:"🛠️ Preventive Maintenance Status",
+    tabPreventiveChecklists:"📋 Preventive Checklists",
     tabDocuments:"📄 Technical Documents",
     tabOccurrenceCatalog:"🧩 Categories & Components",
     tabMaintenancePending:"📌 Pending Actions",
@@ -5233,6 +6108,13 @@ function qrApplyLanguage(lang){
   syncUserSchoolField7620();
   if($("maintenancePendingTitle"))$("maintenancePendingTitle").textContent=qrLanguage==="en-US"?"📌 Pending Actions":"📌 Pendências / Providências";
   if($("maintenancePendingHelp"))$("maintenancePendingHelp").textContent=qrLanguage==="en-US"?"Needs identified during preventive maintenance that require follow-up.":"Necessidades identificadas durante as preventivas e que exigem alguma providência.";
+  if($("preventiveChecklistAdminArea")&&!$("preventiveChecklistAdminArea").classList.contains("hidden")&&preventiveChecklistAdminData7640){
+    renderPreventiveChecklistAdmin7640();
+  }
+  if(preventiveChecklistData7640){
+    renderPreventiveChecklist7640(preventiveChecklistData7640);
+  }
+
   if($("preventiveNeedsActionLabel"))$("preventiveNeedsActionLabel").textContent=qrLanguage==="en-US"?"Was any follow-up action identified?":"Foi identificada alguma necessidade de providência?";
   if($("preventiveActionHeading"))$("preventiveActionHeading").textContent=qrLanguage==="en-US"?"📌 Required action":"📌 Providência necessária";
   if($("preventiveActionNotice"))$("preventiveActionNotice").textContent=qrLanguage==="en-US"?"When the preventive maintenance is saved, this need will be registered under Pending Actions and communicated to the responsible users.":"Ao salvar a preventiva, esta necessidade será registrada em Pendências / Providências e comunicada aos responsáveis.";
@@ -5296,10 +6178,17 @@ $("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgo
 $("globalSchoolSelect").onchange=function(){
   const schoolId=captureSchoolSelection7626(this);
   schoolScopeUpdatePromise7625=changeGlobalSchoolScope7622(schoolId);
-};$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+};$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=function(){if(currentAsset?.id)setOriginAsset(currentAsset.id);requireSystemLogin(()=>{hide("assetScreen");show("searchScreen");openMainMenu();focusBackAssetButton()})};
 $("backAssetButton").onclick=function(){const id=getOriginAsset();if(!id)return;clearOriginAsset();location.href="?id="+encodeURIComponent(id)};
 $("occReportRefresh").onclick=loadOccurrenceReport;$("occReportPdf").onclick=generateOccurrenceReportPdf;["occReportStart","occReportEnd","occReportProvider","occReportCategory","occReportComponent","occReportFloor","occReportLocation"].forEach(id=>$(id).onchange=markOccurrenceReportDirty);$("controlRefresh").onclick=refreshPreventiveControl;$("controlCompetence").onchange=loadPreventiveControl;$("controlProvider").onchange=()=>{if(["MASTER","GESTOR"].includes(systemSession?.perfil))loadPreventiveControl();else renderControlList()};$("controlAll").onclick=()=>setControlMode("all");$("controlPending").onclick=()=>setControlMode("pending");$("controlDone").onclick=()=>setControlMode("done");$("sendMonthlyReport").onclick=sendMonthlyPreventiveReport;
+$("preventiveChecklistBackMenu").onclick=showSearchTab;
+$("newPreventiveChecklist").onclick=openNewPreventiveChecklist7640;
+$("preventiveChecklistScope").onchange=syncPreventiveChecklistScope7640;
+$("addPreventiveChecklistItem").onclick=()=>addPreventiveChecklistItem7640();
+$("cancelPreventiveChecklist").onclick=()=>$("preventiveChecklistAdminModal").style.display="none";
+$("savePreventiveChecklist").onclick=savePreventiveChecklistAdmin7640;
+
 $("preventiveLogout").onclick=()=>showSearchTab();$("cancelPreventive").onclick=()=>{if(!preventivePosting)$("preventiveModal").style.display="none"};$("savePreventive").onclick=savePreventive;$("cancelReport").onclick=function(){if(reportPosting){if($("sendReport").textContent==="Ocorrência gravada"){reportPosting=false;$("reportModal").style.display="none";location.reload()}return}$("reportModal").style.display="none"};$("sendReport").onclick=sendReport;$("historySelect").onchange=function(){renderHistoryItem(Number(this.value))};$("manageStatus").onchange=toggleConclusion;$("cancelManage").onclick=()=>{if(!managePosting)$("manageModal").style.display="none"};$("saveManage").onclick=saveManage;$("signatureCanvas").addEventListener("pointerdown",signatureStart);$("signatureCanvas").addEventListener("pointermove",signatureMove);window.addEventListener("pointerup",signatureEnd);$("clearSignature").onclick=clearSignatureCanvas;
 qrLoadLanguage();
 qrInstallRoutineObserver();
@@ -5758,6 +6647,39 @@ const QR_ROUTINE_HELP_7631 = {
     }
   },
 
+  checklists:{
+    pt:{
+      title:"📋 Checklists de Preventiva",
+      purpose:"Configura os itens que devem ser verificados durante o registro de uma manutenção preventiva.",
+      when:"Use para padronizar a execução das preventivas por tipo de equipamento, ativo específico, área ou escola.",
+      steps:[
+        "Abra Checklists de Preventiva no Menu Principal.",
+        "Crie um novo checklist ou edite um checklist permitido para seu perfil.",
+        "Defina o escopo: ativo, tipo de equipamento, área ou escola.",
+        "Adicione, remova ou reorganize os itens e defina quais são obrigatórios e quais permitem N/A.",
+        "Salve. O checklist será carregado automaticamente na preventiva do ativo correspondente."
+      ],
+      rules:"A prioridade de aplicação é Ativo específico → Tipo de equipamento → Área → Escola/Geral. GESTOR não altera os modelos globais; ele pode criar uma versão específica de sua escola, que terá prioridade sobre o modelo global.",
+      access:"Configuração disponível para MASTER e GESTOR. PRESTADOR executa o checklist na preventiva, mas não altera sua configuração. CONSULTA é somente leitura.",
+      example:"Exemplo: o checklist global Boiler pode ser substituído por um checklist Boiler específico da Lincoln Elementary School."
+    },
+    en:{
+      title:"📋 Preventive Checklists",
+      purpose:"Configures the items that must be checked when recording preventive maintenance.",
+      when:"Use this to standardize preventive maintenance by equipment type, specific asset, area, or school.",
+      steps:[
+        "Open Preventive Checklists from the Main Menu.",
+        "Create a new checklist or edit a checklist allowed for your profile.",
+        "Define the scope: asset, equipment type, area, or school.",
+        "Add, remove, or reorder items and define which are required and which allow N/A.",
+        "Save. The checklist will automatically load for matching preventive-maintenance records."
+      ],
+      rules:"Application priority is Specific Asset → Equipment Type → Area → School/General. GESTOR cannot edit global templates; a school-specific version can be created and will take priority over the global model.",
+      access:"Configuration is available to MASTER and GESTOR. PRESTADOR executes the checklist during preventive maintenance but cannot change its configuration. CONSULTA is read-only.",
+      example:"Example: the global Boiler checklist can be overridden by a Boiler checklist specific to Lincoln Elementary School."
+    }
+  },
+
   company:{
     pt:{
       title:"⚙️ Configuração da Empresa",
@@ -5797,6 +6719,7 @@ const QR_ROUTINE_HELP_MAP_7631 = [
   ["pendingArea","pending"],
   ["occurrenceReportArea","occurrenceReport"],
   ["preventiveControlArea","preventive"],
+  ["preventiveChecklistAdminArea","checklists"],
   ["documentsArea","documents"],
   ["occurrenceCatalogArea","catalog"],
   ["maintenancePendingArea","maintenancePending"],
@@ -5993,6 +6916,8 @@ if(document.readyState==="loading"){
 }
 
 // QRManut USA 7.6.3.2 - Contextual Help initialization fix.
+
+// QRManut USA 7.6.4.0 - Structured Preventive Maintenance Checklists.
 </script>
 
 </body>
