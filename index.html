@@ -1456,7 +1456,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.5.0</div>
+<div class="footer">QRManut USA • Version 7.6.5.1</div>
 </div>
 <script>
 /* ============================================================
@@ -4507,7 +4507,7 @@ function assetFillManagementOptions7610(){
     const schools=o.schools||[];
     school.innerHTML=`<option value="">${qrLanguage==="en-US"?"Select school...":"Selecione o colégio..."}</option>`+
       schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.display||((x.idEscola||"")+" – "+(x.escola||"")))}</option>`).join("");
-    const activeScope=activeSchoolId7622();
+    const activeScope=selectedSchoolId7626();
     const help=$("assetSchoolHelp");
 
     if(systemSession?.perfil==="GESTOR"||activeScope){
@@ -4600,17 +4600,48 @@ async function loadAssets760(){
     return loadAssets760();
   }
 
-  const responseScope=String(r.scopeSchoolId||"");
+  const responseScope=String(r.scopeSchoolId||"").trim();
+
+  // 7.6.5.1:
+  // A escola visível/selecionada pelo usuário é a referência principal
+  // para a tela. O backend continua sendo a primeira barreira; este filtro
+  // no navegador é a segunda barreira.
+  const authoritativeSchoolId=String(
+    requestedSchoolId||
+    responseScope||
+    ""
+  ).trim();
 
   qrAssets760=(r.items||[]).filter(a=>{
-    if(!responseScope)return true;
-    return String(a.idEscola||"").toUpperCase()===responseScope.toUpperCase();
+    if(!authoritativeSchoolId)return true;
+
+    return String(
+      a.idEscola||
+      a.schoolId||
+      a.school_id||
+      ""
+    ).trim().toUpperCase()===authoritativeSchoolId.toUpperCase();
   });
 
+  const selectedSchoolOption=(()=>{
+    const sel=$("globalSchoolSelect");
+    if(!sel||!authoritativeSchoolId)return null;
+    return [...sel.options].find(
+      o=>String(o.value||"").trim().toUpperCase()===
+         authoritativeSchoolId.toUpperCase()
+    )||null;
+  })();
+
+  const selectedSchoolName=
+    String(r.scopeSchoolName||"").trim()||
+    String(selectedSchoolOption?.textContent||"")
+      .replace(/^\s*[^–-]+\s*[–-]\s*/,"")
+      .trim();
+
   qrAssetScope7650={
-    schoolId:responseScope,
-    schoolName:String(r.scopeSchoolName||""),
-    allSchools:!!r.allSchools
+    schoolId:authoritativeSchoolId,
+    schoolName:selectedSchoolName,
+    allSchools:!authoritativeSchoolId
   };
 
   qrAssetTypes760=r.types||[];
@@ -4627,7 +4658,7 @@ function renderAssets760(){
 
     $("assetScopeStatus").innerHTML=qrAssetScope7650.allSchools
       ?`<span class="asset-scope-chip">🏫 ${qrLanguage==="en-US"?"All Schools":"Todos os colégios"}</span> • ${qrAssets760.length} ${qrLanguage==="en-US"?"assets":"ativos"}`
-      :`<span class="asset-scope-chip">🏫 ${esc(scopeName||"")}</span> • ${qrAssets760.length} ${qrLanguage==="en-US"?"assets":"ativos"}`;
+      :`<span class="asset-scope-chip">🏫 ${esc(scopeName||qrAssetScope7650.schoolId)}</span> • ${qrAssets760.length} ${qrLanguage==="en-US"?"assets":"ativos"} • <b>${esc(qrAssetScope7650.schoolId)}</b>`;
   }
 
   const q=String($("assetSearch").value||"").toLowerCase();
@@ -4687,7 +4718,7 @@ function openAssetModal760(a){
   $("assetName").value=a?.nome||"";
   assetSetAssistedValue7610("assetStatus",null,a?.status||"Ativo");
   if($("assetSchool")){
-    const activeScope=activeSchoolId7622();
+    const activeScope=selectedSchoolId7626();
 
     if(a){
       $("assetSchool").value=activeScope||(a?.idEscola||"");
@@ -4772,7 +4803,7 @@ async function saveAsset760(){
   if(!name)return alert(qrLanguage==="en-US"?"Enter the asset name.":"Informe o nome do equipamento.");
   if(!existing&&!$("assetTypeCode").value)return alert(qrLanguage==="en-US"?"Select the asset type/code before saving.":"Selecione o tipo/sigla do ativo antes de salvar.");
   if(!existing&&(!id||id==="—"))return alert(qrLanguage==="en-US"?"Generate the asset ID before saving.":"Gere o ID do ativo antes de salvar.");
-  const selectedScopeSchool=activeSchoolId7622();
+  const selectedScopeSchool=selectedSchoolId7626();
   const schoolId=selectedScopeSchool||String($("assetSchool")?.value||"");
 
   if(!schoolId){
@@ -7702,6 +7733,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.4.3 - Immediate feedback on preventive maintenance registration.
 
 // QRManut USA 7.6.5.0 - School / Unit Management + scoped Asset Management.
+
+// QRManut USA 7.6.5.1 - Asset Management School filtering fix.
 </script>
 
 </body>
