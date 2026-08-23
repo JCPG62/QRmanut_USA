@@ -1,10 +1,10 @@
 /* ============================================================
  * QRmanutUSA - Service Worker
- * Version 7.6.3.0
+ * Version 7.6.3.1
  * ============================================================ */
 
 const CACHE_PREFIX = "qrmanut-usa-";
-const CACHE_NAME = "qrmanut-usa-v7.6.3.0";
+const CACHE_NAME = "qrmanut-usa-v7.6.3.1";
 
 const APP_SHELL = [
   "./",
@@ -43,7 +43,6 @@ self.addEventListener("fetch", event => {
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
 
-  // Navegação: rede primeiro. Isso reduz o risco de abrir HTML antigo.
   if(request.mode==="navigate"){
     event.respondWith(
       fetch(request,{cache:"no-store"})
@@ -64,7 +63,6 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Recursos estáticos: mostra cache imediatamente e atualiza em paralelo.
   event.respondWith(
     caches.open(CACHE_NAME).then(async cache=>{
       const cached=await cache.match(request);
