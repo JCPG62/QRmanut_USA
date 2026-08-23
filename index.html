@@ -736,6 +736,744 @@ html,body{max-width:100%;overflow-x:hidden}
 }
 
 
+
+/* ============================================================
+ * PROBLEM ASSETS / EQUIPMENT ATTENTION – 7.6.6.2
+ * ============================================================ */
+
+function problemT7662(pt,en){
+  return qrLanguage==="en-US"?en:pt;
+}
+
+function problemLevelLabel7662(level){
+  const map={
+    HIGH:[
+      "🔴 Alta Atenção",
+      "🔴 High Attention"
+    ],
+    ATTENTION:[
+      "🟠 Atenção",
+      "🟠 Attention"
+    ],
+    WATCH:[
+      "🟡 Monitorar",
+      "🟡 Watch"
+    ],
+    NORMAL:[
+      "🔵 Normal",
+      "🔵 Normal"
+    ]
+  };
+
+  const x=map[String(level||"").toUpperCase()]||[
+    String(level||""),
+    String(level||"")
+  ];
+
+  return problemT7662(x[0],x[1]);
+}
+
+function problemLevelClass7662(level){
+  const l=String(level||"").toUpperCase();
+  if(l==="HIGH")return "problem-level-high";
+  if(l==="ATTENTION")return "problem-level-attention";
+  if(l==="WATCH")return "problem-level-watch";
+  return "problem-level-normal";
+}
+
+function problemDate7662(v){
+  if(!v)return "—";
+  const d=new Date(v);
+  if(Number.isNaN(d.getTime()))return String(v);
+
+  return new Intl.DateTimeFormat(
+    qrLanguage==="en-US"?"en-US":"pt-BR",
+    {dateStyle:"medium"}
+  ).format(d);
+}
+
+function problemDateTime7662(v){
+  if(!v)return "—";
+  const d=new Date(v);
+  if(Number.isNaN(d.getTime()))return String(v);
+
+  return new Intl.DateTimeFormat(
+    qrLanguage==="en-US"?"en-US":"pt-BR",
+    {dateStyle:"short",timeStyle:"short"}
+  ).format(d);
+}
+
+function problemPeriodParams7662(){
+  const period=$("problemAssetsPeriod").value||"365";
+
+  return {
+    period,
+    startDate:period==="custom"?$("problemAssetsStart").value:"",
+    endDate:period==="custom"?$("problemAssetsEnd").value:""
+  };
+}
+
+function setProblemDefaultDates7662(){
+  if($("problemAssetsStart").value&&$("problemAssetsEnd").value)return;
+
+  const end=new Date();
+  const start=new Date(end);
+  start.setDate(start.getDate()-365);
+
+  $("problemAssetsStart").value=isoDateLocal(start);
+  $("problemAssetsEnd").value=isoDateLocal(end);
+}
+
+function toggleProblemCustomDates7662(){
+  const custom=$("problemAssetsPeriod").value==="custom";
+
+  document.querySelectorAll(".problem-custom-date").forEach(el=>{
+    el.classList.toggle("hidden",!custom);
+  });
+
+  if(custom)setProblemDefaultDates7662();
+}
+
+function applyProblemAssetsLanguage7662(){
+  if(!$("problemAssetsArea"))return;
+
+  $("problemAssetsTitle").textContent=
+    problemT7662(
+      "⚠️ Problem Assets / Atenção aos Equipamentos",
+      "⚠️ Problem Assets / Equipment Attention"
+    );
+
+  $("problemAssetsSubtitle").textContent=
+    problemT7662(
+      "Identifica equipamentos com recorrência de manutenção e condições que exigem atenção.",
+      "Identifies equipment with repeated maintenance events and conditions requiring attention."
+    );
+
+  $("problemAssetsBackMenu").textContent=
+    problemT7662("← Voltar ao Menu Principal","← Back to Main Menu");
+
+  $("problemAssetsRefresh").textContent=
+    problemT7662("↻ Atualizar","↻ Refresh");
+
+  $("problemAssetsPeriodLabel").firstChild.nodeValue=
+    problemT7662("Período de análise ","Analysis Period ");
+
+  $("problemAssetsStartLabel").firstChild.nodeValue=
+    problemT7662("Data inicial ","Start Date ");
+
+  $("problemAssetsEndLabel").firstChild.nodeValue=
+    problemT7662("Data final ","End Date ");
+
+  $("problemAssetsLevelLabel").firstChild.nodeValue=
+    problemT7662("Nível de atenção ","Attention Level ");
+
+  $("problemAssetsSearchLabel").firstChild.nodeValue=
+    problemT7662("Buscar ","Search ");
+
+  $("problemAssetsSearch").placeholder=
+    problemT7662(
+      "Ativo, colégio, tipo ou categoria...",
+      "Asset, school, type or category..."
+    );
+
+  $("problemAssetsScopeLabel").textContent=
+    problemT7662("Escopo","Scope");
+
+  $("problemAssetsRankingTitle").textContent=
+    problemT7662(
+      "Ranking de Atenção dos Equipamentos",
+      "Equipment Attention Ranking"
+    );
+
+  $("problemAssetsRankingHelp").textContent=
+    problemT7662(
+      "Pontuações maiores indicam maior atividade de manutenção, não conformidades e recorrência.",
+      "Higher scores indicate more maintenance activity, nonconformities and recurrence."
+    );
+
+  $("problemAssetsMethodSummary").textContent=
+    problemT7662(
+      "Como o Attention Score é calculado?",
+      "How is the Attention Score calculated?"
+    );
+
+  $("problemAssetDetailClose").textContent=
+    problemT7662("Fechar","Close");
+
+  $("problemAssetDetailCloseTop").textContent=
+    problemT7662("Fechar","Close");
+
+  $("problemAssetOpenAsset").textContent=
+    problemT7662("Abrir Equipamento","Open Asset");
+
+  $("problemAssetRecurrenceTitle").textContent=
+    problemT7662("Problemas Recorrentes","Repeated Problems");
+
+  $("problemAssetWorkOrdersTitle").textContent=
+    problemT7662("OCs / Ocorrências","Work Orders / Occurrences");
+
+  $("problemAssetPendingTitle").textContent=
+    problemT7662("Pendências / Providências","Pending Actions");
+
+  $("problemAssetChecklistTitle").textContent=
+    problemT7662("Não Conformidades de Checklist","Checklist Issues");
+
+  const period=$("problemAssetsPeriod");
+  const currentPeriod=period.value;
+
+  period.innerHTML=[
+    ["90",problemT7662("Últimos 90 dias","Last 90 Days")],
+    ["180",problemT7662("Últimos 180 dias","Last 180 Days")],
+    ["365",problemT7662("Últimos 12 meses","Last 12 Months")],
+    ["custom",problemT7662("Personalizado","Custom")]
+  ].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+
+  period.value=currentPeriod;
+
+  const level=$("problemAssetsLevel");
+  const currentLevel=level.value;
+
+  level.innerHTML=[
+    ["NON_NORMAL",problemT7662("Exigem atenção","Needs Attention")],
+    ["HIGH",problemT7662("Alta Atenção","High Attention")],
+    ["ATTENTION",problemT7662("Atenção","Attention")],
+    ["WATCH",problemT7662("Monitorar","Watch")],
+    ["NORMAL",problemT7662("Normal","Normal")],
+    ["ALL",problemT7662("Todos os equipamentos monitorados","All Monitored Assets")]
+  ].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+
+  level.value=currentLevel;
+
+  $("executiveDashboardProblemAssets").textContent=
+    problemT7662("⚠️ Problem Assets","⚠️ Problem Assets");
+
+  if(problemAssetsData7662){
+    renderProblemAssets7662();
+  }
+
+  if(
+    $("problemAssetDetailModal").style.display==="flex" &&
+    problemAssetDetailData7662
+  ){
+    renderProblemAssetDetail7662(problemAssetDetailData7662);
+  }
+}
+
+async function showProblemAssetsTab7662(){
+  if(!["MASTER","GESTOR"].includes(systemSession?.perfil||"")){
+    return alert(
+      problemT7662(
+        "Somente MASTER ou GESTOR pode acessar Problem Assets.",
+        "Only MASTER or MANAGER can access Problem Assets."
+      )
+    );
+  }
+
+  clearTabs();
+  $("tabProblemAssets").classList.add("active");
+  showOnly("problemAssetsArea");
+
+  applyProblemAssetsLanguage7662();
+  toggleProblemCustomDates7662();
+
+  await loadProblemAssets7662(false);
+}
+
+async function loadProblemAssets7662(forceRefresh){
+  if(problemAssetsLoading7662)return;
+
+  const params=problemPeriodParams7662();
+
+  if(params.period==="custom"&&(!params.startDate||!params.endDate)){
+    $("problemAssetsStatus").textContent=
+      problemT7662(
+        "Informe a data inicial e final.",
+        "Enter the start and end dates."
+      );
+    return;
+  }
+
+  problemAssetsLoading7662=true;
+
+  $("problemAssetsRefresh").disabled=true;
+  $("problemAssetsRefresh").textContent=
+    problemT7662("Atualizando...","Refreshing...");
+
+  $("problemAssetsStatus").textContent=
+    problemT7662(
+      "Analisando histórico dos equipamentos...",
+      "Analyzing equipment history..."
+    );
+
+  try{
+    const r=await menuApi({
+      action:"problemassetscore",
+      ...params,
+      refresh:forceRefresh?"1":"0"
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        r.error||
+        problemT7662(
+          "Não foi possível analisar os equipamentos.",
+          "Unable to analyze equipment."
+        )
+      );
+    }
+
+    problemAssetsData7662=r.data||null;
+
+    renderProblemAssets7662();
+
+    $("problemAssetsStatus").textContent=
+      problemT7662(
+        `Atualizado em ${problemDateTime7662(problemAssetsData7662?.generatedAt)}${r.performanceMs!==undefined?` • ${r.performanceMs} ms`:""}`,
+        `Updated ${problemDateTime7662(problemAssetsData7662?.generatedAt)}${r.performanceMs!==undefined?` • ${r.performanceMs} ms`:""}`
+      );
+
+  }catch(e){
+    problemAssetsData7662=null;
+    $("problemAssetsSummary").innerHTML="";
+    $("problemAssetsList").innerHTML="";
+    $("problemAssetsStatus").textContent=e.message||String(e);
+  }finally{
+    problemAssetsLoading7662=false;
+    $("problemAssetsRefresh").disabled=false;
+    $("problemAssetsRefresh").textContent=
+      problemT7662("↻ Atualizar","↻ Refresh");
+  }
+}
+
+function problemAssetsFiltered7662(){
+  const d=problemAssetsData7662;
+  if(!d)return [];
+
+  const q=String($("problemAssetsSearch").value||"")
+    .trim()
+    .toLowerCase();
+
+  const level=$("problemAssetsLevel").value||"NON_NORMAL";
+
+  return (d.items||[]).filter(x=>{
+    const l=String(x.attentionLevel||"NORMAL").toUpperCase();
+
+    if(level==="NON_NORMAL"&&l==="NORMAL")return false;
+    if(level!=="ALL"&&level!=="NON_NORMAL"&&l!==level)return false;
+
+    if(q){
+      const hay=[
+        x.schoolId,
+        x.school,
+        x.assetId,
+        x.name,
+        x.category,
+        x.type
+      ].join(" ").toLowerCase();
+
+      if(!hay.includes(q))return false;
+    }
+
+    return true;
+  });
+}
+
+function problemSummaryCard7662(label,value,css){
+  return `<div class="problem-summary-card ${css}">
+    <div class="problem-summary-label">${esc(label)}</div>
+    <div class="problem-summary-value">${Number(value||0)}</div>
+  </div>`;
+}
+
+function renderProblemAssets7662(){
+  const d=problemAssetsData7662;
+  if(!d)return;
+
+  const all=d.items||[];
+
+  const counts={
+    HIGH:0,
+    ATTENTION:0,
+    WATCH:0,
+    NORMAL:0
+  };
+
+  all.forEach(x=>{
+    const l=String(x.attentionLevel||"NORMAL").toUpperCase();
+    if(Object.prototype.hasOwnProperty.call(counts,l))counts[l]++;
+  });
+
+  $("problemAssetsScope").textContent=d.scope?.allSchools
+    ?problemT7662("Todos os colégios","All Schools")
+    :(d.scope?.schoolName||d.scope?.schoolId||"—");
+
+  $("problemAssetsSummary").innerHTML=[
+    problemSummaryCard7662(
+      problemT7662("Alta Atenção","High Attention"),
+      counts.HIGH,
+      "problem-summary-high"
+    ),
+    problemSummaryCard7662(
+      problemT7662("Atenção","Attention"),
+      counts.ATTENTION,
+      "problem-summary-attention"
+    ),
+    problemSummaryCard7662(
+      problemT7662("Monitorar","Watch"),
+      counts.WATCH,
+      "problem-summary-watch"
+    ),
+    problemSummaryCard7662(
+      problemT7662("Normal","Normal"),
+      counts.NORMAL,
+      "problem-summary-normal"
+    ),
+    problemSummaryCard7662(
+      problemT7662("Monitorados","Monitored"),
+      all.length,
+      "problem-summary-total"
+    )
+  ].join("");
+
+  const items=problemAssetsFiltered7662();
+
+  $("problemAssetsVisibleCount").textContent=
+    problemT7662(
+      `${items.length} equipamento(s) exibido(s)`,
+      `${items.length} equipment item(s) displayed`
+    );
+
+  if(!items.length){
+    $("problemAssetsList").innerHTML=
+      `<div class="dashboard-empty">${
+        problemT7662(
+          "Nenhum equipamento corresponde aos filtros selecionados.",
+          "No equipment matches the selected filters."
+        )
+      }</div>`;
+  }else{
+    const table=`<div style="overflow:auto">
+      <table class="problem-assets-table">
+        <thead>
+          <tr>
+            <th>${problemT7662("Colégio","School")}</th>
+            <th>${problemT7662("Equipamento","Asset")}</th>
+            <th>${problemT7662("Tipo / Categoria","Type / Category")}</th>
+            <th>OCs</th>
+            <th>${problemT7662("Anomalias","Anomalies")}</th>
+            <th>${problemT7662("Pendências","Pending")}</th>
+            <th>${problemT7662("Checklist","Checklist")}</th>
+            <th>${problemT7662("Recorrência","Recurrence")}</th>
+            <th>${problemT7662("Última ocorrência","Last Occurrence")}</th>
+            <th>Score</th>
+            <th>${problemT7662("Nível","Level")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(x=>`
+            <tr data-problem-asset="${esc(x.assetId)}">
+              <td>${esc(x.schoolId||"")}<br><span class="muted">${esc(x.school||"")}</span></td>
+              <td class="problem-asset-name"><b>${esc(x.assetId||"")}</b><br>${esc(x.name||"")}</td>
+              <td>${esc(x.type||"—")}<br><span class="muted">${esc(x.category||"")}</span></td>
+              <td>${Number(x.workOrders||0)}</td>
+              <td>${Number(x.anomalies||0)}</td>
+              <td>${Number(x.pendingActions||0)}</td>
+              <td>${Number(x.checklistNonconformities||0)}</td>
+              <td>${Number(x.recurrenceCount||0)}</td>
+              <td>${problemDate7662(x.lastOccurrence)}</td>
+              <td class="problem-score">${Number(x.attentionScore||0).toFixed(1)}</td>
+              <td>
+                <span class="problem-level-badge ${problemLevelClass7662(x.attentionLevel)}">
+                  ${esc(problemLevelLabel7662(x.attentionLevel))}
+                </span>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+    const mobile=items.map(x=>`
+      <div class="problem-asset-mobile-card" data-problem-asset="${esc(x.assetId)}">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+          <div>
+            <strong>${esc(x.assetId||"")} – ${esc(x.name||"")}</strong>
+            <div class="muted">${esc(x.schoolId||"")} – ${esc(x.school||"")}</div>
+            <div class="muted">${esc(x.type||x.category||"")}</div>
+          </div>
+          <span class="problem-level-badge ${problemLevelClass7662(x.attentionLevel)}">
+            ${esc(problemLevelLabel7662(x.attentionLevel))}
+          </span>
+        </div>
+
+        <div class="problem-mobile-metrics">
+          <div class="problem-mobile-metric"><span>OCs</span><strong>${Number(x.workOrders||0)}</strong></div>
+          <div class="problem-mobile-metric"><span>${problemT7662("Anom.","Anom.")}</span><strong>${Number(x.anomalies||0)}</strong></div>
+          <div class="problem-mobile-metric"><span>${problemT7662("Pend.","Pending")}</span><strong>${Number(x.pendingActions||0)}</strong></div>
+          <div class="problem-mobile-metric"><span>Checklist</span><strong>${Number(x.checklistNonconformities||0)}</strong></div>
+          <div class="problem-mobile-metric"><span>${problemT7662("Recorr.","Recurr.")}</span><strong>${Number(x.recurrenceCount||0)}</strong></div>
+          <div class="problem-mobile-metric"><span>Score</span><strong>${Number(x.attentionScore||0).toFixed(1)}</strong></div>
+        </div>
+
+        <div class="muted" style="margin-top:8px">
+          ${problemT7662("Última ocorrência","Last occurrence")}: ${problemDate7662(x.lastOccurrence)}
+        </div>
+      </div>
+    `).join("");
+
+    $("problemAssetsList").innerHTML=table+mobile;
+
+    document.querySelectorAll("[data-problem-asset]").forEach(el=>{
+      el.onclick=()=>openProblemAssetDetail7662(el.dataset.problemAsset);
+    });
+  }
+
+  const sm=d.scoreModel||{};
+
+  $("problemAssetsMethodText").innerHTML=
+    `${problemT7662(
+      "O Attention Score é um indicador de priorização, não uma recomendação automática de substituição.",
+      "The Attention Score is a prioritization indicator, not an automatic replacement recommendation."
+    )}<br><br>`+
+    `<b>${problemT7662("Pesos atuais","Current weights")}:</b> `+
+    `OC ${Number(sm.workOrder||1)} • `+
+    `${problemT7662("Anomalia","Anomaly")} ${Number(sm.anomaly||2)} • `+
+    `${problemT7662("OC aberta","Open WO")} ${Number(sm.openWorkOrder||1.5)} • `+
+    `${problemT7662("Pendência","Pending")} ${Number(sm.pendingAction||1.5)} • `+
+    `Checklist ATTENTION ${Number(sm.checklistNonconformity||2)} • `+
+    `${problemT7662("Recorrência","Recurrence")} ${Number(sm.recurrence||1.5)}.<br>`+
+    `${problemT7662(
+      "A prioridade das pendências acrescenta peso adicional. Os eventos normais de preventiva não aumentam a pontuação.",
+      "Pending-action priority adds extra weight. Normal preventive maintenance events do not increase the score."
+    )}`;
+}
+
+async function openProblemAssetDetail7662(assetId){
+  $("problemAssetDetailModal").style.display="flex";
+  $("problemAssetDetailTitle").textContent=
+    problemT7662("⚠️ Atenção ao Equipamento","⚠️ Equipment Attention");
+
+  $("problemAssetDetailSubtitle").textContent=assetId||"";
+  $("problemAssetDetailStatus").textContent=
+    problemT7662("Carregando histórico...","Loading history...");
+
+  $("problemAssetDetailSummary").innerHTML="";
+  $("problemAssetRecurrenceList").innerHTML="";
+  $("problemAssetWorkOrders").innerHTML="";
+  $("problemAssetPending").innerHTML="";
+  $("problemAssetChecklist").innerHTML="";
+
+  try{
+    const r=await menuApi({
+      action:"problemassetdetails",
+      ...problemPeriodParams7662(),
+      assetId
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        r.error||
+        problemT7662(
+          "Não foi possível carregar o equipamento.",
+          "Unable to load the equipment."
+        )
+      );
+    }
+
+    problemAssetDetailData7662=r.data||null;
+
+    renderProblemAssetDetail7662(problemAssetDetailData7662);
+
+    $("problemAssetDetailStatus").textContent=
+      problemT7662(
+        `Detalhes atualizados${r.performanceMs!==undefined?` • ${r.performanceMs} ms`:""}`,
+        `Details updated${r.performanceMs!==undefined?` • ${r.performanceMs} ms`:""}`
+      );
+
+  }catch(e){
+    problemAssetDetailData7662=null;
+    $("problemAssetDetailStatus").textContent=e.message||String(e);
+  }
+}
+
+function renderProblemAssetDetail7662(d){
+  if(!d)return;
+
+  const a=d.asset||{};
+  const s=d.summary||{};
+
+  $("problemAssetDetailTitle").textContent=
+    `⚠️ ${a.assetId||""} – ${a.name||""}`;
+
+  $("problemAssetDetailSubtitle").textContent=
+    [
+      a.schoolId&&a.school?`${a.schoolId} – ${a.school}`:(a.school||a.schoolId),
+      a.type||a.category,
+      a.location
+    ].filter(Boolean).join(" • ");
+
+  const metrics=[
+    [problemT7662("Attention Score","Attention Score"),Number(s.attentionScore||0).toFixed(1)],
+    [problemT7662("OCs","Work Orders"),Number(s.workOrders||0)],
+    [problemT7662("Anomalias","Anomalies"),Number(s.anomalies||0)],
+    [problemT7662("OCs abertas","Open WOs"),Number(s.openWorkOrders||0)],
+    [problemT7662("Pendências","Pending"),Number(s.pendingActions||0)],
+    [problemT7662("Checklist","Checklist"),Number(s.checklistNonconformities||0)]
+  ];
+
+  $("problemAssetDetailSummary").innerHTML=
+    `<div style="margin-bottom:9px">
+      <span class="problem-level-badge ${problemLevelClass7662(s.attentionLevel)}">
+        ${esc(problemLevelLabel7662(s.attentionLevel))}
+      </span>
+      <span class="muted" style="margin-left:7px">
+        ${problemT7662("Recorrência","Recurrence")}: ${Number(s.recurrenceCount||0)}
+        • ${problemT7662("Última ocorrência","Last occurrence")}: ${problemDate7662(s.lastOccurrence)}
+      </span>
+    </div>
+    <div class="problem-detail-summary-grid">
+      ${metrics.map(([label,value])=>`
+        <div class="problem-detail-summary-card">
+          <span>${esc(label)}</span>
+          <strong>${esc(String(value))}</strong>
+        </div>
+      `).join("")}
+    </div>`;
+
+  renderProblemRecurrence7662(d.recurrenceGroups||[]);
+  renderProblemWorkOrders7662(d.workOrders||[]);
+  renderProblemPending7662(d.pendingActions||[]);
+  renderProblemChecklist7662(d.checklistIssues||[]);
+}
+
+function renderProblemRecurrence7662(items){
+  if(!items.length){
+    $("problemAssetRecurrenceList").innerHTML=
+      `<div class="dashboard-empty">${
+        problemT7662(
+          "Nenhum padrão repetido identificado no período.",
+          "No repeated problem pattern identified in the period."
+        )
+      }</div>`;
+    return;
+  }
+
+  $("problemAssetRecurrenceList").innerHTML=items.map(x=>`
+    <div class="problem-recurrence-card">
+      <b>${Number(x.count||0)}×</b>
+      ${esc(x.detectedIssueType||"UNCLASSIFIED")}
+      ${x.category?` • ${esc(qrStructured7613(x.category))}`:""}
+      ${x.component?` • ${esc(qrStructured7613(x.component))}`:""}
+    </div>
+  `).join("");
+}
+
+function renderProblemWorkOrders7662(items){
+  if(!items.length){
+    $("problemAssetWorkOrders").innerHTML=
+      `<div class="dashboard-empty">${
+        problemT7662(
+          "Nenhuma OC encontrada no período.",
+          "No work orders found in the period."
+        )
+      }</div>`;
+    return;
+  }
+
+  $("problemAssetWorkOrders").innerHTML=items.map(x=>`
+    <div class="problem-evidence-card">
+      <strong>${esc(x.occurrence||"")} • ${esc(qrStatus7612(x.status||""))}</strong>
+
+      <div class="problem-evidence-meta">
+        ${problemDateTime7662(x.openedAt)}
+        ${x.category?` • ${esc(qrStructured7613(x.category))}`:""}
+        ${x.component?` • ${esc(qrStructured7613(x.component))}`:""}
+      </div>
+
+      ${x.description?`<div style="margin-top:6px">${esc(x.description)}</div>`:""}
+
+      <div>
+        <span class="problem-classification-chip">
+          ${esc(x.effectiveClassification||"UNCLASSIFIED")}
+          ${x.detectedIssueType?` • ${esc(x.detectedIssueType)}`:""}
+          ${Number(x.confidence||0)>0?` • ${Number(x.confidence||0)}%`:""}
+        </span>
+        ${x.reviewRequired?`
+          <span class="problem-classification-chip">
+            ${problemT7662("Revisão necessária","Review required")}
+          </span>
+        `:""}
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderProblemPending7662(items){
+  if(!items.length){
+    $("problemAssetPending").innerHTML=
+      `<div class="dashboard-empty">${
+        problemT7662(
+          "Nenhuma pendência aberta para este equipamento.",
+          "No open pending actions for this equipment."
+        )
+      }</div>`;
+    return;
+  }
+
+  $("problemAssetPending").innerHTML=items.map(x=>`
+    <div class="problem-evidence-card">
+      <strong>${esc(x.id||"")} • ${esc(qrPriority7613(x.priority||""))}</strong>
+
+      <div class="problem-evidence-meta">
+        ${esc(qrPendingType7613(x.type||""))}
+        ${x.status?` • ${esc(qrPendingStatus7613(x.status))}`:""}
+        ${x.workOrder?` • OC ${esc(x.workOrder)}`:""}
+      </div>
+
+      ${x.description?`<div style="margin-top:6px">${esc(x.description)}</div>`:""}
+    </div>
+  `).join("");
+}
+
+function renderProblemChecklist7662(items){
+  if(!items.length){
+    $("problemAssetChecklist").innerHTML=
+      `<div class="dashboard-empty">${
+        problemT7662(
+          "Nenhuma não conformidade de checklist no período.",
+          "No checklist issues found in the period."
+        )
+      }</div>`;
+    return;
+  }
+
+  $("problemAssetChecklist").innerHTML=items.map(x=>`
+    <div class="problem-evidence-card">
+      <strong>⚠️ ${esc(x.item||"")}</strong>
+      <div class="problem-evidence-meta">
+        ${problemDateTime7662(x.date)}
+        ${x.preventiveId?` • ${problemT7662("Preventiva","Preventive")} ${esc(x.preventiveId)}`:""}
+      </div>
+      ${x.note?`<div style="margin-top:6px">${esc(x.note)}</div>`:""}
+    </div>
+  `).join("");
+}
+
+function closeProblemAssetDetail7662(){
+  $("problemAssetDetailModal").style.display="none";
+}
+
+async function openCurrentProblemAsset7662(){
+  const id=problemAssetDetailData7662?.asset?.assetId||"";
+  if(!id)return;
+
+  closeProblemAssetDetail7662();
+  await loadAsset(id);
+}
+
+
 /* ============================================================
  * EXECUTIVE DASHBOARD – 7.6.6.1
  * ============================================================ */
@@ -1031,6 +1769,337 @@ button.dashboard-kpi-card:hover{
   }
 }
 
+
+/* ============================================================
+ * PROBLEM ASSETS / EQUIPMENT ATTENTION – 7.6.6.2
+ * ============================================================ */
+
+.problem-assets-header{
+  margin-bottom:14px;
+}
+
+.problem-assets-title-row,
+.problem-assets-section-head,
+.problem-asset-detail-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.problem-assets-title-row h2,
+.problem-assets-section-head h3,
+.problem-asset-detail-head h2,
+.problem-detail-section h3{
+  margin:0;
+}
+
+.problem-assets-filters{
+  display:grid;
+  grid-template-columns:minmax(165px,210px) minmax(145px,180px) minmax(145px,180px) minmax(170px,220px) minmax(210px,1fr);
+  gap:10px;
+  align-items:end;
+  margin-top:15px;
+}
+
+.problem-assets-scope-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+.problem-assets-scope-box{
+  border:1px solid #dbe5ef;
+  border-radius:10px;
+  padding:9px 12px;
+  background:#f8fafc;
+  min-width:190px;
+}
+
+.problem-assets-scope-box span,
+.problem-assets-scope-box strong{
+  display:block;
+}
+
+.problem-assets-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(145px,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.problem-summary-card{
+  border:1px solid #dbe5ef;
+  border-radius:13px;
+  background:#fff;
+  padding:14px;
+  min-height:98px;
+}
+
+.problem-summary-label{
+  color:#52687d;
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.problem-summary-value{
+  font-size:28px;
+  font-weight:900;
+  margin-top:7px;
+}
+
+.problem-summary-high{
+  border-left:5px solid #a4382b;
+}
+
+.problem-summary-attention{
+  border-left:5px solid #c56f13;
+}
+
+.problem-summary-watch{
+  border-left:5px solid #b7951c;
+}
+
+.problem-summary-normal{
+  border-left:5px solid #4f7c9d;
+}
+
+.problem-summary-total{
+  border-left:5px solid #536b82;
+}
+
+.problem-assets-section,
+.problem-assets-method-card{
+  margin-bottom:14px;
+}
+
+.problem-assets-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.problem-assets-table th,
+.problem-assets-table td{
+  border-bottom:1px solid #e4ebf2;
+  padding:9px 8px;
+  text-align:left;
+  vertical-align:middle;
+  font-size:13px;
+}
+
+.problem-assets-table th{
+  color:#52687d;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.025em;
+  white-space:nowrap;
+}
+
+.problem-assets-table tbody tr{
+  cursor:pointer;
+}
+
+.problem-assets-table tbody tr:hover{
+  background:#f8fafc;
+}
+
+.problem-asset-name{
+  min-width:180px;
+}
+
+.problem-score{
+  font-size:17px;
+  font-weight:900;
+}
+
+.problem-level-badge{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.problem-level-high{
+  background:#fce8e5;
+  color:#8f2d22;
+}
+
+.problem-level-attention{
+  background:#fff0db;
+  color:#8a4c00;
+}
+
+.problem-level-watch{
+  background:#fff7d7;
+  color:#735c00;
+}
+
+.problem-level-normal{
+  background:#eaf2f8;
+  color:#355f7f;
+}
+
+.problem-asset-mobile-card{
+  display:none;
+  border:1px solid #dbe5ef;
+  border-radius:12px;
+  background:#fff;
+  padding:12px;
+  margin-bottom:8px;
+  cursor:pointer;
+}
+
+.problem-asset-mobile-card:hover{
+  background:#f8fafc;
+}
+
+.problem-mobile-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-top:9px;
+}
+
+.problem-mobile-metric{
+  border:1px solid #e4ebf2;
+  border-radius:8px;
+  padding:7px;
+  text-align:center;
+}
+
+.problem-mobile-metric strong{
+  display:block;
+  font-size:17px;
+}
+
+.problem-asset-detail-box{
+  width:min(1080px,96vw);
+  max-width:1080px;
+  max-height:90vh;
+  overflow:auto;
+}
+
+.problem-detail-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(110px,1fr));
+  gap:8px;
+}
+
+.problem-detail-summary-card{
+  border:1px solid #dbe5ef;
+  border-radius:10px;
+  padding:10px;
+  background:#f8fafc;
+}
+
+.problem-detail-summary-card span{
+  display:block;
+  color:#52687d;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.problem-detail-summary-card strong{
+  display:block;
+  margin-top:5px;
+  font-size:19px;
+}
+
+.problem-detail-section{
+  margin-top:18px;
+}
+
+.problem-recurrence-card,
+.problem-evidence-card{
+  border:1px solid #dbe5ef;
+  border-radius:10px;
+  padding:10px;
+  margin-top:7px;
+}
+
+.problem-recurrence-card{
+  border-left:4px solid #c56f13;
+}
+
+.problem-evidence-card strong{
+  display:block;
+}
+
+.problem-evidence-meta{
+  margin-top:3px;
+  color:#52687d;
+  font-size:12px;
+}
+
+.problem-classification-chip{
+  display:inline-flex;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#eef3f7;
+  color:#3f607b;
+  font-size:11px;
+  font-weight:800;
+  margin-top:5px;
+}
+
+.problem-assets-method-card summary{
+  cursor:pointer;
+  font-weight:800;
+}
+
+@media(max-width:1180px){
+  .problem-assets-filters{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .problem-assets-summary-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .problem-detail-summary-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(max-width:820px){
+  .problem-assets-table{
+    display:none;
+  }
+
+  .problem-asset-mobile-card{
+    display:block;
+  }
+
+  .problem-assets-filters{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .problem-assets-summary-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:520px){
+  .problem-assets-filters,
+  .problem-assets-summary-grid,
+  .problem-detail-summary-grid{
+    grid-template-columns:1fr;
+  }
+
+  .problem-mobile-metrics{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1058,6 +2127,7 @@ button.dashboard-kpi-card:hover{
   <div id="mainMenuButtons" class="menu-busca">
     <button id="tabSearch" class="menu-button active">🔎 Buscar ativos</button>
     <button id="tabExecutiveDashboard" class="menu-button hidden">📈 Dashboard Executivo</button>
+    <button id="tabProblemAssets" class="menu-button hidden">⚠️ Problem Assets</button>
     <button id="tabPending" class="menu-button">⚠️ OCs pendentes</button>
     <button id="tabOccurrenceReport" class="menu-button reports">📊 Relatório de OCs</button>
     <button id="tabPreventive" class="menu-button preventive">🛠️ Status das Preventivas</button>
@@ -1075,6 +2145,95 @@ button.dashboard-kpi-card:hover{
     <button id="tabCompany" class="menu-button company hidden">⚙️ Empresa</button>
   </div>
 
+
+  <div id="problemAssetsArea" class="hidden">
+    <div class="card problem-assets-header">
+      <div class="back-asset-wrap">
+        <button id="problemAssetsBackMenu" class="back-asset-btn">← Back to Main Menu</button>
+      </div>
+
+      <div class="problem-assets-title-row">
+        <div>
+          <h2 id="problemAssetsTitle">⚠️ Problem Assets / Equipment Attention</h2>
+          <div id="problemAssetsSubtitle" class="muted">
+            Identifies equipment with repeated maintenance events and conditions requiring attention.
+          </div>
+        </div>
+        <button id="problemAssetsRefresh" class="btn btn-blue" type="button">↻ Refresh</button>
+      </div>
+
+      <div class="problem-assets-filters">
+        <label id="problemAssetsPeriodLabel">
+          Analysis Period
+          <select id="problemAssetsPeriod">
+            <option value="90">Last 90 Days</option>
+            <option value="180">Last 180 Days</option>
+            <option value="365" selected>Last 12 Months</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+
+        <label id="problemAssetsStartLabel" class="problem-custom-date hidden">
+          Start Date
+          <input id="problemAssetsStart" type="date">
+        </label>
+
+        <label id="problemAssetsEndLabel" class="problem-custom-date hidden">
+          End Date
+          <input id="problemAssetsEnd" type="date">
+        </label>
+
+        <label id="problemAssetsLevelLabel">
+          Attention Level
+          <select id="problemAssetsLevel">
+            <option value="NON_NORMAL">Needs Attention</option>
+            <option value="HIGH">High Attention</option>
+            <option value="ATTENTION">Attention</option>
+            <option value="WATCH">Watch</option>
+            <option value="NORMAL">Normal</option>
+            <option value="ALL">All Monitored Assets</option>
+          </select>
+        </label>
+
+        <label id="problemAssetsSearchLabel">
+          Search
+          <input id="problemAssetsSearch" type="search" placeholder="Asset, school, type or category...">
+        </label>
+      </div>
+
+      <div class="problem-assets-scope-row">
+        <div class="problem-assets-scope-box">
+          <span id="problemAssetsScopeLabel" class="muted">Scope</span>
+          <strong id="problemAssetsScope">—</strong>
+        </div>
+        <div id="problemAssetsStatus" class="muted"></div>
+      </div>
+    </div>
+
+    <div id="problemAssetsSummary" class="problem-assets-summary-grid"></div>
+
+    <div class="card problem-assets-section">
+      <div class="problem-assets-section-head">
+        <div>
+          <h3 id="problemAssetsRankingTitle">Equipment Attention Ranking</h3>
+          <div id="problemAssetsRankingHelp" class="muted">
+            Higher scores indicate more maintenance activity, nonconformities and recurrence.
+          </div>
+        </div>
+        <div id="problemAssetsVisibleCount" class="muted"></div>
+      </div>
+
+      <div id="problemAssetsList" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card problem-assets-method-card">
+      <details>
+        <summary id="problemAssetsMethodSummary">How is the Attention Score calculated?</summary>
+        <div id="problemAssetsMethodText" class="muted" style="margin-top:10px"></div>
+      </details>
+    </div>
+  </div>
+
   <div id="executiveDashboardArea" class="hidden">
     <div class="card executive-dashboard-header">
       <div class="back-asset-wrap">
@@ -1088,7 +2247,10 @@ button.dashboard-kpi-card:hover{
             Management overview of work orders, preventive maintenance and maintenance risks.
           </div>
         </div>
-        <button id="executiveDashboardRefresh" class="btn btn-blue" type="button">↻ Refresh</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="executiveDashboardProblemAssets" class="btn btn-secondary" type="button">⚠️ Problem Assets</button>
+          <button id="executiveDashboardRefresh" class="btn btn-blue" type="button">↻ Refresh</button>
+        </div>
       </div>
 
       <div class="executive-dashboard-filters">
@@ -1679,6 +2841,50 @@ button.dashboard-kpi-card:hover{
 </div>
 
 
+
+<div id="problemAssetDetailModal" class="modal">
+  <div class="modal-box problem-asset-detail-box">
+    <div class="problem-asset-detail-head">
+      <div>
+        <h2 id="problemAssetDetailTitle">⚠️ Equipment Attention</h2>
+        <div id="problemAssetDetailSubtitle" class="muted"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="problemAssetOpenAsset" type="button" class="btn btn-blue">Open Asset</button>
+        <button id="problemAssetDetailCloseTop" type="button" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+
+    <div id="problemAssetDetailStatus" class="muted" style="margin-top:10px"></div>
+    <div id="problemAssetDetailSummary" style="margin-top:12px"></div>
+
+    <div class="problem-detail-section">
+      <h3 id="problemAssetRecurrenceTitle">Repeated Problems</h3>
+      <div id="problemAssetRecurrenceList"></div>
+    </div>
+
+    <div class="problem-detail-section">
+      <h3 id="problemAssetWorkOrdersTitle">Work Orders / Occurrences</h3>
+      <div id="problemAssetWorkOrders"></div>
+    </div>
+
+    <div class="problem-detail-section">
+      <h3 id="problemAssetPendingTitle">Pending Actions</h3>
+      <div id="problemAssetPending"></div>
+    </div>
+
+    <div class="problem-detail-section">
+      <h3 id="problemAssetChecklistTitle">Checklist Issues</h3>
+      <div id="problemAssetChecklist"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="problemAssetDetailClose" class="btn btn-secondary">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="executiveDashboardDetailModal" class="modal">
   <div class="modal-box executive-dashboard-detail-box">
     <div class="executive-dashboard-detail-head">
@@ -1851,7 +3057,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.6.1</div>
+<div class="footer">QRManut USA • Version 7.6.6.2</div>
 </div>
 <script>
 /* ============================================================
@@ -1866,6 +3072,9 @@ let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAsset
 let executiveDashboardData7661=null;
 let executiveDashboardLoading7661=false;
 let executiveDashboardDetailKind7661="";
+let problemAssetsData7662=null;
+let problemAssetsLoading7662=false;
+let problemAssetDetailData7662=null;
 let preventiveChecklistData7640=null;
 let preventiveChecklistAdminData7640=null;
 let preventiveChecklistAdminEditing7640=null;
@@ -2259,6 +3468,11 @@ async function refreshCurrentSchoolScopedView7622(){
     return;
   }
 
+  if(!$("problemAssetsArea").classList.contains("hidden")){
+    await loadProblemAssets7662(true);
+    return;
+  }
+
   if(!$("pendingArea").classList.contains("hidden")){
     await loadPendingFilters();
     await loadPending();
@@ -2369,7 +3583,7 @@ async function changeGlobalSchoolScope7622(requestedSchoolId){
   }
 }
 
-function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabExecutiveDashboard"):hide("tabExecutiveDashboard")}
+function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabExecutiveDashboard"):hide("tabExecutiveDashboard");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabProblemAssets"):hide("tabProblemAssets")}
 function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
@@ -2399,7 +3613,7 @@ async function requirePreventiveLogin(nextAction,provider){
 }
 function processPhoto(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>MAX_DIM||h>MAX_DIM){if(w>h){h=Math.round(h*MAX_DIM/w);w=MAX_DIM}else{w=Math.round(w*MAX_DIM/h);h=MAX_DIM}}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);const url=c.toDataURL("image/jpeg",QUALITY);resolve({base64:url.split(",")[1],dataUrl:url,mime:"image/jpeg",name:"foto_"+Date.now()+".jpg"})};img.src=e.target.result};reader.onerror=reject;reader.readAsDataURL(file)})}
 function setupSignatureCanvas(){const c=$("signatureCanvas"),rect=c.getBoundingClientRect(),ratio=window.devicePixelRatio||1;c.width=Math.floor(rect.width*ratio);c.height=Math.floor(180*ratio);signatureCtx=c.getContext("2d");signatureCtx.scale(ratio,ratio);signatureCtx.lineWidth=2;signatureCtx.lineCap="round";signatureCtx.lineJoin="round";clearSignatureCanvas()}function clearSignatureCanvas(){const c=$("signatureCanvas");if(!signatureCtx)return;signatureCtx.save();signatureCtx.setTransform(1,0,0,1,0,0);signatureCtx.fillStyle="#fff";signatureCtx.fillRect(0,0,c.width,c.height);signatureCtx.restore();signatureDirty=false}function signaturePoint(e){const r=$("signatureCanvas").getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}function signatureStart(e){e.preventDefault();signatureDrawing=true;const p=signaturePoint(e);signatureCtx.beginPath();signatureCtx.moveTo(p.x,p.y);signatureDirty=true}function signatureMove(e){if(!signatureDrawing)return;e.preventDefault();const p=signaturePoint(e);signatureCtx.lineTo(p.x,p.y);signatureCtx.stroke()}function signatureEnd(){signatureDrawing=false}function getSignatureData(){if(!signatureDirty)return null;const u=$("signatureCanvas").toDataURL("image/png");return{base64:u.split(",")[1],mime:"image/png"}}
-function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel","schoolsAdminArea","executiveDashboardArea"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabExecutiveDashboard","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement","tabSchoolsAdmin"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
+function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel","schoolsAdminArea","executiveDashboardArea","problemAssetsArea"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabExecutiveDashboard","tabProblemAssets","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement","tabSchoolsAdmin"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
 async function showAuditTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode consultar a auditoria.");return}clearTabs();$("tabAudit").classList.add("active");showOnly("auditArea");setDefaultAuditDates();await loadAuditFilters();await loadAudit()}
 
 function isoDateLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -5487,6 +6701,7 @@ const QR_TEXT={
   "pt-BR":{
     tabSearch:"🔎 Buscar ativos",
     tabExecutiveDashboard:"📈 Dashboard Executivo",
+    tabProblemAssets:"⚠️ Problem Assets / Atenção",
     tabPending:"⚠️ OCs Pendentes",
     tabOccurrenceReport:"📊 Relatório de OCs",
     tabPreventive:"🛠️ Status das Preventivas",
@@ -5532,6 +6747,7 @@ const QR_TEXT={
   "en-US":{
     tabSearch:"🔎 Search Assets",
     tabExecutiveDashboard:"📈 Executive Dashboard",
+    tabProblemAssets:"⚠️ Problem Assets",
     tabPending:"⚠️ Pending Work Orders",
     tabOccurrenceReport:"📊 Work Order Report",
     tabPreventive:"🛠️ Preventive Maintenance Status",
@@ -6651,6 +7867,10 @@ function qrApplyLanguage(lang){
     applyExecutiveDashboardLanguage7661();
   }
 
+  if($("problemAssetsArea")){
+    applyProblemAssetsLanguage7662();
+  }
+
   // Headings/labels that have no functional event attached.
   const safeText=[
     ["#systemLoginModal h2","🔐 Acesso ao QRManut","🔐 QRManut Access"],
@@ -7657,7 +8877,7 @@ function renderExecutiveDashboardDetails7661(kind,items){
 }
 
 
-$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=function(){if(currentAsset?.id)setOriginAsset(currentAsset.id);requireSystemLogin(()=>{hide("assetScreen");show("searchScreen");openMainMenu();focusBackAssetButton()})};
 $("backAssetButton").onclick=function(){const id=getOriginAsset();if(!id)return;clearOriginAsset();location.href="?id="+encodeURIComponent(id)};
 $("occReportRefresh").onclick=loadOccurrenceReport;$("occReportPdf").onclick=generateOccurrenceReportPdf;["occReportStart","occReportEnd","occReportProvider","occReportCategory","occReportComponent","occReportFloor","occReportLocation"].forEach(id=>$(id).onchange=markOccurrenceReportDirty);$("controlRefresh").onclick=refreshPreventiveControl;$("controlCompetence").onchange=loadPreventiveControl;$("controlProvider").onchange=()=>{if(["MASTER","GESTOR"].includes(systemSession?.perfil))loadPreventiveControl();else renderControlList()};$("controlAll").onclick=()=>setControlMode("all");$("controlPending").onclick=()=>setControlMode("pending");$("controlDone").onclick=()=>setControlMode("done");$("sendMonthlyReport").onclick=sendMonthlyPreventiveReport;
@@ -8778,6 +9998,41 @@ const QR_ROUTINE_HELP_7631 = {
     }
   },
 
+  problemAssets:{
+    pt:{
+      title:"⚠️ Problem Assets / Atenção aos Equipamentos",
+      purpose:"Identifica equipamentos que concentram OCs, anomalias, pendências, não conformidades e problemas recorrentes.",
+      when:"Use para priorizar investigação técnica, planejamento de manutenção e futuras análises de Repair vs. Replace.",
+      steps:[
+        "Selecione o Colégio / Unidade no filtro global.",
+        "Abra Problem Assets / Atenção.",
+        "Escolha o período de análise e o nível de atenção.",
+        "Use a busca para localizar um equipamento, tipo ou categoria.",
+        "Clique em um equipamento para visualizar as OCs, pendências, checklists e padrões recorrentes que originaram a pontuação.",
+        "Use Abrir Equipamento para acessar a ficha completa e o histórico existente."
+      ],
+      rules:"A pontuação é um indicador de priorização e não uma recomendação automática de substituição. Preventivas realizadas normalmente não aumentam o score. O sistema considera OCs, anomalias, OCs abertas, pendências e sua prioridade, itens ATTENTION dos checklists e recorrência de problemas.",
+      access:"Disponível para MASTER e GESTOR, sempre respeitando o Multi-School.",
+      example:"Exemplo: um boiler com várias OCs, duas anomalias de ruído repetidas e itens ATTENTION no checklist tende a subir no ranking."
+    },
+    en:{
+      title:"⚠️ Problem Assets / Equipment Attention",
+      purpose:"Identifies equipment that concentrates work orders, anomalies, pending actions, nonconformities, and repeated problems.",
+      when:"Use it to prioritize technical investigation, maintenance planning, and future Repair vs. Replace analysis.",
+      steps:[
+        "Select the School / Unit in the global filter.",
+        "Open Problem Assets / Equipment Attention.",
+        "Choose the analysis period and attention level.",
+        "Use search to locate an asset, type, or category.",
+        "Click an asset to see the work orders, pending actions, checklist issues, and repeated patterns behind its score.",
+        "Use Open Asset to access the existing full asset record and history."
+      ],
+      rules:"The score is a prioritization indicator, not an automatic replacement recommendation. Normal preventive maintenance does not increase the score. The analysis considers work orders, anomalies, open work orders, pending actions and priority, checklist ATTENTION items, and recurrence.",
+      access:"Available to MASTER and MANAGER and always follows Multi-School scope.",
+      example:"Example: a boiler with several work orders, two repeated noise anomalies, and checklist ATTENTION items will tend to rise in the ranking."
+    }
+  },
+
   executiveDashboard:{
     pt:{
       title:"📈 Dashboard Executivo",
@@ -8855,6 +10110,7 @@ const QR_ROUTINE_HELP_MAP_7631 = [
   ["occurrenceCatalogArea","catalog"],
   ["maintenancePendingArea","maintenancePending"],
   ["executiveDashboardArea","executiveDashboard"],
+  ["problemAssetsArea","problemAssets"],
   ["assetManagementPanel","assets"],
   ["schoolsAdminArea","schoolsAdmin"],
   ["documentUploadArea","upload"],
@@ -9065,6 +10321,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.6.0 - Analytics core and assisted occurrence classification.
 
 // QRManut USA 7.6.6.1 - Executive Dashboard with Multi-School drill-down.
+
+// QRManut USA 7.6.6.2 - Problem Assets / Equipment Attention.
 </script>
 
 </body>
