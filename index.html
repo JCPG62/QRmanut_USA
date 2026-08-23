@@ -307,587 +307,6 @@ html,body{max-width:100%;overflow-x:hidden}
 
 
 /* ============================================================
- * PREVENTIVE CHECKLIST – 7.6.4.0
- * ============================================================ */
-
-function checklistT7640(pt,en){
-  return qrLanguage==="en-US"?en:pt;
-}
-
-function checklistScopeLabel7640(scope){
-  const s=String(scope||"").toUpperCase();
-  const en=qrLanguage==="en-US";
-
-  return {
-    ASSET:en?"Specific Asset":"Ativo específico",
-    TYPE:en?"Equipment Type":"Tipo de equipamento",
-    AREA:en?"Area / Environment":"Área / ambiente",
-    SCHOOL:en?"School / General":"Escola / geral"
-  }[s]||s;
-}
-
-function checklistStatusLabel7640(status){
-  const s=String(status||"").toUpperCase();
-
-  if(s==="OK")return "OK";
-  if(s==="ATTENTION")return qrLanguage==="en-US"?"Needs Attention":"Atenção";
-  if(s==="NA")return "N/A";
-
-  return "";
-}
-
-function renderPreventiveChecklist7640(data){
-  preventiveChecklistData7640=data||null;
-
-  const box=$("preventiveChecklistBox");
-  const itemsBox=$("preventiveChecklistItems");
-
-  if(!box||!itemsBox)return;
-
-  if(!data||!(data.itens||[]).length){
-    hide("preventiveChecklistBox");
-    itemsBox.innerHTML="";
-    return;
-  }
-
-  show("preventiveChecklistBox");
-
-  $("preventiveChecklistTitle").textContent=
-    "📋 "+(qrLanguage==="en-US"?(data.nomeEn||data.nomePt):(data.nomePt||data.nomeEn));
-
-  $("preventiveChecklistHelp").textContent=
-    checklistT7640(
-      "Responda todos os itens obrigatórios. Itens em Atenção devem gerar uma providência.",
-      "Complete all required items. Items marked Needs Attention must generate a follow-up action."
-    );
-
-  $("preventiveChecklistScopeBadge").textContent=
-    checklistScopeLabel7640(data.escopo)+
-    (data.valorEscopo?": "+data.valorEscopo:"");
-
-  itemsBox.innerHTML=(data.itens||[]).map((item,index)=>{
-    const text=qrLanguage==="en-US"?(item.textoEn||item.textoPt):(item.textoPt||item.textoEn);
-    const guidance=qrLanguage==="en-US"?(item.orientacaoEn||item.orientacaoPt):(item.orientacaoPt||item.orientacaoEn);
-
-    return `<div class="preventive-checklist-item" data-checklist-item="${esc(item.idItem)}">
-      <div class="preventive-checklist-item-title">
-        ${index+1}. ${esc(text)}
-        ${item.obrigatorio?` <span class="preventive-checklist-item-required">*</span>`:""}
-      </div>
-      ${guidance?`<div class="muted" style="margin-top:3px">${esc(guidance)}</div>`:""}
-      <div class="preventive-checklist-row">
-        <select class="preventive-checklist-status" data-item-id="${esc(item.idItem)}">
-          <option value="">${checklistT7640("Selecione...","Select...")}</option>
-          <option value="OK">✅ OK</option>
-          <option value="ATTENTION">⚠️ ${checklistT7640("Atenção","Needs Attention")}</option>
-          ${item.permiteNa?`<option value="NA">N/A</option>`:""}
-        </select>
-        <input
-          class="preventive-checklist-note"
-          data-item-id="${esc(item.idItem)}"
-          placeholder="${checklistT7640("Observação do item (opcional)","Item note (optional)")}"
-        >
-      </div>
-    </div>`;
-  }).join("");
-
-  itemsBox.querySelectorAll(".preventive-checklist-status").forEach(sel=>{
-    sel.onchange=()=>syncPreventiveChecklistState7640();
-  });
-
-  syncPreventiveChecklistState7640();
-}
-
-function syncPreventiveChecklistState7640(){
-  if(!preventiveChecklistData7640)return;
-
-  let hasAttention=false;
-
-  document.querySelectorAll("#preventiveChecklistItems .preventive-checklist-item").forEach(card=>{
-    card.classList.remove("checklist-ok","checklist-attention","checklist-na");
-
-    const sel=card.querySelector(".preventive-checklist-status");
-    const status=String(sel?.value||"");
-
-    if(status==="OK")card.classList.add("checklist-ok");
-    if(status==="ATTENTION"){
-      card.classList.add("checklist-attention");
-      hasAttention=true;
-    }
-    if(status==="NA")card.classList.add("checklist-na");
-  });
-
-  if(hasAttention){
-    $("preventiveNeedsAction").checked=true;
-    show("preventiveActionFields");
-
-    if(!$("preventiveActionType").value){
-      $("preventiveActionType").value="Intervenção corretiva";
-    }
-  }
-}
-
-function collectPreventiveChecklist7640(){
-  if(!preventiveChecklistData7640)return {
-    ok:true,
-    payload:null,
-    hasAttention:false
-  };
-
-  const responses=[];
-  let missing=false;
-  let hasAttention=false;
-
-  (preventiveChecklistData7640.itens||[]).forEach(item=>{
-    const statusEl=document.querySelector(
-      `#preventiveChecklistItems .preventive-checklist-status[data-item-id="${CSS.escape(item.idItem)}"]`
-    );
-    const noteEl=document.querySelector(
-      `#preventiveChecklistItems .preventive-checklist-note[data-item-id="${CSS.escape(item.idItem)}"]`
-    );
-
-    const status=String(statusEl?.value||"");
-    const observacao=String(noteEl?.value||"").trim();
-
-    if(item.obrigatorio&&!status)missing=true;
-    if(status==="ATTENTION")hasAttention=true;
-
-    if(status){
-      responses.push({
-        idItem:item.idItem,
-        status,
-        observacao
-      });
-    }
-  });
-
-  if(missing){
-    return {
-      ok:false,
-      error:checklistT7640(
-        "Responda todos os itens obrigatórios do checklist.",
-        "Complete all required checklist items."
-      )
-    };
-  }
-
-  return {
-    ok:true,
-    hasAttention,
-    payload:{
-      idChecklist:preventiveChecklistData7640.idChecklist,
-      respostas:responses
-    }
-  };
-}
-
-function checklistHistoryHtml7640(c){
-  if(!c)return "";
-
-  const t=checklistT7640;
-  const name=qrLanguage==="en-US"?(c.nomeEn||c.nomePt):(c.nomePt||c.nomeEn);
-
-  return `<div style="margin-top:10px;padding:10px;border:1px solid #dbeafe;border-radius:10px;background:#f8fbff">
-    <b>📋 ${esc(name||t("Checklist","Checklist"))}</b>
-    <div class="muted" style="margin-top:4px">
-      ✅ ${Number(c.ok||0)} •
-      ⚠️ ${Number(c.attention||0)} •
-      N/A ${Number(c.na||0)}
-    </div>
-    ${(c.itens||[]).map((item,index)=>{
-      const text=qrLanguage==="en-US"?(item.textoEn||item.textoPt):(item.textoPt||item.textoEn);
-      const icon=item.status==="OK"?"✅":item.status==="ATTENTION"?"⚠️":"➖";
-
-      return `<div style="margin-top:6px">
-        ${icon} ${index+1}. ${esc(text)}
-        ${item.observacao?`<div class="muted" style="margin-left:22px">${esc(item.observacao)}</div>`:""}
-      </div>`;
-    }).join("")}
-  </div>`;
-}
-
-
-/* ---------------- ADMIN ---------------- */
-
-async function showPreventiveChecklistAdminTab7640(){
-  if(!["MASTER","GESTOR"].includes(systemSession?.perfil)){
-    return alert(checklistT7640(
-      "Seu perfil não possui permissão para configurar checklists.",
-      "Your profile does not have permission to configure checklists."
-    ));
-  }
-
-  clearTabs();
-  $("tabPreventiveChecklists").classList.add("active");
-  showOnly("preventiveChecklistAdminArea");
-
-  await loadPreventiveChecklistsAdmin7640();
-}
-
-async function loadPreventiveChecklistsAdmin7640(){
-  $("preventiveChecklistAdminStatus").textContent=
-    checklistT7640("Carregando checklists...","Loading checklists...");
-
-  const r=await menuApi({action:"preventivechecklistsadmin"});
-
-  if(!r.ok){
-    $("preventiveChecklistAdminStatus").textContent=r.detail||r.error||"";
-    return;
-  }
-
-  preventiveChecklistAdminData7640=r.data||{
-    checklists:[],
-    schools:[],
-    suggestions:{types:[],areas:[]}
-  };
-
-  renderPreventiveChecklistAdmin7640();
-}
-
-function renderPreventiveChecklistAdmin7640(){
-  const d=preventiveChecklistAdminData7640||{checklists:[]};
-  const items=d.checklists||[];
-
-  $("preventiveChecklistAdminTitle").textContent=
-    checklistT7640("📋 Checklists de Preventiva","📋 Preventive Checklists");
-
-  $("preventiveChecklistAdminHelp").textContent=
-    checklistT7640(
-      "Configure os itens executados durante a preventiva. A prioridade é: ativo específico → tipo de equipamento → área → checklist geral da escola.",
-      "Configure the items performed during preventive maintenance. Priority is: specific asset → equipment type → area → school/general checklist."
-    );
-
-  $("newPreventiveChecklist").textContent=
-    checklistT7640("+ Novo checklist","+ New Checklist");
-
-  $("preventiveChecklistAdminStatus").textContent=
-    checklistT7640(
-      `${items.length} checklist(s) disponível(is).`,
-      `${items.length} checklist(s) available.`
-    );
-
-  $("preventiveChecklistAdminList").innerHTML=items.length
-    ? items.map(c=>{
-        const name=qrLanguage==="en-US"?(c.nomeEn||c.nomePt):(c.nomePt||c.nomeEn);
-        const schoolName=(d.schools||[]).find(x=>x.idEscola===c.idEscola)?.escola||c.idEscola||"";
-        const scope=checklistScopeLabel7640(c.escopo);
-        const active=c.ativo;
-
-        return `<div class="checklist-admin-card">
-          <div class="checklist-admin-head">
-            <div>
-              <div style="font-weight:900">${esc(name)}</div>
-              <div class="checklist-admin-tags">
-                <span class="tag">${esc(scope)}${c.valorEscopo?`: ${esc(c.valorEscopo)}`:""}</span>
-                <span class="tag">🏫 ${esc(schoolName||checklistT7640("Global","Global"))}</span>
-                <span class="tag">${active?"✅ "+checklistT7640("Ativo","Active"):"⛔ "+checklistT7640("Inativo","Inactive")}</span>
-                <span class="tag">📋 ${(c.itens||[]).length} ${checklistT7640("itens","items")}</span>
-              </div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
-              ${c.canEdit?`
-                <button class="btn btn-secondary" type="button" onclick="editPreventiveChecklist7640('${esc(c.idChecklist)}')">
-                  ${checklistT7640("Editar","Edit")}
-                </button>
-                <button class="btn btn-secondary" type="button" onclick="togglePreventiveChecklist7640('${esc(c.idChecklist)}',${!active})">
-                  ${active?checklistT7640("Inativar","Deactivate"):checklistT7640("Ativar","Activate")}
-                </button>
-              `:""}
-            </div>
-          </div>
-
-          ${c.observacoes?`<div class="muted" style="margin-top:8px">${esc(c.observacoes)}</div>`:""}
-
-          ${!c.canEdit?`
-            <div class="checklist-readonly-note">
-              ${checklistT7640(
-                "Modelo padrão/global somente leitura para este perfil. Para personalizar, crie um checklist específico para sua escola com o mesmo escopo.",
-                "Standard/global read-only model for this profile. To customize it, create a school-specific checklist with the same scope."
-              )}
-            </div>
-          `:""}
-        </div>`;
-      }).join("")
-    : `<div class="muted">${checklistT7640("Nenhum checklist encontrado.","No checklist found.")}</div>`;
-}
-
-function resetPreventiveChecklistModal7640(){
-  preventiveChecklistAdminEditing7640=null;
-
-  $("preventiveChecklistId").value="";
-  $("preventiveChecklistNamePt").value="";
-  $("preventiveChecklistNameEn").value="";
-  $("preventiveChecklistScope").value="TYPE";
-  $("preventiveChecklistScopeValue").value="";
-  $("preventiveChecklistActive").checked=true;
-  $("preventiveChecklistNotes").value="";
-  $("preventiveChecklistItemsEditor").innerHTML="";
-  $("preventiveChecklistAdminMessage").className="message";
-  $("preventiveChecklistAdminMessage").textContent="";
-
-  fillPreventiveChecklistSchools7640("");
-  syncPreventiveChecklistScope7640();
-  addPreventiveChecklistItem7640();
-}
-
-function fillPreventiveChecklistSchools7640(selected){
-  const sel=$("preventiveChecklistSchool");
-  const schools=preventiveChecklistAdminData7640?.schools||[];
-
-  if(systemSession?.perfil==="GESTOR"){
-    const own=String(systemSession.idEscola||systemSession.scopeSchoolId||"");
-    sel.innerHTML=schools
-      .filter(x=>x.idEscola===own)
-      .map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`)
-      .join("");
-    sel.value=own;
-    sel.disabled=true;
-    return;
-  }
-
-  sel.disabled=false;
-  sel.innerHTML=
-    `<option value="">${checklistT7640("Global – todas as escolas","Global – all schools")}</option>`+
-    schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
-
-  sel.value=selected||"";
-}
-
-function openNewPreventiveChecklist7640(){
-  resetPreventiveChecklistModal7640();
-
-  $("preventiveChecklistModalTitle").textContent=
-    checklistT7640("📋 Novo Checklist de Preventiva","📋 New Preventive Checklist");
-
-  $("preventiveChecklistAdminModal").style.display="flex";
-}
-
-function editPreventiveChecklist7640(id){
-  const c=(preventiveChecklistAdminData7640?.checklists||[]).find(x=>x.idChecklist===id);
-  if(!c||!c.canEdit)return;
-
-  preventiveChecklistAdminEditing7640=c;
-
-  $("preventiveChecklistModalTitle").textContent=
-    checklistT7640("📋 Editar Checklist de Preventiva","📋 Edit Preventive Checklist");
-
-  $("preventiveChecklistId").value=c.idChecklist||"";
-  $("preventiveChecklistNamePt").value=c.nomePt||"";
-  $("preventiveChecklistNameEn").value=c.nomeEn||"";
-  $("preventiveChecklistScope").value=c.escopo||"TYPE";
-  $("preventiveChecklistScopeValue").value=c.valorEscopo||"";
-  $("preventiveChecklistActive").checked=!!c.ativo;
-  $("preventiveChecklistNotes").value=c.observacoes||"";
-
-  fillPreventiveChecklistSchools7640(c.idEscola||"");
-  syncPreventiveChecklistScope7640();
-
-  $("preventiveChecklistItemsEditor").innerHTML="";
-
-  (c.itens||[]).forEach(item=>addPreventiveChecklistItem7640(item));
-
-  if(!(c.itens||[]).length)addPreventiveChecklistItem7640();
-
-  $("preventiveChecklistAdminMessage").className="message";
-  $("preventiveChecklistAdminMessage").textContent="";
-  $("preventiveChecklistAdminModal").style.display="flex";
-}
-
-function syncPreventiveChecklistScope7640(){
-  const scope=$("preventiveChecklistScope").value;
-  const input=$("preventiveChecklistScopeValue");
-  const label=$("preventiveChecklistScopeValueLabel");
-  const list=$("preventiveChecklistScopeSuggestions");
-
-  if(scope==="SCHOOL"){
-    input.value="";
-    input.disabled=true;
-    label.style.opacity=".55";
-    list.innerHTML="";
-    return;
-  }
-
-  input.disabled=false;
-  label.style.opacity="1";
-
-  const suggestions=scope==="AREA"
-    ? (preventiveChecklistAdminData7640?.suggestions?.areas||[])
-    : scope==="TYPE"
-      ? (preventiveChecklistAdminData7640?.suggestions?.types||[])
-      : [];
-
-  list.innerHTML=suggestions.map(v=>`<option value="${esc(v)}"></option>`).join("");
-
-  if(scope==="ASSET"){
-    input.placeholder=checklistT7640("Ex.: EQ001","Example: EQ001");
-  }else if(scope==="TYPE"){
-    input.placeholder=checklistT7640("Ex.: Boiler | HVAC","Example: Boiler | HVAC");
-  }else{
-    input.placeholder=checklistT7640("Ex.: Kitchen | Boiler Room","Example: Kitchen | Boiler Room");
-  }
-}
-
-function addPreventiveChecklistItem7640(item={}){
-  const wrap=document.createElement("div");
-  wrap.className="checklist-admin-item-editor";
-  wrap.dataset.itemId=item.idItem||"";
-
-  const index=$("preventiveChecklistItemsEditor").children.length+1;
-
-  wrap.innerHTML=`
-    <div class="checklist-admin-item-top">
-      <b>${checklistT7640("Item","Item")} <span class="checklist-item-number">${index}</span></b>
-      <button type="button" class="btn btn-secondary checklist-remove-item">${checklistT7640("Remover","Remove")}</button>
-    </div>
-
-    <div class="checklist-admin-item-grid">
-      <label>${checklistT7640("Texto em português *","Portuguese text *")}
-        <input class="checklist-item-pt" value="${esc(item.textoPt||"")}">
-      </label>
-
-      <label>${checklistT7640("Texto em inglês","English text")}
-        <input class="checklist-item-en" value="${esc(item.textoEn||"")}">
-      </label>
-
-      <label>${checklistT7640("Orientação em português","Portuguese guidance")}
-        <input class="checklist-item-guide-pt" value="${esc(item.orientacaoPt||"")}">
-      </label>
-
-      <label>${checklistT7640("Orientação em inglês","English guidance")}
-        <input class="checklist-item-guide-en" value="${esc(item.orientacaoEn||"")}">
-      </label>
-    </div>
-
-    <div class="checklist-admin-item-actions">
-      <label>
-        <input type="checkbox" class="checklist-item-required" ${item.obrigatorio!==false?"checked":""}>
-        ${checklistT7640("Obrigatório","Required")}
-      </label>
-      <label>
-        <input type="checkbox" class="checklist-item-na" ${item.permiteNa!==false?"checked":""}>
-        ${checklistT7640("Permite N/A","Allow N/A")}
-      </label>
-    </div>
-  `;
-
-  wrap.querySelector(".checklist-remove-item").onclick=()=>{
-    wrap.remove();
-    renumberPreventiveChecklistItems7640();
-  };
-
-  $("preventiveChecklistItemsEditor").appendChild(wrap);
-  renumberPreventiveChecklistItems7640();
-}
-
-function renumberPreventiveChecklistItems7640(){
-  [...$("preventiveChecklistItemsEditor").children].forEach((el,i)=>{
-    const n=el.querySelector(".checklist-item-number");
-    if(n)n.textContent=i+1;
-  });
-}
-
-function collectChecklistAdminItems7640(){
-  return [...$("preventiveChecklistItemsEditor").children].map(el=>({
-    idItem:el.dataset.itemId||"",
-    textoPt:el.querySelector(".checklist-item-pt").value.trim(),
-    textoEn:el.querySelector(".checklist-item-en").value.trim(),
-    orientacaoPt:el.querySelector(".checklist-item-guide-pt").value.trim(),
-    orientacaoEn:el.querySelector(".checklist-item-guide-en").value.trim(),
-    obrigatorio:el.querySelector(".checklist-item-required").checked?"Sim":"Não",
-    permiteNa:el.querySelector(".checklist-item-na").checked?"Sim":"Não"
-  }));
-}
-
-async function savePreventiveChecklistAdmin7640(){
-  const btn=$("savePreventiveChecklist");
-  const msg=$("preventiveChecklistAdminMessage");
-
-  const namePt=$("preventiveChecklistNamePt").value.trim();
-  const scope=$("preventiveChecklistScope").value;
-  const scopeValue=$("preventiveChecklistScopeValue").value.trim();
-  const items=collectChecklistAdminItems7640();
-
-  if(!namePt){
-    msg.className="message error";
-    msg.textContent=checklistT7640("Informe o nome do checklist.","Enter the checklist name.");
-    return;
-  }
-
-  if(scope!=="SCHOOL"&&!scopeValue){
-    msg.className="message error";
-    msg.textContent=checklistT7640("Informe o valor do escopo.","Enter the scope value.");
-    return;
-  }
-
-  if(!items.length||items.some(x=>!x.textoPt)){
-    msg.className="message error";
-    msg.textContent=checklistT7640(
-      "Inclua pelo menos um item e preencha o texto em português de todos os itens.",
-      "Add at least one item and complete the Portuguese text for every item."
-    );
-    return;
-  }
-
-  btn.disabled=true;
-  btn.textContent=checklistT7640("Salvando...","Saving...");
-
-  try{
-    const r=await menuApiPost({
-      action:"savepreventivechecklist",
-      checklistId:$("preventiveChecklistId").value,
-      checklistNamePt:namePt,
-      checklistNameEn:$("preventiveChecklistNameEn").value.trim(),
-      checklistScope:scope,
-      checklistScopeValue:scopeValue,
-      checklistSchoolId:$("preventiveChecklistSchool").value,
-      checklistActive:$("preventiveChecklistActive").checked?"Sim":"Não",
-      checklistNotes:$("preventiveChecklistNotes").value.trim(),
-      checklistItemsJson:JSON.stringify(items)
-    });
-
-    if(!r.ok)throw new Error(r.detail||r.error||"");
-
-    msg.className="message success";
-    msg.textContent=checklistT7640("Checklist salvo com sucesso.","Checklist saved successfully.");
-
-    setTimeout(async()=>{
-      $("preventiveChecklistAdminModal").style.display="none";
-      await loadPreventiveChecklistsAdmin7640();
-    },600);
-
-  }catch(e){
-    msg.className="message error";
-    msg.textContent=e.message||checklistT7640("Erro ao salvar checklist.","Unable to save checklist.");
-  }finally{
-    btn.disabled=false;
-    btn.textContent=checklistT7640("Salvar checklist","Save Checklist");
-  }
-}
-
-async function togglePreventiveChecklist7640(id,active){
-  if(!confirm(
-    active
-      ? checklistT7640("Ativar este checklist?","Activate this checklist?")
-      : checklistT7640("Inativar este checklist?","Deactivate this checklist?")
-  ))return;
-
-  try{
-    const r=await menuApiPost({
-      action:"setpreventivechecklistactive",
-      checklistId:id,
-      checklistActive:active?"Sim":"Não"
-    });
-
-    if(!r.ok)throw new Error(r.detail||r.error||"");
-
-    await loadPreventiveChecklistsAdmin7640();
-  }catch(e){
-    alert(e.message);
-  }
-}
-
-
-/* ============================================================
  * CONTEXTUAL HELP – 7.6.3.1
  * ============================================================ */
 
@@ -1846,7 +1265,7 @@ async function togglePreventiveChecklist7640(id,active){
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.4.0</div>
+<div class="footer">QRManut USA • Version 7.6.4.1</div>
 </div>
 <script>
 /* ============================================================
@@ -6253,6 +5672,586 @@ $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLoca
 
 
 /* ============================================================
+ * PREVENTIVE CHECKLIST – 7.6.4.0
+ * ============================================================ */
+
+function checklistT7640(pt,en){
+  return qrLanguage==="en-US"?en:pt;
+}
+
+function checklistScopeLabel7640(scope){
+  const s=String(scope||"").toUpperCase();
+  const en=qrLanguage==="en-US";
+
+  return {
+    ASSET:en?"Specific Asset":"Ativo específico",
+    TYPE:en?"Equipment Type":"Tipo de equipamento",
+    AREA:en?"Area / Environment":"Área / ambiente",
+    SCHOOL:en?"School / General":"Escola / geral"
+  }[s]||s;
+}
+
+function checklistStatusLabel7640(status){
+  const s=String(status||"").toUpperCase();
+
+  if(s==="OK")return "OK";
+  if(s==="ATTENTION")return qrLanguage==="en-US"?"Needs Attention":"Atenção";
+  if(s==="NA")return "N/A";
+
+  return "";
+}
+
+function renderPreventiveChecklist7640(data){
+  preventiveChecklistData7640=data||null;
+
+  const box=$("preventiveChecklistBox");
+  const itemsBox=$("preventiveChecklistItems");
+
+  if(!box||!itemsBox)return;
+
+  if(!data||!(data.itens||[]).length){
+    hide("preventiveChecklistBox");
+    itemsBox.innerHTML="";
+    return;
+  }
+
+  show("preventiveChecklistBox");
+
+  $("preventiveChecklistTitle").textContent=
+    "📋 "+(qrLanguage==="en-US"?(data.nomeEn||data.nomePt):(data.nomePt||data.nomeEn));
+
+  $("preventiveChecklistHelp").textContent=
+    checklistT7640(
+      "Responda todos os itens obrigatórios. Itens em Atenção devem gerar uma providência.",
+      "Complete all required items. Items marked Needs Attention must generate a follow-up action."
+    );
+
+  $("preventiveChecklistScopeBadge").textContent=
+    checklistScopeLabel7640(data.escopo)+
+    (data.valorEscopo?": "+data.valorEscopo:"");
+
+  itemsBox.innerHTML=(data.itens||[]).map((item,index)=>{
+    const text=qrLanguage==="en-US"?(item.textoEn||item.textoPt):(item.textoPt||item.textoEn);
+    const guidance=qrLanguage==="en-US"?(item.orientacaoEn||item.orientacaoPt):(item.orientacaoPt||item.orientacaoEn);
+
+    return `<div class="preventive-checklist-item" data-checklist-item="${esc(item.idItem)}">
+      <div class="preventive-checklist-item-title">
+        ${index+1}. ${esc(text)}
+        ${item.obrigatorio?` <span class="preventive-checklist-item-required">*</span>`:""}
+      </div>
+      ${guidance?`<div class="muted" style="margin-top:3px">${esc(guidance)}</div>`:""}
+      <div class="preventive-checklist-row">
+        <select class="preventive-checklist-status" data-item-id="${esc(item.idItem)}">
+          <option value="">${checklistT7640("Selecione...","Select...")}</option>
+          <option value="OK">✅ OK</option>
+          <option value="ATTENTION">⚠️ ${checklistT7640("Atenção","Needs Attention")}</option>
+          ${item.permiteNa?`<option value="NA">N/A</option>`:""}
+        </select>
+        <input
+          class="preventive-checklist-note"
+          data-item-id="${esc(item.idItem)}"
+          placeholder="${checklistT7640("Observação do item (opcional)","Item note (optional)")}"
+        >
+      </div>
+    </div>`;
+  }).join("");
+
+  itemsBox.querySelectorAll(".preventive-checklist-status").forEach(sel=>{
+    sel.onchange=()=>syncPreventiveChecklistState7640();
+  });
+
+  syncPreventiveChecklistState7640();
+}
+
+function syncPreventiveChecklistState7640(){
+  if(!preventiveChecklistData7640)return;
+
+  let hasAttention=false;
+
+  document.querySelectorAll("#preventiveChecklistItems .preventive-checklist-item").forEach(card=>{
+    card.classList.remove("checklist-ok","checklist-attention","checklist-na");
+
+    const sel=card.querySelector(".preventive-checklist-status");
+    const status=String(sel?.value||"");
+
+    if(status==="OK")card.classList.add("checklist-ok");
+    if(status==="ATTENTION"){
+      card.classList.add("checklist-attention");
+      hasAttention=true;
+    }
+    if(status==="NA")card.classList.add("checklist-na");
+  });
+
+  if(hasAttention){
+    $("preventiveNeedsAction").checked=true;
+    show("preventiveActionFields");
+
+    if(!$("preventiveActionType").value){
+      $("preventiveActionType").value="Intervenção corretiva";
+    }
+  }
+}
+
+function collectPreventiveChecklist7640(){
+  if(!preventiveChecklistData7640)return {
+    ok:true,
+    payload:null,
+    hasAttention:false
+  };
+
+  const responses=[];
+  let missing=false;
+  let hasAttention=false;
+
+  (preventiveChecklistData7640.itens||[]).forEach(item=>{
+    const statusEl=document.querySelector(
+      `#preventiveChecklistItems .preventive-checklist-status[data-item-id="${CSS.escape(item.idItem)}"]`
+    );
+    const noteEl=document.querySelector(
+      `#preventiveChecklistItems .preventive-checklist-note[data-item-id="${CSS.escape(item.idItem)}"]`
+    );
+
+    const status=String(statusEl?.value||"");
+    const observacao=String(noteEl?.value||"").trim();
+
+    if(item.obrigatorio&&!status)missing=true;
+    if(status==="ATTENTION")hasAttention=true;
+
+    if(status){
+      responses.push({
+        idItem:item.idItem,
+        status,
+        observacao
+      });
+    }
+  });
+
+  if(missing){
+    return {
+      ok:false,
+      error:checklistT7640(
+        "Responda todos os itens obrigatórios do checklist.",
+        "Complete all required checklist items."
+      )
+    };
+  }
+
+  return {
+    ok:true,
+    hasAttention,
+    payload:{
+      idChecklist:preventiveChecklistData7640.idChecklist,
+      respostas:responses
+    }
+  };
+}
+
+function checklistHistoryHtml7640(c){
+  if(!c)return "";
+
+  const t=checklistT7640;
+  const name=qrLanguage==="en-US"?(c.nomeEn||c.nomePt):(c.nomePt||c.nomeEn);
+
+  return `<div style="margin-top:10px;padding:10px;border:1px solid #dbeafe;border-radius:10px;background:#f8fbff">
+    <b>📋 ${esc(name||t("Checklist","Checklist"))}</b>
+    <div class="muted" style="margin-top:4px">
+      ✅ ${Number(c.ok||0)} •
+      ⚠️ ${Number(c.attention||0)} •
+      N/A ${Number(c.na||0)}
+    </div>
+    ${(c.itens||[]).map((item,index)=>{
+      const text=qrLanguage==="en-US"?(item.textoEn||item.textoPt):(item.textoPt||item.textoEn);
+      const icon=item.status==="OK"?"✅":item.status==="ATTENTION"?"⚠️":"➖";
+
+      return `<div style="margin-top:6px">
+        ${icon} ${index+1}. ${esc(text)}
+        ${item.observacao?`<div class="muted" style="margin-left:22px">${esc(item.observacao)}</div>`:""}
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+
+/* ---------------- ADMIN ---------------- */
+
+async function showPreventiveChecklistAdminTab7640(){
+  if(!["MASTER","GESTOR"].includes(systemSession?.perfil)){
+    return alert(checklistT7640(
+      "Seu perfil não possui permissão para configurar checklists.",
+      "Your profile does not have permission to configure checklists."
+    ));
+  }
+
+  clearTabs();
+  $("tabPreventiveChecklists").classList.add("active");
+  showOnly("preventiveChecklistAdminArea");
+
+  await loadPreventiveChecklistsAdmin7640();
+}
+
+async function loadPreventiveChecklistsAdmin7640(){
+  $("preventiveChecklistAdminStatus").textContent=
+    checklistT7640("Carregando checklists...","Loading checklists...");
+
+  const r=await menuApi({action:"preventivechecklistsadmin"});
+
+  if(!r.ok){
+    $("preventiveChecklistAdminStatus").textContent=r.detail||r.error||"";
+    return;
+  }
+
+  preventiveChecklistAdminData7640=r.data||{
+    checklists:[],
+    schools:[],
+    suggestions:{types:[],areas:[]}
+  };
+
+  renderPreventiveChecklistAdmin7640();
+}
+
+function renderPreventiveChecklistAdmin7640(){
+  const d=preventiveChecklistAdminData7640||{checklists:[]};
+  const items=d.checklists||[];
+
+  $("preventiveChecklistAdminTitle").textContent=
+    checklistT7640("📋 Checklists de Preventiva","📋 Preventive Checklists");
+
+  $("preventiveChecklistAdminHelp").textContent=
+    checklistT7640(
+      "Configure os itens executados durante a preventiva. A prioridade é: ativo específico → tipo de equipamento → área → checklist geral da escola.",
+      "Configure the items performed during preventive maintenance. Priority is: specific asset → equipment type → area → school/general checklist."
+    );
+
+  $("newPreventiveChecklist").textContent=
+    checklistT7640("+ Novo checklist","+ New Checklist");
+
+  $("preventiveChecklistAdminStatus").textContent=
+    checklistT7640(
+      `${items.length} checklist(s) disponível(is).`,
+      `${items.length} checklist(s) available.`
+    );
+
+  $("preventiveChecklistAdminList").innerHTML=items.length
+    ? items.map(c=>{
+        const name=qrLanguage==="en-US"?(c.nomeEn||c.nomePt):(c.nomePt||c.nomeEn);
+        const schoolName=(d.schools||[]).find(x=>x.idEscola===c.idEscola)?.escola||c.idEscola||"";
+        const scope=checklistScopeLabel7640(c.escopo);
+        const active=c.ativo;
+
+        return `<div class="checklist-admin-card">
+          <div class="checklist-admin-head">
+            <div>
+              <div style="font-weight:900">${esc(name)}</div>
+              <div class="checklist-admin-tags">
+                <span class="tag">${esc(scope)}${c.valorEscopo?`: ${esc(c.valorEscopo)}`:""}</span>
+                <span class="tag">🏫 ${esc(schoolName||checklistT7640("Global","Global"))}</span>
+                <span class="tag">${active?"✅ "+checklistT7640("Ativo","Active"):"⛔ "+checklistT7640("Inativo","Inactive")}</span>
+                <span class="tag">📋 ${(c.itens||[]).length} ${checklistT7640("itens","items")}</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${c.canEdit?`
+                <button class="btn btn-secondary" type="button" onclick="editPreventiveChecklist7640('${esc(c.idChecklist)}')">
+                  ${checklistT7640("Editar","Edit")}
+                </button>
+                <button class="btn btn-secondary" type="button" onclick="togglePreventiveChecklist7640('${esc(c.idChecklist)}',${!active})">
+                  ${active?checklistT7640("Inativar","Deactivate"):checklistT7640("Ativar","Activate")}
+                </button>
+              `:""}
+            </div>
+          </div>
+
+          ${c.observacoes?`<div class="muted" style="margin-top:8px">${esc(c.observacoes)}</div>`:""}
+
+          ${!c.canEdit?`
+            <div class="checklist-readonly-note">
+              ${checklistT7640(
+                "Modelo padrão/global somente leitura para este perfil. Para personalizar, crie um checklist específico para sua escola com o mesmo escopo.",
+                "Standard/global read-only model for this profile. To customize it, create a school-specific checklist with the same scope."
+              )}
+            </div>
+          `:""}
+        </div>`;
+      }).join("")
+    : `<div class="muted">${checklistT7640("Nenhum checklist encontrado.","No checklist found.")}</div>`;
+}
+
+function resetPreventiveChecklistModal7640(){
+  preventiveChecklistAdminEditing7640=null;
+
+  $("preventiveChecklistId").value="";
+  $("preventiveChecklistNamePt").value="";
+  $("preventiveChecklistNameEn").value="";
+  $("preventiveChecklistScope").value="TYPE";
+  $("preventiveChecklistScopeValue").value="";
+  $("preventiveChecklistActive").checked=true;
+  $("preventiveChecklistNotes").value="";
+  $("preventiveChecklistItemsEditor").innerHTML="";
+  $("preventiveChecklistAdminMessage").className="message";
+  $("preventiveChecklistAdminMessage").textContent="";
+
+  fillPreventiveChecklistSchools7640("");
+  syncPreventiveChecklistScope7640();
+  addPreventiveChecklistItem7640();
+}
+
+function fillPreventiveChecklistSchools7640(selected){
+  const sel=$("preventiveChecklistSchool");
+  const schools=preventiveChecklistAdminData7640?.schools||[];
+
+  if(systemSession?.perfil==="GESTOR"){
+    const own=String(systemSession.idEscola||systemSession.scopeSchoolId||"");
+    sel.innerHTML=schools
+      .filter(x=>x.idEscola===own)
+      .map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`)
+      .join("");
+    sel.value=own;
+    sel.disabled=true;
+    return;
+  }
+
+  sel.disabled=false;
+  sel.innerHTML=
+    `<option value="">${checklistT7640("Global – todas as escolas","Global – all schools")}</option>`+
+    schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
+
+  sel.value=selected||"";
+}
+
+function openNewPreventiveChecklist7640(){
+  resetPreventiveChecklistModal7640();
+
+  $("preventiveChecklistModalTitle").textContent=
+    checklistT7640("📋 Novo Checklist de Preventiva","📋 New Preventive Checklist");
+
+  $("preventiveChecklistAdminModal").style.display="flex";
+}
+
+function editPreventiveChecklist7640(id){
+  const c=(preventiveChecklistAdminData7640?.checklists||[]).find(x=>x.idChecklist===id);
+  if(!c||!c.canEdit)return;
+
+  preventiveChecklistAdminEditing7640=c;
+
+  $("preventiveChecklistModalTitle").textContent=
+    checklistT7640("📋 Editar Checklist de Preventiva","📋 Edit Preventive Checklist");
+
+  $("preventiveChecklistId").value=c.idChecklist||"";
+  $("preventiveChecklistNamePt").value=c.nomePt||"";
+  $("preventiveChecklistNameEn").value=c.nomeEn||"";
+  $("preventiveChecklistScope").value=c.escopo||"TYPE";
+  $("preventiveChecklistScopeValue").value=c.valorEscopo||"";
+  $("preventiveChecklistActive").checked=!!c.ativo;
+  $("preventiveChecklistNotes").value=c.observacoes||"";
+
+  fillPreventiveChecklistSchools7640(c.idEscola||"");
+  syncPreventiveChecklistScope7640();
+
+  $("preventiveChecklistItemsEditor").innerHTML="";
+
+  (c.itens||[]).forEach(item=>addPreventiveChecklistItem7640(item));
+
+  if(!(c.itens||[]).length)addPreventiveChecklistItem7640();
+
+  $("preventiveChecklistAdminMessage").className="message";
+  $("preventiveChecklistAdminMessage").textContent="";
+  $("preventiveChecklistAdminModal").style.display="flex";
+}
+
+function syncPreventiveChecklistScope7640(){
+  const scope=$("preventiveChecklistScope").value;
+  const input=$("preventiveChecklistScopeValue");
+  const label=$("preventiveChecklistScopeValueLabel");
+  const list=$("preventiveChecklistScopeSuggestions");
+
+  if(scope==="SCHOOL"){
+    input.value="";
+    input.disabled=true;
+    label.style.opacity=".55";
+    list.innerHTML="";
+    return;
+  }
+
+  input.disabled=false;
+  label.style.opacity="1";
+
+  const suggestions=scope==="AREA"
+    ? (preventiveChecklistAdminData7640?.suggestions?.areas||[])
+    : scope==="TYPE"
+      ? (preventiveChecklistAdminData7640?.suggestions?.types||[])
+      : [];
+
+  list.innerHTML=suggestions.map(v=>`<option value="${esc(v)}"></option>`).join("");
+
+  if(scope==="ASSET"){
+    input.placeholder=checklistT7640("Ex.: EQ001","Example: EQ001");
+  }else if(scope==="TYPE"){
+    input.placeholder=checklistT7640("Ex.: Boiler | HVAC","Example: Boiler | HVAC");
+  }else{
+    input.placeholder=checklistT7640("Ex.: Kitchen | Boiler Room","Example: Kitchen | Boiler Room");
+  }
+}
+
+function addPreventiveChecklistItem7640(item={}){
+  const wrap=document.createElement("div");
+  wrap.className="checklist-admin-item-editor";
+  wrap.dataset.itemId=item.idItem||"";
+
+  const index=$("preventiveChecklistItemsEditor").children.length+1;
+
+  wrap.innerHTML=`
+    <div class="checklist-admin-item-top">
+      <b>${checklistT7640("Item","Item")} <span class="checklist-item-number">${index}</span></b>
+      <button type="button" class="btn btn-secondary checklist-remove-item">${checklistT7640("Remover","Remove")}</button>
+    </div>
+
+    <div class="checklist-admin-item-grid">
+      <label>${checklistT7640("Texto em português *","Portuguese text *")}
+        <input class="checklist-item-pt" value="${esc(item.textoPt||"")}">
+      </label>
+
+      <label>${checklistT7640("Texto em inglês","English text")}
+        <input class="checklist-item-en" value="${esc(item.textoEn||"")}">
+      </label>
+
+      <label>${checklistT7640("Orientação em português","Portuguese guidance")}
+        <input class="checklist-item-guide-pt" value="${esc(item.orientacaoPt||"")}">
+      </label>
+
+      <label>${checklistT7640("Orientação em inglês","English guidance")}
+        <input class="checklist-item-guide-en" value="${esc(item.orientacaoEn||"")}">
+      </label>
+    </div>
+
+    <div class="checklist-admin-item-actions">
+      <label>
+        <input type="checkbox" class="checklist-item-required" ${item.obrigatorio!==false?"checked":""}>
+        ${checklistT7640("Obrigatório","Required")}
+      </label>
+      <label>
+        <input type="checkbox" class="checklist-item-na" ${item.permiteNa!==false?"checked":""}>
+        ${checklistT7640("Permite N/A","Allow N/A")}
+      </label>
+    </div>
+  `;
+
+  wrap.querySelector(".checklist-remove-item").onclick=()=>{
+    wrap.remove();
+    renumberPreventiveChecklistItems7640();
+  };
+
+  $("preventiveChecklistItemsEditor").appendChild(wrap);
+  renumberPreventiveChecklistItems7640();
+}
+
+function renumberPreventiveChecklistItems7640(){
+  [...$("preventiveChecklistItemsEditor").children].forEach((el,i)=>{
+    const n=el.querySelector(".checklist-item-number");
+    if(n)n.textContent=i+1;
+  });
+}
+
+function collectChecklistAdminItems7640(){
+  return [...$("preventiveChecklistItemsEditor").children].map(el=>({
+    idItem:el.dataset.itemId||"",
+    textoPt:el.querySelector(".checklist-item-pt").value.trim(),
+    textoEn:el.querySelector(".checklist-item-en").value.trim(),
+    orientacaoPt:el.querySelector(".checklist-item-guide-pt").value.trim(),
+    orientacaoEn:el.querySelector(".checklist-item-guide-en").value.trim(),
+    obrigatorio:el.querySelector(".checklist-item-required").checked?"Sim":"Não",
+    permiteNa:el.querySelector(".checklist-item-na").checked?"Sim":"Não"
+  }));
+}
+
+async function savePreventiveChecklistAdmin7640(){
+  const btn=$("savePreventiveChecklist");
+  const msg=$("preventiveChecklistAdminMessage");
+
+  const namePt=$("preventiveChecklistNamePt").value.trim();
+  const scope=$("preventiveChecklistScope").value;
+  const scopeValue=$("preventiveChecklistScopeValue").value.trim();
+  const items=collectChecklistAdminItems7640();
+
+  if(!namePt){
+    msg.className="message error";
+    msg.textContent=checklistT7640("Informe o nome do checklist.","Enter the checklist name.");
+    return;
+  }
+
+  if(scope!=="SCHOOL"&&!scopeValue){
+    msg.className="message error";
+    msg.textContent=checklistT7640("Informe o valor do escopo.","Enter the scope value.");
+    return;
+  }
+
+  if(!items.length||items.some(x=>!x.textoPt)){
+    msg.className="message error";
+    msg.textContent=checklistT7640(
+      "Inclua pelo menos um item e preencha o texto em português de todos os itens.",
+      "Add at least one item and complete the Portuguese text for every item."
+    );
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent=checklistT7640("Salvando...","Saving...");
+
+  try{
+    const r=await menuApiPost({
+      action:"savepreventivechecklist",
+      checklistId:$("preventiveChecklistId").value,
+      checklistNamePt:namePt,
+      checklistNameEn:$("preventiveChecklistNameEn").value.trim(),
+      checklistScope:scope,
+      checklistScopeValue:scopeValue,
+      checklistSchoolId:$("preventiveChecklistSchool").value,
+      checklistActive:$("preventiveChecklistActive").checked?"Sim":"Não",
+      checklistNotes:$("preventiveChecklistNotes").value.trim(),
+      checklistItemsJson:JSON.stringify(items)
+    });
+
+    if(!r.ok)throw new Error(r.detail||r.error||"");
+
+    msg.className="message success";
+    msg.textContent=checklistT7640("Checklist salvo com sucesso.","Checklist saved successfully.");
+
+    setTimeout(async()=>{
+      $("preventiveChecklistAdminModal").style.display="none";
+      await loadPreventiveChecklistsAdmin7640();
+    },600);
+
+  }catch(e){
+    msg.className="message error";
+    msg.textContent=e.message||checklistT7640("Erro ao salvar checklist.","Unable to save checklist.");
+  }finally{
+    btn.disabled=false;
+    btn.textContent=checklistT7640("Salvar checklist","Save Checklist");
+  }
+}
+
+async function togglePreventiveChecklist7640(id,active){
+  if(!confirm(
+    active
+      ? checklistT7640("Ativar este checklist?","Activate this checklist?")
+      : checklistT7640("Inativar este checklist?","Deactivate this checklist?")
+  ))return;
+
+  try{
+    const r=await menuApiPost({
+      action:"setpreventivechecklistactive",
+      checklistId:id,
+      checklistActive:active?"Sim":"Não"
+    });
+
+    if(!r.ok)throw new Error(r.detail||r.error||"");
+
+    await loadPreventiveChecklistsAdmin7640();
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+/* ============================================================
  * CONTEXTUAL HELP – 7.6.3.1
  * ============================================================ */
 
@@ -6918,6 +6917,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.3.2 - Contextual Help initialization fix.
 
 // QRManut USA 7.6.4.0 - Structured Preventive Maintenance Checklists.
+
+// QRManut USA 7.6.4.1 - Fix: Preventive Checklist JS moved from CSS to script.
 </script>
 
 </body>
