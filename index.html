@@ -304,6 +304,178 @@ html,body{max-width:100%;overflow-x:hidden}
 .asset-other-input.hidden{display:none!important}
 @media(max-width:720px){.asset-form-grid,.asset-form-grid.three{grid-template-columns:1fr}.asset-form-grid .full{grid-column:auto}}
 
+
+/* ============================================================
+ * CONTEXTUAL HELP – 7.6.3.1
+ * ============================================================ */
+
+.routine-help-bar{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  margin:0 0 10px 0;
+}
+
+.routine-help-button{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border:1px solid #b8c8da;
+  background:#f7fbff;
+  color:#0b315e;
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  line-height:1;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+
+.routine-help-button:hover{
+  background:#edf6ff;
+  border-color:#88a9c9;
+}
+
+.routine-help-button:focus{
+  outline:3px solid rgba(11,49,94,.15);
+  outline-offset:2px;
+}
+
+.qr-help-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(4,20,36,.58);
+  z-index:10050;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+
+.qr-help-modal.open{
+  display:flex;
+}
+
+.qr-help-box{
+  width:min(760px,100%);
+  max-height:min(86vh,860px);
+  overflow:auto;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+  border:1px solid rgba(11,49,94,.12);
+}
+
+.qr-help-head{
+  position:sticky;
+  top:0;
+  z-index:2;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:18px 20px 14px;
+  background:#fff;
+  border-bottom:1px solid #e7edf3;
+  border-radius:18px 18px 0 0;
+}
+
+.qr-help-title{
+  margin:0;
+  color:#0b315e;
+  font-size:22px;
+  line-height:1.2;
+}
+
+.qr-help-subtitle{
+  margin-top:4px;
+  color:#607386;
+  font-size:13px;
+}
+
+.qr-help-close{
+  flex:0 0 auto;
+  width:38px;
+  height:38px;
+  border:0;
+  border-radius:50%;
+  background:#edf2f7;
+  color:#24394d;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.qr-help-close:hover{
+  background:#dde7f0;
+}
+
+.qr-help-body{
+  padding:18px 20px 22px;
+}
+
+.qr-help-section{
+  padding:14px 0;
+  border-bottom:1px solid #edf1f5;
+}
+
+.qr-help-section:last-child{
+  border-bottom:0;
+}
+
+.qr-help-section h3{
+  margin:0 0 7px;
+  color:#173b61;
+  font-size:15px;
+}
+
+.qr-help-section p{
+  margin:0;
+  line-height:1.55;
+  color:#34495e;
+}
+
+.qr-help-steps{
+  margin:7px 0 0 20px;
+  padding:0;
+  color:#34495e;
+}
+
+.qr-help-steps li{
+  margin:7px 0;
+  line-height:1.45;
+}
+
+.qr-help-example{
+  margin-top:7px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#f6f9fc;
+  border-left:4px solid #0b315e;
+  color:#34495e;
+  line-height:1.5;
+}
+
+@media (max-width:640px){
+  .qr-help-box{
+    max-height:91vh;
+    border-radius:14px;
+  }
+
+  .qr-help-head{
+    padding:15px 15px 12px;
+    border-radius:14px 14px 0 0;
+  }
+
+  .qr-help-body{
+    padding:12px 15px 18px;
+  }
+
+  .qr-help-title{
+    font-size:19px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -826,7 +998,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.3.0</div>
+<div class="footer">QRManut USA • Version 7.6.3.1</div>
 </div>
 <script>
 /* ============================================================
@@ -5086,6 +5258,11 @@ function qrApplyLanguage(lang){
     if(el)qrTranslateElementTree(el);
   });
 
+  // 7.6.3.1 - Atualiza os botões e o Help aberto ao mudar o idioma.
+  if(typeof refreshRoutineHelpButtons7631==="function"){
+    refreshRoutineHelpButtons7631();
+  }
+
 }
 
 function qrLoadLanguage(){
@@ -5180,6 +5357,636 @@ $("assetLocation").addEventListener("change",()=>assetToggleOther7610("assetLoca
 // QRManut USA 7.6.2.9 - User Management remains global for MASTER.
 
 // QRManut USA 7.6.3.0 - Performance release + QRmanutUSA installation label.
+
+
+/* ============================================================
+ * CONTEXTUAL HELP – 7.6.3.1
+ * ============================================================ */
+
+const QR_ROUTINE_HELP_7631 = {
+  search:{
+    pt:{
+      title:"🔎 Buscar Ativos",
+      purpose:"Localiza equipamentos e ativos pelo ID, nome, fabricante, modelo, número de série, categoria, componente, pavimento ou localização.",
+      when:"Use quando precisar identificar rapidamente um ativo antes de consultar seus dados, abrir uma ocorrência ou acessar seu histórico.",
+      steps:[
+        "Selecione o Colégio / Unidade no filtro global.",
+        "Digite pelo menos 2 caracteres no campo de busca.",
+        "Pressione Buscar.",
+        "Abra o ativo desejado para visualizar seus dados e rotinas."
+      ],
+      rules:"Os resultados respeitam o Colégio / Unidade selecionado e as permissões do usuário. Em All Schools, somente ativos ligados às escolas ativas do QRManut USA são considerados.",
+      access:"Disponível conforme o perfil e o escopo autorizado. CONSULTA possui acesso somente leitura.",
+      example:"Exemplo: selecione Lincoln Elementary School, digite Boiler e pressione Buscar."
+    },
+    en:{
+      title:"🔎 Search Assets",
+      purpose:"Finds equipment and assets by ID, name, manufacturer, model, serial number, category, component, floor, or location.",
+      when:"Use this when you need to identify an asset before viewing details, opening a work order, or checking its history.",
+      steps:[
+        "Select the School / Unit in the global filter.",
+        "Enter at least 2 characters in the search field.",
+        "Press Search.",
+        "Open the desired asset to view its information and routines."
+      ],
+      rules:"Results respect the selected School / Unit and the user's permissions. Under All Schools, only assets linked to active QRManut USA schools are considered.",
+      access:"Available according to the user's authorized profile and scope. CONSULTA is read-only.",
+      example:"Example: select Lincoln Elementary School, type Boiler, and press Search."
+    }
+  },
+
+  pending:{
+    pt:{
+      title:"⚠️ OCs Pendentes",
+      purpose:"Mostra as Ordens de Manutenção ainda abertas ou em andamento dentro do Colégio / Unidade selecionado.",
+      when:"Use para acompanhar o backlog de manutenção, verificar prioridades e identificar serviços que ainda precisam de ação.",
+      steps:[
+        "Selecione o Colégio / Unidade.",
+        "Use os filtros de prestador, status, categoria, pavimento e localização.",
+        "Pressione Aplicar filtros.",
+        "Abra a OC para consultar detalhes e, quando permitido, atualizar o atendimento."
+      ],
+      rules:"Somente OCs vinculadas aos ativos do escopo atual são exibidas. PRESTADOR também fica limitado ao seu próprio escopo operacional.",
+      access:"MASTER e GESTOR possuem visão gerencial dentro do escopo. PRESTADOR vê os itens autorizados. CONSULTA visualiza sem alterar.",
+      example:"Exemplo: filtre Status = Pendente e Pavimento = 1st Floor para revisar as OCs ainda não iniciadas."
+    },
+    en:{
+      title:"⚠️ Pending Work Orders",
+      purpose:"Shows maintenance work orders that are still open or in progress within the selected School / Unit.",
+      when:"Use this to monitor the maintenance backlog, review priorities, and identify work that still requires action.",
+      steps:[
+        "Select the School / Unit.",
+        "Use the service provider, status, category, floor, and location filters.",
+        "Press Apply Filters.",
+        "Open a work order to review details and, when authorized, update the service."
+      ],
+      rules:"Only work orders linked to assets in the current scope are shown. Service providers are also restricted to their authorized operational scope.",
+      access:"MASTER and GESTOR have management visibility within their scope. PRESTADOR sees authorized items. CONSULTA is read-only.",
+      example:"Example: filter Status = Pending and Floor = 1st Floor to review work orders that have not started."
+    }
+  },
+
+  occurrenceReport:{
+    pt:{
+      title:"📊 Relatório de OCs",
+      purpose:"Consulta as OCs concluídas em um período e apresenta resumo gerencial e detalhamento dos atendimentos.",
+      when:"Use para reuniões, prestação de contas, análise de desempenho e acompanhamento do histórico de manutenção.",
+      steps:[
+        "Informe a data inicial e a data final.",
+        "Aplique filtros opcionais de prestador, categoria, componente, pavimento e localização.",
+        "Pressione Consultar.",
+        "Revise o resumo e a lista detalhada.",
+        "Quando necessário, pressione Gerar PDF."
+      ],
+      rules:"O período considera a Data de Conclusão da OC. Todos os filtros respeitam o Colégio / Unidade selecionado.",
+      access:"Disponível conforme o perfil autorizado. Funções de geração/alteração podem variar de acordo com a permissão.",
+      example:"Exemplo: consulte as OCs concluídas no mês atual somente para a escola selecionada e gere o PDF para a reunião."
+    },
+    en:{
+      title:"📊 Work Order Report",
+      purpose:"Queries completed work orders for a selected period and provides a management summary plus detailed service records.",
+      when:"Use this for meetings, accountability, performance review, and maintenance-history analysis.",
+      steps:[
+        "Enter the start date and end date.",
+        "Apply optional filters for service provider, category, component, floor, and location.",
+        "Press Search.",
+        "Review the summary and detailed list.",
+        "When needed, press Generate PDF."
+      ],
+      rules:"The period is based on the Work Order Completion Date. All filters respect the selected School / Unit.",
+      access:"Available according to the authorized profile. Report-generation or update features may vary by permission.",
+      example:"Example: query work orders completed this month for the selected school and generate the PDF for a meeting."
+    }
+  },
+
+  preventive:{
+    pt:{
+      title:"🛠️ Preventive Maintenance Status",
+      purpose:"Acompanha as manutenções preventivas previstas e realizadas por competência, prestador e ativo.",
+      when:"Use para controlar cumprimento do plano preventivo e identificar itens pendentes antes do vencimento da competência.",
+      steps:[
+        "Selecione a competência.",
+        "Selecione o prestador, quando necessário.",
+        "Pressione Atualizar.",
+        "Use as abas Todos, Pendentes e Realizadas.",
+        "Revise o percentual de conclusão e os itens listados."
+      ],
+      rules:"A rotina respeita o Colégio / Unidade ativo. O relatório da competência considera preventivas realizadas e pendentes dentro do mesmo escopo.",
+      access:"A visualização e as ações disponíveis dependem do perfil. CONSULTA permanece em modo leitura.",
+      example:"Exemplo: selecione agosto/2026 e veja somente as preventivas pendentes da escola ativa."
+    },
+    en:{
+      title:"🛠️ Preventive Maintenance Status",
+      purpose:"Tracks scheduled and completed preventive maintenance by period, service provider, and asset.",
+      when:"Use this to control preventive-plan compliance and identify pending items before the period closes.",
+      steps:[
+        "Select the reporting period.",
+        "Select a service provider when needed.",
+        "Press Update.",
+        "Use the All, Pending, and Completed tabs.",
+        "Review completion percentage and listed items."
+      ],
+      rules:"The routine respects the active School / Unit. The period report includes completed and pending preventive maintenance within the same scope.",
+      access:"Available actions depend on the user's profile. CONSULTA remains read-only.",
+      example:"Example: select August 2026 and display only pending preventive maintenance for the active school."
+    }
+  },
+
+  documents:{
+    pt:{
+      title:"📄 Documentos Técnicos",
+      purpose:"Localiza documentos técnicos vinculados à operação, aos ativos e às instalações, como manuais, desenhos e PDFs.",
+      when:"Use quando precisar consultar documentação antes de uma intervenção, inspeção ou análise técnica.",
+      steps:[
+        "Selecione o Colégio / Unidade.",
+        "Digite um termo ou use os filtros de tipo, disciplina e pavimento.",
+        "Pressione Buscar.",
+        "Abra o documento desejado."
+      ],
+      rules:"Os resultados respeitam o escopo de escola e de acesso do usuário. Documentos vinculados a ativos fora do escopo não devem ser exibidos.",
+      access:"Consulta conforme o perfil autorizado. O upload é tratado em rotina separada para perfis com permissão.",
+      example:"Exemplo: pesquise HVAC e filtre Discipline para localizar os documentos do sistema de climatização."
+    },
+    en:{
+      title:"📄 Technical Documents",
+      purpose:"Finds technical documents linked to operations, assets, and facilities, such as manuals, drawings, and PDFs.",
+      when:"Use this before maintenance work, inspections, or technical analysis when supporting documentation is required.",
+      steps:[
+        "Select the School / Unit.",
+        "Enter a search term or use Type, Discipline, and Floor filters.",
+        "Press Search.",
+        "Open the required document."
+      ],
+      rules:"Results respect the user's school and access scope. Documents linked to assets outside the current scope should not be shown.",
+      access:"View access depends on profile. Upload is handled in a separate routine for authorized profiles.",
+      example:"Example: search for HVAC and filter by Discipline to locate air-conditioning system documents."
+    }
+  },
+
+  catalog:{
+    pt:{
+      title:"🧩 Categorias e Componentes",
+      purpose:"Administra as categorias e os componentes exibidos nos formulários de ocorrência.",
+      when:"Use quando precisar criar, ativar, desativar ou reorganizar opções utilizadas no registro das OCs.",
+      steps:[
+        "Cadastre ou selecione uma categoria.",
+        "Informe os nomes em português e inglês.",
+        "Cadastre os componentes relacionados.",
+        "Use ↑ e ↓ para ajustar a ordem quando necessário.",
+        "Mantenha somente opções válidas como ativas."
+      ],
+      rules:"Alterações nesta rotina afetam as opções disponíveis nos formulários de ocorrência. Evite excluir conceitos que já estejam sendo usados no histórico.",
+      access:"Rotina administrativa disponível aos perfis autorizados.",
+      example:"Exemplo: criar a categoria Plumbing e cadastrar o componente Water Pump."
+    },
+    en:{
+      title:"🧩 Categories & Components",
+      purpose:"Manages the categories and components displayed in work-order forms.",
+      when:"Use this when you need to create, activate, deactivate, or reorder options used when recording work orders.",
+      steps:[
+        "Create or select a category.",
+        "Enter the Portuguese and English names.",
+        "Create the related components.",
+        "Use ↑ and ↓ to adjust display order when needed.",
+        "Keep only valid options active."
+      ],
+      rules:"Changes here affect the options available in work-order forms. Avoid removing concepts already used in historical records.",
+      access:"Administrative routine available to authorized profiles.",
+      example:"Example: create the Plumbing category and add Water Pump as a component."
+    }
+  },
+
+  maintenancePending:{
+    pt:{
+      title:"📌 Pendências / Providências",
+      purpose:"Controla necessidades identificadas durante preventivas que exigem material, correção, contratação ou outra providência.",
+      when:"Use para não perder ações detectadas durante a manutenção preventiva e acompanhar sua resolução.",
+      steps:[
+        "Selecione o Colégio / Unidade.",
+        "Filtre por status ou prioridade.",
+        "Use a busca quando precisar localizar um ativo, material ou OC.",
+        "Pressione Atualizar.",
+        "Acompanhe cada pendência até sua resolução."
+      ],
+      rules:"A pendência permanece vinculada ao ativo e ao escopo da escola. Status e prioridades devem refletir a situação real da providência.",
+      access:"A consulta e atualização dependem do perfil. CONSULTA permanece somente leitura.",
+      example:"Exemplo: filtre Prioridade = Alta para revisar necessidades que devem ser tratadas primeiro."
+    },
+    en:{
+      title:"📌 Pending Actions",
+      purpose:"Tracks needs identified during preventive maintenance that require materials, corrective work, contracting, or another follow-up action.",
+      when:"Use this to ensure findings from preventive maintenance are not lost and are followed through to resolution.",
+      steps:[
+        "Select the School / Unit.",
+        "Filter by status or priority.",
+        "Use search to locate an asset, material, or work order.",
+        "Press Update.",
+        "Track each action until it is resolved."
+      ],
+      rules:"Each pending action remains linked to its asset and school scope. Status and priority should reflect the current situation.",
+      access:"Viewing and updating depend on profile. CONSULTA remains read-only.",
+      example:"Example: filter Priority = High to review the actions that should be addressed first."
+    }
+  },
+
+  assets:{
+    pt:{
+      title:"🏷️ Gestão de Ativos",
+      purpose:"Permite cadastrar, editar e inativar ativos sem alterar diretamente a planilha.",
+      when:"Use para manter o cadastro técnico atualizado, criar novos equipamentos e ajustar dados de localização ou classificação.",
+      steps:[
+        "Selecione o Colégio / Unidade correto.",
+        "Use a busca para localizar um ativo existente ou clique em Novo Ativo.",
+        "Preencha os dados de identificação, localização e classificação.",
+        "Revise o School ID antes de salvar.",
+        "Salve as alterações."
+      ],
+      rules:"O ID do ativo é preservado na edição para manter histórico, QR Code e documentos vinculados. O usuário só pode atuar no escopo autorizado.",
+      access:"MASTER e GESTOR conforme o escopo autorizado.",
+      example:"Exemplo: cadastrar uma nova Air Handling Unit na Lincoln Elementary School e vinculá-la ao prédio e sala corretos."
+    },
+    en:{
+      title:"🏷️ Asset Management",
+      purpose:"Allows assets to be created, edited, and deactivated without directly editing the spreadsheet.",
+      when:"Use this to keep the technical asset register current, create new equipment, and update location or classification data.",
+      steps:[
+        "Select the correct School / Unit.",
+        "Search for an existing asset or click New Asset.",
+        "Complete identification, location, and classification information.",
+        "Review the School ID before saving.",
+        "Save the changes."
+      ],
+      rules:"The asset ID is preserved during editing to maintain history, QR Code, and linked documents. Users may only operate within their authorized scope.",
+      access:"MASTER and GESTOR according to their authorized scope.",
+      example:"Example: create a new Air Handling Unit at Lincoln Elementary School and link it to the correct building and room."
+    }
+  },
+
+  upload:{
+    pt:{
+      title:"📤 Upload de Documentos",
+      purpose:"Cadastra arquivos PDF técnicos e permite vinculá-los a ativos e classificações do sistema.",
+      when:"Use para incluir manuais, desenhos, certificados, relatórios ou outros documentos que precisam ficar disponíveis no QRManut.",
+      steps:[
+        "Selecione o Colégio / Unidade.",
+        "Informe título, tipo e demais classificações.",
+        "Selecione o ativo quando houver vínculo específico.",
+        "Escolha o arquivo PDF.",
+        "Revise os dados e envie o documento."
+      ],
+      rules:"Somente PDF e dentro do limite de tamanho informado pela tela. O vínculo com ativo deve respeitar o escopo da escola.",
+      access:"Disponível para MASTER e GESTOR conforme as permissões do sistema.",
+      example:"Exemplo: anexar o manual de uma Boiler e vinculá-lo diretamente ao respectivo ativo."
+    },
+    en:{
+      title:"📤 Upload Documents",
+      purpose:"Registers technical PDF files and links them to assets and system classifications.",
+      when:"Use this to add manuals, drawings, certificates, reports, or other documents that should be available in QRManut.",
+      steps:[
+        "Select the School / Unit.",
+        "Enter title, type, and other classifications.",
+        "Select an asset when the document has a specific asset link.",
+        "Choose the PDF file.",
+        "Review the information and upload the document."
+      ],
+      rules:"PDF only and within the file-size limit shown on screen. Asset links must respect the selected school scope.",
+      access:"Available to MASTER and GESTOR according to system permissions.",
+      example:"Example: upload a Boiler manual and link it directly to the corresponding asset."
+    }
+  },
+
+  users:{
+    pt:{
+      title:"👥 Gestão de Usuários",
+      purpose:"Administra contas de acesso, perfis, prestadores e vínculos com Colégio / Unidade.",
+      when:"Use para criar usuários, ajustar permissões, reenviar convites e manter os acessos do sistema atualizados.",
+      steps:[
+        "Localize o usuário ou clique em Novo usuário.",
+        "Informe nome, login e e-mail.",
+        "Selecione o perfil correto.",
+        "Vincule School / Unit e prestador quando aplicável.",
+        "Salve e envie o convite de criação de senha quando necessário."
+      ],
+      rules:"MASTER mantém visão administrativa global. GESTOR fica limitado ao seu próprio escopo. Cada funcionário deve possuir uma conta individual.",
+      access:"MASTER e GESTOR conforme as regras de administração de usuários.",
+      example:"Exemplo: criar um usuário CONSULTA para SCH-002 e enviar o convite para criação da primeira senha."
+    },
+    en:{
+      title:"👥 User Management",
+      purpose:"Manages user accounts, profiles, service providers, and School / Unit assignments.",
+      when:"Use this to create users, adjust permissions, resend invitations, and keep system access current.",
+      steps:[
+        "Locate a user or click New User.",
+        "Enter name, login, and email.",
+        "Select the correct profile.",
+        "Assign School / Unit and service provider when applicable.",
+        "Save and send the password-creation invitation when required."
+      ],
+      rules:"MASTER keeps global administrative visibility. GESTOR remains limited to its own scope. Each employee should have an individual account.",
+      access:"MASTER and GESTOR according to user-administration rules.",
+      example:"Example: create a CONSULTA user for SCH-002 and send an invitation to create the first password."
+    }
+  },
+
+  audit:{
+    pt:{
+      title:"🧾 Auditoria",
+      purpose:"Consulta a trilha de eventos administrativos e operacionais registrados pelo QRManut.",
+      when:"Use para investigar alterações, confirmar quem realizou uma ação e apoiar controles internos.",
+      steps:[
+        "Informe o período desejado.",
+        "Aplique filtros de ação, resultado ou usuário.",
+        "Use a busca para localizar um ID específico.",
+        "Pressione Consultar.",
+        "Revise data/hora, usuário, ação, alvo e resultado."
+      ],
+      rules:"A auditoria deve ser preservada como evidência. O filtro por School / Unit é aplicado quando o evento puder ser relacionado ao escopo selecionado.",
+      access:"Consulta exclusiva do perfil MASTER.",
+      example:"Exemplo: pesquisar uma OC específica para identificar quem alterou seu status e quando."
+    },
+    en:{
+      title:"🧾 Audit",
+      purpose:"Queries the administrative and operational event trail recorded by QRManut.",
+      when:"Use this to investigate changes, confirm who performed an action, and support internal controls.",
+      steps:[
+        "Enter the desired date range.",
+        "Apply Action, Result, or User filters.",
+        "Use search to locate a specific ID.",
+        "Press Search.",
+        "Review date/time, user, action, target, and result."
+      ],
+      rules:"Audit data should be preserved as evidence. School / Unit scope is applied when an event can be linked to the selected scope.",
+      access:"MASTER profile only.",
+      example:"Example: search a specific work order to identify who changed its status and when."
+    }
+  },
+
+  providers:{
+    pt:{
+      title:"🏢 Prestadores",
+      purpose:"Administra empresas prestadoras e as regras operacionais herdadas pelos usuários do perfil PRESTADOR.",
+      when:"Use ao cadastrar uma nova empresa de manutenção ou atualizar seus dados e permissões.",
+      steps:[
+        "Localize o prestador existente ou clique em Novo prestador.",
+        "Preencha os dados cadastrais e de contato.",
+        "Revise as regras operacionais.",
+        "Salve as alterações.",
+        "Vincule os usuários PRESTADOR à empresa correspondente."
+      ],
+      rules:"A configuração do prestador influencia o escopo dos usuários vinculados. Faça alterações com cuidado para não ampliar acesso indevidamente.",
+      access:"Rotina administrativa disponível ao perfil autorizado, normalmente MASTER.",
+      example:"Exemplo: cadastrar uma empresa de HVAC e depois vincular o técnico responsável ao respectivo ID Prestador."
+    },
+    en:{
+      title:"🏢 Service Providers",
+      purpose:"Manages service-provider companies and the operational rules inherited by PRESTADOR users.",
+      when:"Use this when registering a new maintenance company or updating its information and permissions.",
+      steps:[
+        "Locate an existing provider or click New Provider.",
+        "Complete company and contact information.",
+        "Review operational rules.",
+        "Save the changes.",
+        "Link PRESTADOR users to the corresponding company."
+      ],
+      rules:"Provider configuration affects the scope of linked users. Make changes carefully to avoid unintentionally expanding access.",
+      access:"Administrative routine available to the authorized profile, normally MASTER.",
+      example:"Example: register an HVAC contractor and then link the responsible technician to its Service Provider ID."
+    }
+  },
+
+  company:{
+    pt:{
+      title:"⚙️ Configuração da Empresa",
+      purpose:"Mantém os dados institucionais e parâmetros gerais desta implantação do QRManut.",
+      when:"Use para atualizar nome da empresa, e-mails institucionais, nome do sistema, cores, fuso horário e URL principal.",
+      steps:[
+        "Revise os dados institucionais.",
+        "Atualize somente os campos necessários.",
+        "Confira especialmente e-mails, fuso horário e URL.",
+        "Salve a configuração.",
+        "Atualize a página quando necessário para conferir a identidade visual."
+      ],
+      rules:"Esta é uma configuração global da implantação e não deve ser alterada por escola. Mudanças incorretas podem afetar comunicações e identidade do sistema.",
+      access:"Rotina administrativa do perfil MASTER.",
+      example:"Exemplo: atualizar o e-mail de relatórios ou o nome exibido da implantação."
+    },
+    en:{
+      title:"⚙️ Company Configuration",
+      purpose:"Maintains institutional information and general settings for this QRManut deployment.",
+      when:"Use this to update company name, institutional emails, system name, colors, time zone, and main URL.",
+      steps:[
+        "Review institutional information.",
+        "Update only the required fields.",
+        "Pay special attention to emails, time zone, and URL.",
+        "Save the configuration.",
+        "Refresh when necessary to verify branding changes."
+      ],
+      rules:"This is a global deployment configuration and is not school-specific. Incorrect changes may affect communications and system identity.",
+      access:"MASTER administrative routine.",
+      example:"Example: update the reports email address or the display name of the deployment."
+    }
+  }
+};
+
+const QR_ROUTINE_HELP_MAP_7631 = [
+  ["searchArea","search"],
+  ["pendingArea","pending"],
+  ["occurrenceReportArea","occurrenceReport"],
+  ["preventiveControlArea","preventive"],
+  ["documentsArea","documents"],
+  ["occurrenceCatalogArea","catalog"],
+  ["maintenancePendingArea","maintenancePending"],
+  ["assetManagementPanel","assets"],
+  ["documentUploadArea","upload"],
+  ["usersArea","users"],
+  ["auditArea","audit"],
+  ["providersAdminArea","providers"],
+  ["companyArea","company"]
+];
+
+let qrCurrentHelpKey7631="";
+
+function qrHelpLocale7631(){
+  return qrLanguage==="en-US"?"en":"pt";
+}
+
+function ensureRoutineHelpModal7631(){
+  if(document.getElementById("qrRoutineHelpModal7631"))return;
+
+  const modal=document.createElement("div");
+  modal.id="qrRoutineHelpModal7631";
+  modal.className="qr-help-modal";
+  modal.setAttribute("role","dialog");
+  modal.setAttribute("aria-modal","true");
+
+  modal.innerHTML=`
+    <div class="qr-help-box">
+      <div class="qr-help-head">
+        <div>
+          <h2 id="qrHelpTitle7631" class="qr-help-title"></h2>
+          <div id="qrHelpSubtitle7631" class="qr-help-subtitle"></div>
+        </div>
+        <button id="qrHelpClose7631" class="qr-help-close" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="qrHelpBody7631" class="qr-help-body"></div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const close=()=>closeRoutineHelp7631();
+
+  document.getElementById("qrHelpClose7631").onclick=close;
+
+  modal.addEventListener("click",e=>{
+    if(e.target===modal)close();
+  });
+
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape" && modal.classList.contains("open"))close();
+  });
+}
+
+function openRoutineHelp7631(key){
+  const entry=QR_ROUTINE_HELP_7631[key];
+  if(!entry)return;
+
+  ensureRoutineHelpModal7631();
+
+  qrCurrentHelpKey7631=key;
+
+  const lang=qrHelpLocale7631();
+  const h=entry[lang]||entry.en||entry.pt;
+
+  const sectionLabels=lang==="en"
+    ?{
+      purpose:"What this screen does",
+      when:"When to use it",
+      steps:"How to use it",
+      rules:"Important rules",
+      access:"Who can access it",
+      example:"Example"
+    }
+    :{
+      purpose:"O que esta tela faz",
+      when:"Quando utilizar",
+      steps:"Como utilizar",
+      rules:"Regras importantes",
+      access:"Quem pode acessar",
+      example:"Exemplo"
+    };
+
+  document.getElementById("qrHelpTitle7631").textContent=h.title;
+  document.getElementById("qrHelpSubtitle7631").textContent=
+    lang==="en"
+      ?"Contextual help for this QRmanutUSA routine."
+      :"Ajuda contextual desta rotina do QRmanutUSA.";
+
+  document.getElementById("qrHelpClose7631").setAttribute(
+    "aria-label",
+    lang==="en"?"Close help":"Fechar ajuda"
+  );
+
+  document.getElementById("qrHelpBody7631").innerHTML=`
+    <div class="qr-help-section">
+      <h3>${esc(sectionLabels.purpose)}</h3>
+      <p>${esc(h.purpose)}</p>
+    </div>
+
+    <div class="qr-help-section">
+      <h3>${esc(sectionLabels.when)}</h3>
+      <p>${esc(h.when)}</p>
+    </div>
+
+    <div class="qr-help-section">
+      <h3>${esc(sectionLabels.steps)}</h3>
+      <ol class="qr-help-steps">
+        ${h.steps.map(step=>`<li>${esc(step)}</li>`).join("")}
+      </ol>
+    </div>
+
+    <div class="qr-help-section">
+      <h3>${esc(sectionLabels.rules)}</h3>
+      <p>${esc(h.rules)}</p>
+    </div>
+
+    <div class="qr-help-section">
+      <h3>${esc(sectionLabels.access)}</h3>
+      <p>${esc(h.access)}</p>
+    </div>
+
+    <div class="qr-help-section">
+      <h3>${esc(sectionLabels.example)}</h3>
+      <div class="qr-help-example">${esc(h.example)}</div>
+    </div>
+  `;
+
+  document.getElementById("qrRoutineHelpModal7631").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+
+function closeRoutineHelp7631(){
+  const modal=document.getElementById("qrRoutineHelpModal7631");
+  if(modal)modal.classList.remove("open");
+  document.body.style.overflow="";
+  qrCurrentHelpKey7631="";
+}
+
+function refreshRoutineHelpButtons7631(){
+  const en=qrLanguage==="en-US";
+
+  document.querySelectorAll(".routine-help-button[data-help-key]").forEach(btn=>{
+    btn.textContent=en?"? Help":"? Ajuda";
+    btn.setAttribute(
+      "aria-label",
+      en?"Open help for this routine":"Abrir ajuda desta rotina"
+    );
+  });
+
+  if(
+    qrCurrentHelpKey7631 &&
+    document.getElementById("qrRoutineHelpModal7631")?.classList.contains("open")
+  ){
+    openRoutineHelp7631(qrCurrentHelpKey7631);
+  }
+}
+
+function installRoutineHelp7631(){
+  ensureRoutineHelpModal7631();
+
+  QR_ROUTINE_HELP_MAP_7631.forEach(([areaId,key])=>{
+    const area=document.getElementById(areaId);
+    if(!area)return;
+
+    const card=area.querySelector(".card");
+    if(!card)return;
+
+    if(card.querySelector(`.routine-help-button[data-help-key="${key}"]`))return;
+
+    const bar=document.createElement("div");
+    bar.className="routine-help-bar";
+
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.className="routine-help-button";
+    btn.dataset.helpKey=key;
+
+    btn.onclick=()=>openRoutineHelp7631(key);
+
+    bar.appendChild(btn);
+    card.insertBefore(bar,card.firstChild);
+  });
+
+  refreshRoutineHelpButtons7631();
+}
+
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",installRoutineHelp7631);
+}else{
+  installRoutineHelp7631();
+}
+
+// QRManut USA 7.6.3.1 - Contextual Help.
 </script>
 
 </body>
