@@ -735,6 +735,302 @@ html,body{max-width:100%;overflow-x:hidden}
   font-weight:800;
 }
 
+
+/* ============================================================
+ * EXECUTIVE DASHBOARD – 7.6.6.1
+ * ============================================================ */
+
+.executive-dashboard-header{
+  margin-bottom:14px;
+}
+
+.executive-dashboard-title-row,
+.executive-dashboard-section-head,
+.executive-dashboard-detail-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.executive-dashboard-title-row h2,
+.executive-dashboard-section h3,
+.executive-dashboard-detail-head h2{
+  margin:0;
+}
+
+.executive-dashboard-filters{
+  display:grid;
+  grid-template-columns:minmax(180px,220px) minmax(150px,190px) minmax(150px,190px) 1fr;
+  gap:10px;
+  align-items:end;
+  margin-top:15px;
+}
+
+.executive-dashboard-scope-box{
+  border:1px solid #dbe5ef;
+  border-radius:10px;
+  padding:10px 12px;
+  background:#f8fafc;
+  min-height:42px;
+}
+
+.executive-dashboard-scope-box span,
+.executive-dashboard-scope-box strong{
+  display:block;
+}
+
+.executive-dashboard-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(150px,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.dashboard-kpi-card{
+  border:1px solid #dbe5ef;
+  border-radius:14px;
+  background:#fff;
+  padding:15px;
+  min-height:126px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  box-shadow:0 2px 8px rgba(24,56,88,.05);
+}
+
+button.dashboard-kpi-card{
+  width:100%;
+  text-align:left;
+  color:inherit;
+  font:inherit;
+  cursor:pointer;
+}
+
+button.dashboard-kpi-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 5px 14px rgba(24,56,88,.10);
+}
+
+.dashboard-kpi-label{
+  font-size:12px;
+  font-weight:800;
+  color:#52687d;
+  text-transform:uppercase;
+  letter-spacing:.025em;
+}
+
+.dashboard-kpi-value{
+  font-size:31px;
+  line-height:1;
+  font-weight:900;
+  margin-top:12px;
+  color:#183858;
+}
+
+.dashboard-kpi-foot{
+  margin-top:10px;
+  font-size:12px;
+  color:#6b7d8e;
+}
+
+.dashboard-kpi-alert .dashboard-kpi-value{
+  color:#a23a2a;
+}
+
+.dashboard-kpi-warning .dashboard-kpi-value{
+  color:#8a5a00;
+}
+
+.dashboard-kpi-good .dashboard-kpi-value{
+  color:#24733d;
+}
+
+.dashboard-compliance-track{
+  height:7px;
+  background:#e8eef4;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:10px;
+}
+
+.dashboard-compliance-fill{
+  height:100%;
+  background:currentColor;
+  border-radius:999px;
+}
+
+.executive-dashboard-section{
+  margin-bottom:14px;
+}
+
+.dashboard-priority-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(130px,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+
+.dashboard-priority-card{
+  border:1px solid #dbe5ef;
+  border-radius:12px;
+  background:#fff;
+  padding:13px;
+  cursor:pointer;
+  text-align:left;
+}
+
+.dashboard-priority-card:hover{
+  background:#f8fafc;
+}
+
+.dashboard-priority-count{
+  display:block;
+  font-size:25px;
+  font-weight:900;
+  margin-top:4px;
+}
+
+.dashboard-priority-critical{
+  border-left:5px solid #9f2f25;
+}
+
+.dashboard-priority-high{
+  border-left:5px solid #c87815;
+}
+
+.dashboard-priority-medium{
+  border-left:5px solid #b8951d;
+}
+
+.dashboard-priority-low{
+  border-left:5px solid #4f7c9d;
+}
+
+.dashboard-school-table,
+.dashboard-detail-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+}
+
+.dashboard-school-table th,
+.dashboard-school-table td,
+.dashboard-detail-table th,
+.dashboard-detail-table td{
+  border-bottom:1px solid #e4ebf2;
+  padding:9px 8px;
+  text-align:left;
+  vertical-align:top;
+  font-size:13px;
+}
+
+.dashboard-school-table th,
+.dashboard-detail-table th{
+  color:#52687d;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.025em;
+}
+
+.dashboard-school-name{
+  min-width:180px;
+  font-weight:800;
+}
+
+.dashboard-mini-bar{
+  height:6px;
+  border-radius:999px;
+  background:#e8eef4;
+  overflow:hidden;
+  min-width:80px;
+  margin-top:5px;
+}
+
+.dashboard-mini-bar > span{
+  display:block;
+  height:100%;
+  background:#587d9d;
+  border-radius:999px;
+}
+
+.executive-dashboard-note{
+  margin-bottom:14px;
+}
+
+.executive-dashboard-detail-box{
+  width:min(1040px,95vw);
+  max-width:1040px;
+  max-height:88vh;
+  overflow:auto;
+}
+
+.dashboard-detail-card{
+  display:none;
+  border:1px solid #dbe5ef;
+  border-radius:11px;
+  padding:11px;
+  margin-bottom:8px;
+}
+
+.dashboard-detail-card strong{
+  display:block;
+  margin-bottom:5px;
+}
+
+.dashboard-detail-meta{
+  color:#52687d;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.dashboard-empty{
+  padding:20px;
+  border:1px dashed #cbd7e2;
+  border-radius:12px;
+  text-align:center;
+  color:#6b7d8e;
+  background:#fbfcfd;
+}
+
+@media(max-width:1150px){
+  .executive-dashboard-grid{
+    grid-template-columns:repeat(3,minmax(150px,1fr));
+  }
+}
+
+@media(max-width:780px){
+  .executive-dashboard-filters{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .executive-dashboard-grid{
+    grid-template-columns:repeat(2,minmax(140px,1fr));
+  }
+
+  .dashboard-priority-grid{
+    grid-template-columns:repeat(2,minmax(130px,1fr));
+  }
+
+  .dashboard-school-table,
+  .dashboard-detail-table{
+    display:none;
+  }
+
+  .dashboard-detail-card{
+    display:block;
+  }
+}
+
+@media(max-width:520px){
+  .executive-dashboard-filters,
+  .executive-dashboard-grid,
+  .dashboard-priority-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -761,6 +1057,7 @@ html,body{max-width:100%;overflow-x:hidden}
   <div id="menuLockedCard" class="card menu-locked-card hidden"><h2>🔐 Menu Principal protegido</h2><div class="muted">A ficha do equipamento e o registro de ocorrências continuam disponíveis pelo QR Code. Para acessar a Gestão Rápida, identifique-se.</div><button id="openSystemLoginButton" class="btn btn-blue" type="button">Entrar no Menu Principal</button></div>
   <div id="mainMenuButtons" class="menu-busca">
     <button id="tabSearch" class="menu-button active">🔎 Buscar ativos</button>
+    <button id="tabExecutiveDashboard" class="menu-button hidden">📈 Dashboard Executivo</button>
     <button id="tabPending" class="menu-button">⚠️ OCs pendentes</button>
     <button id="tabOccurrenceReport" class="menu-button reports">📊 Relatório de OCs</button>
     <button id="tabPreventive" class="menu-button preventive">🛠️ Status das Preventivas</button>
@@ -777,6 +1074,84 @@ html,body{max-width:100%;overflow-x:hidden}
     <button id="tabProvidersAdmin" class="menu-button providers-admin hidden">🏢 Prestadores</button>
     <button id="tabCompany" class="menu-button company hidden">⚙️ Empresa</button>
   </div>
+
+  <div id="executiveDashboardArea" class="hidden">
+    <div class="card executive-dashboard-header">
+      <div class="back-asset-wrap">
+        <button id="executiveDashboardBackMenu" class="back-asset-btn">← Back to Main Menu</button>
+      </div>
+
+      <div class="executive-dashboard-title-row">
+        <div>
+          <h2 id="executiveDashboardTitle">📈 Executive Dashboard</h2>
+          <div id="executiveDashboardSubtitle" class="muted">
+            Management overview of work orders, preventive maintenance and maintenance risks.
+          </div>
+        </div>
+        <button id="executiveDashboardRefresh" class="btn btn-blue" type="button">↻ Refresh</button>
+      </div>
+
+      <div class="executive-dashboard-filters">
+        <label id="executiveDashboardPeriodLabel">
+          Period
+          <select id="executiveDashboardPeriod">
+            <option value="month">Current Month</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+
+        <label id="executiveDashboardStartLabel" class="dashboard-custom-date hidden">
+          Start Date
+          <input id="executiveDashboardStart" type="date">
+        </label>
+
+        <label id="executiveDashboardEndLabel" class="dashboard-custom-date hidden">
+          End Date
+          <input id="executiveDashboardEnd" type="date">
+        </label>
+
+        <div class="executive-dashboard-scope-box">
+          <span id="executiveDashboardScopeLabel" class="muted">Scope</span>
+          <strong id="executiveDashboardScope">—</strong>
+        </div>
+      </div>
+
+      <div id="executiveDashboardStatus" class="muted" style="margin-top:12px"></div>
+    </div>
+
+    <div id="executiveDashboardKpis" class="executive-dashboard-grid"></div>
+
+    <div class="card executive-dashboard-section">
+      <div class="executive-dashboard-section-head">
+        <div>
+          <h3 id="executiveDashboardPriorityTitle">Pending Actions by Priority</h3>
+          <div id="executiveDashboardPriorityHelp" class="muted">
+            Open actions requiring maintenance follow-up.
+          </div>
+        </div>
+      </div>
+      <div id="executiveDashboardPriorities" class="dashboard-priority-grid"></div>
+    </div>
+
+    <div id="executiveDashboardComparisonCard" class="card executive-dashboard-section hidden">
+      <div class="executive-dashboard-section-head">
+        <div>
+          <h3 id="executiveDashboardComparisonTitle">School Performance</h3>
+          <div id="executiveDashboardComparisonHelp" class="muted">
+            Comparison is displayed when MASTER selects All Schools.
+          </div>
+        </div>
+      </div>
+      <div id="executiveDashboardComparison"></div>
+    </div>
+
+    <div class="card executive-dashboard-note">
+      <div id="executiveDashboardMethodNote" class="muted"></div>
+    </div>
+  </div>
+
   <div id="searchArea">
     <div id="backAssetWrap" class="back-asset-wrap hidden"><button id="backAssetButton" class="back-asset-btn">← Voltar ao equipamento</button></div>
     <div class="card">
@@ -1303,6 +1678,26 @@ html,body{max-width:100%;overflow-x:hidden}
   </div>
 </div>
 
+
+<div id="executiveDashboardDetailModal" class="modal">
+  <div class="modal-box executive-dashboard-detail-box">
+    <div class="executive-dashboard-detail-head">
+      <div>
+        <h2 id="executiveDashboardDetailTitle">Dashboard Details</h2>
+        <div id="executiveDashboardDetailSubtitle" class="muted"></div>
+      </div>
+      <button id="executiveDashboardDetailCloseTop" type="button" class="btn btn-secondary">Close</button>
+    </div>
+
+    <div id="executiveDashboardDetailStatus" class="muted" style="margin-top:12px"></div>
+    <div id="executiveDashboardDetailList" style="margin-top:12px"></div>
+
+    <div class="modal-actions">
+      <button id="executiveDashboardDetailClose" class="btn btn-secondary">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="systemLoginModal" class="modal"><div class="modal-box"><h2>🔐 Acesso ao QRManut</h2><div class="system-login-note">O acesso ao Menu Principal é individual e controlado por perfil e escopo.</div><label>Usuário ou e-mail<input id="systemUsername" autocomplete="username"></label><label>Senha<div class="password-wrap"><input id="systemPassword" type="password" autocomplete="current-password"><button type="button" class="password-toggle" data-password-target="systemPassword" aria-label="Mostrar senha" title="Mostrar senha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></button></div></label><button id="forgotPasswordButton" class="auth-link" type="button">Esqueci minha senha</button><div id="systemLoginMessage" class="message"></div><div class="modal-actions"><button id="cancelSystemLogin" class="btn btn-secondary">Cancelar</button><button id="sendSystemLogin" class="btn btn-blue">Entrar</button></div></div></div>
 
 <div id="forgotPasswordModal" class="modal"><div class="modal-box"><h2>🔑 Recuperar senha</h2><div class="muted">Informe seu usuário ou e-mail. Se o cadastro existir, o QRManut enviará as instruções.</div><label>Usuário ou e-mail<input id="recoveryIdentifier"></label><div id="recoveryMessage" class="message"></div><div class="modal-actions"><button id="cancelRecovery" class="btn btn-secondary">Cancelar</button><button id="sendRecovery" class="btn btn-blue">Enviar instruções</button></div></div></div>
@@ -1456,7 +1851,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.6.0</div>
+<div class="footer">QRManut USA • Version 7.6.6.1</div>
 </div>
 <script>
 /* ============================================================
@@ -1468,6 +1863,9 @@ html,body{max-width:100%;overflow-x:hidden}
 const API_URL="https://script.google.com/macros/s/AKfycbw3LRRcmSLHN71jZvV1odXk_ySncmjs6F_Sfofcdz86jludpL6_7rwbSkdjwB5DKTl7ig/exec";
 const TOKEN="";const SYSTEM_SESSION_KEY="qrmanut_system_session";const RESPONSIBLE_KEY="qrmanut_responsavel";const PREVENTIVE_SESSION_KEY="qrmanut_preventive_session";const ORIGIN_ASSET_KEY="qrmanut_origin_asset";const MAX_DIM=1280;const QUALITY=.72;
 let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[];
+let executiveDashboardData7661=null;
+let executiveDashboardLoading7661=false;
+let executiveDashboardDetailKind7661="";
 let preventiveChecklistData7640=null;
 let preventiveChecklistAdminData7640=null;
 let preventiveChecklistAdminEditing7640=null;
@@ -1856,6 +2254,11 @@ function resetSchoolScopedData7622(){
 async function refreshCurrentSchoolScopedView7622(){
   resetSchoolScopedData7622();
 
+  if(!$("executiveDashboardArea").classList.contains("hidden")){
+    await loadExecutiveDashboard7661(true);
+    return;
+  }
+
   if(!$("pendingArea").classList.contains("hidden")){
     await loadPendingFilters();
     await loadPending();
@@ -1966,7 +2369,7 @@ async function changeGlobalSchoolScope7622(requestedSchoolId){
   }
 }
 
-function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement")}
+function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabExecutiveDashboard"):hide("tabExecutiveDashboard")}
 function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
@@ -1996,7 +2399,7 @@ async function requirePreventiveLogin(nextAction,provider){
 }
 function processPhoto(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>MAX_DIM||h>MAX_DIM){if(w>h){h=Math.round(h*MAX_DIM/w);w=MAX_DIM}else{w=Math.round(w*MAX_DIM/h);h=MAX_DIM}}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);const url=c.toDataURL("image/jpeg",QUALITY);resolve({base64:url.split(",")[1],dataUrl:url,mime:"image/jpeg",name:"foto_"+Date.now()+".jpg"})};img.src=e.target.result};reader.onerror=reject;reader.readAsDataURL(file)})}
 function setupSignatureCanvas(){const c=$("signatureCanvas"),rect=c.getBoundingClientRect(),ratio=window.devicePixelRatio||1;c.width=Math.floor(rect.width*ratio);c.height=Math.floor(180*ratio);signatureCtx=c.getContext("2d");signatureCtx.scale(ratio,ratio);signatureCtx.lineWidth=2;signatureCtx.lineCap="round";signatureCtx.lineJoin="round";clearSignatureCanvas()}function clearSignatureCanvas(){const c=$("signatureCanvas");if(!signatureCtx)return;signatureCtx.save();signatureCtx.setTransform(1,0,0,1,0,0);signatureCtx.fillStyle="#fff";signatureCtx.fillRect(0,0,c.width,c.height);signatureCtx.restore();signatureDirty=false}function signaturePoint(e){const r=$("signatureCanvas").getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}function signatureStart(e){e.preventDefault();signatureDrawing=true;const p=signaturePoint(e);signatureCtx.beginPath();signatureCtx.moveTo(p.x,p.y);signatureDirty=true}function signatureMove(e){if(!signatureDrawing)return;e.preventDefault();const p=signaturePoint(e);signatureCtx.lineTo(p.x,p.y);signatureCtx.stroke()}function signatureEnd(){signatureDrawing=false}function getSignatureData(){if(!signatureDirty)return null;const u=$("signatureCanvas").toDataURL("image/png");return{base64:u.split(",")[1],mime:"image/png"}}
-function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel","schoolsAdminArea"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement","tabSchoolsAdmin"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
+function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel","schoolsAdminArea","executiveDashboardArea"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabExecutiveDashboard","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement","tabSchoolsAdmin"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
 async function showAuditTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode consultar a auditoria.");return}clearTabs();$("tabAudit").classList.add("active");showOnly("auditArea");setDefaultAuditDates();await loadAuditFilters();await loadAudit()}
 
 function isoDateLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -5083,6 +5486,7 @@ let qrLanguage="en-US";
 const QR_TEXT={
   "pt-BR":{
     tabSearch:"🔎 Buscar ativos",
+    tabExecutiveDashboard:"📈 Dashboard Executivo",
     tabPending:"⚠️ OCs Pendentes",
     tabOccurrenceReport:"📊 Relatório de OCs",
     tabPreventive:"🛠️ Status das Preventivas",
@@ -5127,6 +5531,7 @@ const QR_TEXT={
   },
   "en-US":{
     tabSearch:"🔎 Search Assets",
+    tabExecutiveDashboard:"📈 Executive Dashboard",
     tabPending:"⚠️ Pending Work Orders",
     tabOccurrenceReport:"📊 Work Order Report",
     tabPreventive:"🛠️ Preventive Maintenance Status",
@@ -6242,6 +6647,10 @@ function qrApplyLanguage(lang){
   qrTranslateRoutineScreens();
   qrRefreshLocalizedDateControls();
 
+  if($("executiveDashboardArea")){
+    applyExecutiveDashboardLanguage7661();
+  }
+
   // Headings/labels that have no functional event attached.
   const safeText=[
     ["#systemLoginModal h2","🔐 Acesso ao QRManut","🔐 QRManut Access"],
@@ -6415,7 +6824,840 @@ $("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgo
 $("globalSchoolSelect").onchange=function(){
   const schoolId=captureSchoolSelection7626(this);
   schoolScopeUpdatePromise7625=changeGlobalSchoolScope7622(schoolId);
-};$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+};
+/* ============================================================
+ * EXECUTIVE DASHBOARD – 7.6.6.1
+ * ============================================================ */
+
+function dashT7661(pt,en){
+  return qrLanguage==="en-US"?en:pt;
+}
+
+function dashboardDate7661(v){
+  if(!v)return "—";
+  const d=new Date(v);
+  if(Number.isNaN(d.getTime()))return String(v);
+
+  return new Intl.DateTimeFormat(
+    qrLanguage==="en-US"?"en-US":"pt-BR",
+    {dateStyle:"medium"}
+  ).format(d);
+}
+
+function dashboardDateTime7661(v){
+  if(!v)return "—";
+  const d=new Date(v);
+  if(Number.isNaN(d.getTime()))return String(v);
+
+  return new Intl.DateTimeFormat(
+    qrLanguage==="en-US"?"en-US":"pt-BR",
+    {dateStyle:"short",timeStyle:"short"}
+  ).format(d);
+}
+
+function dashboardCompetence7661(v){
+  const m=String(v||"").match(/^(\d{4})-(\d{2})$/);
+  if(!m)return v||"—";
+
+  const d=new Date(Number(m[1]),Number(m[2])-1,1,12);
+
+  return new Intl.DateTimeFormat(
+    qrLanguage==="en-US"?"en-US":"pt-BR",
+    {month:"short",year:"numeric"}
+  ).format(d);
+}
+
+function dashboardHours7661(v){
+  if(v===null||v===undefined||v==="")return "—";
+  const h=Number(v)||0;
+
+  if(h>=48){
+    const days=h/24;
+    return `${days.toFixed(1)} ${dashT7661("dias","days")}`;
+  }
+
+  return `${h.toFixed(1)} h`;
+}
+
+function dashboardPeriodParams7661(){
+  const period=$("executiveDashboardPeriod").value||"month";
+
+  return {
+    period,
+    startDate:period==="custom"?$("executiveDashboardStart").value:"",
+    endDate:period==="custom"?$("executiveDashboardEnd").value:""
+  };
+}
+
+function setDashboardDefaultDates7661(){
+  if($("executiveDashboardStart").value&&$("executiveDashboardEnd").value)return;
+
+  const end=new Date();
+  const start=new Date(end.getFullYear(),end.getMonth(),1);
+
+  $("executiveDashboardStart").value=isoDateLocal(start);
+  $("executiveDashboardEnd").value=isoDateLocal(end);
+}
+
+function toggleDashboardCustomDates7661(){
+  const custom=$("executiveDashboardPeriod").value==="custom";
+
+  document.querySelectorAll(".dashboard-custom-date").forEach(el=>{
+    el.classList.toggle("hidden",!custom);
+  });
+
+  if(custom)setDashboardDefaultDates7661();
+}
+
+function applyExecutiveDashboardLanguage7661(){
+  if(!$("executiveDashboardArea"))return;
+
+  $("executiveDashboardTitle").textContent=
+    dashT7661("📈 Dashboard Executivo","📈 Executive Dashboard");
+
+  $("executiveDashboardSubtitle").textContent=
+    dashT7661(
+      "Visão gerencial de OCs, preventivas e riscos de manutenção.",
+      "Management overview of work orders, preventive maintenance and maintenance risks."
+    );
+
+  $("executiveDashboardBackMenu").textContent=
+    dashT7661("← Voltar ao Menu Principal","← Back to Main Menu");
+
+  $("executiveDashboardRefresh").textContent=
+    dashT7661("↻ Atualizar","↻ Refresh");
+
+  $("executiveDashboardPeriodLabel").firstChild.nodeValue=
+    dashT7661("Período ","Period ");
+
+  $("executiveDashboardStartLabel").firstChild.nodeValue=
+    dashT7661("Data inicial ","Start Date ");
+
+  $("executiveDashboardEndLabel").firstChild.nodeValue=
+    dashT7661("Data final ","End Date ");
+
+  $("executiveDashboardScopeLabel").textContent=
+    dashT7661("Escopo","Scope");
+
+  const period=$("executiveDashboardPeriod");
+  const current=period.value;
+
+  period.innerHTML=[
+    ["month",dashT7661("Mês atual","Current Month")],
+    ["30",dashT7661("Últimos 30 dias","Last 30 Days")],
+    ["90",dashT7661("Últimos 90 dias","Last 90 Days")],
+    ["custom",dashT7661("Personalizado","Custom")]
+  ].map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+
+  period.value=current;
+
+  $("executiveDashboardPriorityTitle").textContent=
+    dashT7661(
+      "Pendências por Prioridade",
+      "Pending Actions by Priority"
+    );
+
+  $("executiveDashboardPriorityHelp").textContent=
+    dashT7661(
+      "Providências abertas que exigem acompanhamento da manutenção.",
+      "Open actions requiring maintenance follow-up."
+    );
+
+  $("executiveDashboardComparisonTitle").textContent=
+    dashT7661(
+      "Desempenho por Colégio",
+      "School Performance"
+    );
+
+  $("executiveDashboardComparisonHelp").textContent=
+    dashT7661(
+      "A comparação aparece quando o MASTER seleciona Todos os colégios.",
+      "Comparison is displayed when MASTER selects All Schools."
+    );
+
+  $("executiveDashboardDetailClose").textContent=
+    dashT7661("Fechar","Close");
+
+  $("executiveDashboardDetailCloseTop").textContent=
+    dashT7661("Fechar","Close");
+
+  if(executiveDashboardData7661){
+    renderExecutiveDashboard7661();
+  }
+}
+
+async function showExecutiveDashboardTab7661(){
+  if(!["MASTER","GESTOR"].includes(systemSession?.perfil||"")){
+    return alert(
+      dashT7661(
+        "Somente MASTER ou GESTOR pode acessar o Dashboard Executivo.",
+        "Only MASTER or MANAGER can access the Executive Dashboard."
+      )
+    );
+  }
+
+  clearTabs();
+  $("tabExecutiveDashboard").classList.add("active");
+  showOnly("executiveDashboardArea");
+
+  applyExecutiveDashboardLanguage7661();
+  toggleDashboardCustomDates7661();
+
+  await loadExecutiveDashboard7661(false);
+}
+
+async function loadExecutiveDashboard7661(forceRefresh){
+  if(executiveDashboardLoading7661)return;
+
+  const params=dashboardPeriodParams7661();
+
+  if(params.period==="custom"&&(!params.startDate||!params.endDate)){
+    $("executiveDashboardStatus").textContent=
+      dashT7661(
+        "Informe a data inicial e final.",
+        "Enter the start and end dates."
+      );
+    return;
+  }
+
+  executiveDashboardLoading7661=true;
+
+  $("executiveDashboardRefresh").disabled=true;
+  $("executiveDashboardRefresh").textContent=
+    dashT7661("Atualizando...","Refreshing...");
+
+  $("executiveDashboardStatus").textContent=
+    dashT7661(
+      "Carregando indicadores executivos...",
+      "Loading executive indicators..."
+    );
+
+  try{
+    const r=await menuApi({
+      action:"executivedashboardcore",
+      ...params,
+      refresh:forceRefresh?"1":"0"
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        r.error||
+        dashT7661(
+          "Não foi possível carregar o dashboard.",
+          "Unable to load the dashboard."
+        )
+      );
+    }
+
+    executiveDashboardData7661=r.data||null;
+
+    renderExecutiveDashboard7661();
+
+    const generated=executiveDashboardData7661?.generatedAt;
+
+    $("executiveDashboardStatus").textContent=
+      dashT7661(
+        `Atualizado em ${dashboardDateTime7661(generated)}${r.performanceMs!==undefined?` • ${r.performanceMs} ms`:""}`,
+        `Updated ${dashboardDateTime7661(generated)}${r.performanceMs!==undefined?` • ${r.performanceMs} ms`:""}`
+      );
+
+  }catch(e){
+    executiveDashboardData7661=null;
+    $("executiveDashboardKpis").innerHTML="";
+    $("executiveDashboardPriorities").innerHTML="";
+    $("executiveDashboardComparison").innerHTML="";
+    $("executiveDashboardComparisonCard").classList.add("hidden");
+    $("executiveDashboardStatus").textContent=e.message||String(e);
+  }finally{
+    executiveDashboardLoading7661=false;
+    $("executiveDashboardRefresh").disabled=false;
+    $("executiveDashboardRefresh").textContent=
+      dashT7661("↻ Atualizar","↻ Refresh");
+  }
+}
+
+function dashboardKpiCard7661({
+  key,
+  label,
+  value,
+  foot,
+  css="",
+  progress=null
+}){
+  const clickable=!!key;
+
+  return `<${clickable?"button":"div"}
+    ${clickable?`type="button" data-dashboard-detail="${esc(key)}"`:""}
+    class="dashboard-kpi-card ${css}">
+      <div>
+        <div class="dashboard-kpi-label">${esc(label)}</div>
+        <div class="dashboard-kpi-value">${esc(String(value))}</div>
+        ${progress===null?"":`
+          <div class="dashboard-compliance-track">
+            <div class="dashboard-compliance-fill" style="width:${Math.max(0,Math.min(100,Number(progress)||0))}%"></div>
+          </div>
+        `}
+      </div>
+      <div class="dashboard-kpi-foot">
+        ${esc(foot||"")}
+        ${clickable?` • ${dashT7661("clique para detalhes","click for details")}`:""}
+      </div>
+    </${clickable?"button":"div"}>`;
+}
+
+function renderExecutiveDashboard7661(){
+  const d=executiveDashboardData7661;
+  if(!d)return;
+
+  const m=d.metrics||{};
+  const scope=d.scope||{};
+
+  $("executiveDashboardScope").textContent=scope.allSchools
+    ?dashT7661("Todos os colégios","All Schools")
+    :(scope.schoolName||scope.schoolId||"—");
+
+  const compliance=Number(m.pmCompliancePct||0);
+
+  const complianceCss=
+    compliance>=90
+      ?"dashboard-kpi-good"
+      :(compliance>=75
+        ?"dashboard-kpi-warning"
+        :"dashboard-kpi-alert");
+
+  $("executiveDashboardKpis").innerHTML=[
+    dashboardKpiCard7661({
+      key:"openWorkOrders",
+      label:dashT7661("OCs abertas","Open Work Orders"),
+      value:Number(m.openWorkOrders||0),
+      foot:dashT7661("Posição atual","Current status")
+    }),
+
+    dashboardKpiCard7661({
+      key:"overdueWorkOrders",
+      label:dashT7661("OCs atrasadas","Overdue Work Orders"),
+      value:Number(m.overdueWorkOrders||0),
+      foot:dashT7661(
+        `SLA: ${Number(d.slaWorkOrderDays||7)} dias`,
+        `SLA: ${Number(d.slaWorkOrderDays||7)} days`
+      ),
+      css:Number(m.overdueWorkOrders||0)>0?"dashboard-kpi-alert":"dashboard-kpi-good"
+    }),
+
+    dashboardKpiCard7661({
+      key:"completedWorkOrders",
+      label:dashT7661("OCs concluídas","Completed Work Orders"),
+      value:Number(m.completedWorkOrders||0),
+      foot:dashT7661("No período","In selected period"),
+      css:"dashboard-kpi-good"
+    }),
+
+    dashboardKpiCard7661({
+      key:"averageCompletionHours",
+      label:dashT7661("Tempo médio de conclusão","Average Completion Time"),
+      value:dashboardHours7661(m.averageCompletionHours),
+      foot:dashT7661("OCs concluídas no período","Completed WOs in selected period")
+    }),
+
+    dashboardKpiCard7661({
+      key:"scheduledPreventives",
+      label:dashT7661("Preventivas programadas","Scheduled PMs"),
+      value:Number(m.scheduledPreventives||0),
+      foot:dashT7661("No período","In selected period")
+    }),
+
+    dashboardKpiCard7661({
+      key:"completedPreventives",
+      label:dashT7661("Preventivas realizadas","Completed PMs"),
+      value:Number(m.completedPreventives||0),
+      foot:dashT7661("No período","In selected period"),
+      css:"dashboard-kpi-good"
+    }),
+
+    dashboardKpiCard7661({
+      key:"overduePreventives",
+      label:dashT7661("Preventivas vencidas","Overdue PMs"),
+      value:Number(m.overduePreventives||0),
+      foot:dashT7661("Competências anteriores não realizadas","Past due PMs"),
+      css:Number(m.overduePreventives||0)>0?"dashboard-kpi-alert":"dashboard-kpi-good"
+    }),
+
+    dashboardKpiCard7661({
+      key:"scheduledPreventives",
+      label:"PM Compliance %",
+      value:`${compliance.toFixed(1)}%`,
+      foot:dashT7661("Realizadas ÷ programadas","Completed ÷ scheduled"),
+      css:complianceCss,
+      progress:compliance
+    }),
+
+    dashboardKpiCard7661({
+      key:"pendingActions",
+      label:dashT7661("Pendências / Providências","Pending Actions"),
+      value:Number(m.pendingActions||0),
+      foot:dashT7661("Posição atual","Current status"),
+      css:Number(m.pendingActions||0)>0?"dashboard-kpi-warning":"dashboard-kpi-good"
+    }),
+
+    dashboardKpiCard7661({
+      key:"checklistNonconformities",
+      label:dashT7661("Não conformidades de checklist","Checklist Issues"),
+      value:Number(m.checklistNonconformities||0),
+      foot:dashT7661("Itens ATTENTION no período","ATTENTION items in selected period"),
+      css:Number(m.checklistNonconformities||0)>0?"dashboard-kpi-warning":"dashboard-kpi-good"
+    })
+  ].join("");
+
+  document.querySelectorAll("[data-dashboard-detail]").forEach(btn=>{
+    btn.onclick=()=>openExecutiveDashboardDetail7661(btn.dataset.dashboardDetail);
+  });
+
+  renderExecutiveDashboardPriorities7661(m.pendingByPriority||{});
+  renderExecutiveDashboardComparison7661(d.schoolComparison||[]);
+
+  const periodStart=dashboardDate7661(d.period?.start);
+  const periodEnd=dashboardDate7661(d.period?.end);
+
+  $("executiveDashboardMethodNote").textContent=
+    dashT7661(
+      `Período: ${periodStart} a ${periodEnd}. OCs abertas, atrasadas e pendências representam a posição atual. Indicadores concluídos, compliance e checklist consideram o período selecionado.`,
+      `Period: ${periodStart} to ${periodEnd}. Open/overdue work orders and pending actions represent the current status. Completed, compliance and checklist indicators use the selected period.`
+    );
+}
+
+function renderExecutiveDashboardPriorities7661(p){
+  const defs=[
+    ["critical",dashT7661("Crítica","Critical"),"dashboard-priority-critical"],
+    ["high",dashT7661("Alta","High"),"dashboard-priority-high"],
+    ["medium",dashT7661("Média","Medium"),"dashboard-priority-medium"],
+    ["low",dashT7661("Baixa","Low"),"dashboard-priority-low"]
+  ];
+
+  $("executiveDashboardPriorities").innerHTML=defs.map(([key,label,css])=>`
+    <button
+      type="button"
+      class="dashboard-priority-card ${css}"
+      data-dashboard-priority="${key}">
+      <span>${esc(label)}</span>
+      <span class="dashboard-priority-count">${Number(p[key]||0)}</span>
+    </button>
+  `).join("");
+
+  document.querySelectorAll("[data-dashboard-priority]").forEach(btn=>{
+    btn.onclick=()=>openExecutiveDashboardDetail7661(
+      "pendingActions",
+      btn.dataset.dashboardPriority
+    );
+  });
+}
+
+function renderExecutiveDashboardComparison7661(items){
+  const card=$("executiveDashboardComparisonCard");
+
+  if(!Array.isArray(items)||!items.length){
+    card.classList.add("hidden");
+    $("executiveDashboardComparison").innerHTML="";
+    return;
+  }
+
+  card.classList.remove("hidden");
+
+  const maxOpen=Math.max(1,...items.map(x=>Number(x.openWorkOrders||0)));
+
+  const table=`<div style="overflow:auto">
+    <table class="dashboard-school-table">
+      <thead>
+        <tr>
+          <th>${dashT7661("Colégio","School")}</th>
+          <th>${dashT7661("OCs abertas","Open WOs")}</th>
+          <th>${dashT7661("Atrasadas","Overdue")}</th>
+          <th>${dashT7661("Concluídas","Completed")}</th>
+          <th>PM Compliance</th>
+          <th>${dashT7661("Pendências","Pending")}</th>
+          <th>${dashT7661("Checklist","Checklist")}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map(x=>`
+          <tr>
+            <td class="dashboard-school-name">
+              ${esc(x.schoolId)} – ${esc(x.school)}
+              <div class="dashboard-mini-bar">
+                <span style="width:${Math.min(100,(Number(x.openWorkOrders||0)/maxOpen)*100)}%"></span>
+              </div>
+            </td>
+            <td>${Number(x.openWorkOrders||0)}</td>
+            <td>${Number(x.overdueWorkOrders||0)}</td>
+            <td>${Number(x.completedWorkOrders||0)}</td>
+            <td>${Number(x.pmCompliancePct||0).toFixed(1)}%</td>
+            <td>${Number(x.pendingActions||0)}</td>
+            <td>${Number(x.checklistNonconformities||0)}</td>
+            <td>
+              <button
+                class="btn btn-secondary"
+                type="button"
+                onclick="dashboardSelectSchool7661('${esc(x.schoolId)}')">
+                ${dashT7661("Visualizar","View")}
+              </button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  </div>`;
+
+  const mobile=items.map(x=>`
+    <div class="dashboard-detail-card">
+      <strong>${esc(x.schoolId)} – ${esc(x.school)}</strong>
+      <div class="dashboard-detail-meta">${dashT7661("OCs abertas","Open WOs")}: ${Number(x.openWorkOrders||0)}</div>
+      <div class="dashboard-detail-meta">${dashT7661("OCs atrasadas","Overdue WOs")}: ${Number(x.overdueWorkOrders||0)}</div>
+      <div class="dashboard-detail-meta">${dashT7661("OCs concluídas","Completed WOs")}: ${Number(x.completedWorkOrders||0)}</div>
+      <div class="dashboard-detail-meta">PM Compliance: ${Number(x.pmCompliancePct||0).toFixed(1)}%</div>
+      <div class="dashboard-detail-meta">${dashT7661("Pendências","Pending Actions")}: ${Number(x.pendingActions||0)}</div>
+      <div class="dashboard-detail-meta">${dashT7661("Checklist","Checklist Issues")}: ${Number(x.checklistNonconformities||0)}</div>
+      <button
+        class="btn btn-secondary"
+        type="button"
+        style="margin-top:9px"
+        onclick="dashboardSelectSchool7661('${esc(x.schoolId)}')">
+        ${dashT7661("Visualizar colégio","View School")}
+      </button>
+    </div>
+  `).join("");
+
+  $("executiveDashboardComparison").innerHTML=table+mobile;
+}
+
+async function dashboardSelectSchool7661(schoolId){
+  if(systemSession?.perfil!=="MASTER")return;
+  await changeGlobalSchoolScope7622(schoolId);
+}
+
+function dashboardDetailTitle7661(kind){
+  const map={
+    openWorkOrders:[
+      "OCs abertas",
+      "Open Work Orders"
+    ],
+    overdueWorkOrders:[
+      "OCs atrasadas",
+      "Overdue Work Orders"
+    ],
+    completedWorkOrders:[
+      "OCs concluídas",
+      "Completed Work Orders"
+    ],
+    averageCompletionHours:[
+      "OCs usadas no tempo médio de conclusão",
+      "Work Orders Used for Average Completion Time"
+    ],
+    scheduledPreventives:[
+      "Preventivas programadas",
+      "Scheduled Preventive Maintenance"
+    ],
+    completedPreventives:[
+      "Preventivas realizadas",
+      "Completed Preventive Maintenance"
+    ],
+    overduePreventives:[
+      "Preventivas vencidas",
+      "Overdue Preventive Maintenance"
+    ],
+    pendingActions:[
+      "Pendências / Providências",
+      "Pending Actions"
+    ],
+    checklistNonconformities:[
+      "Não conformidades de checklist",
+      "Checklist Issues"
+    ]
+  };
+
+  const x=map[kind]||["Detalhes","Details"];
+  return dashT7661(x[0],x[1]);
+}
+
+async function openExecutiveDashboardDetail7661(kind,priority){
+  executiveDashboardDetailKind7661=kind;
+
+  $("executiveDashboardDetailTitle").textContent=
+    dashboardDetailTitle7661(kind);
+
+  $("executiveDashboardDetailSubtitle").textContent="";
+  $("executiveDashboardDetailList").innerHTML="";
+  $("executiveDashboardDetailStatus").textContent=
+    dashT7661("Carregando registros...","Loading records...");
+
+  $("executiveDashboardDetailModal").style.display="flex";
+
+  try{
+    const r=await menuApi({
+      action:"executivedashboarddetails",
+      ...dashboardPeriodParams7661(),
+      kind
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        r.error||
+        dashT7661(
+          "Não foi possível carregar os registros.",
+          "Unable to load records."
+        )
+      );
+    }
+
+    const d=r.data||{};
+    let items=Array.isArray(d.items)?d.items:[];
+
+    if(kind==="pendingActions"&&priority){
+      const priorityMap={
+        critical:["critica","critical"],
+        high:["alta","high"],
+        medium:["media","medium"],
+        low:["baixa","low"]
+      };
+
+      const accepted=priorityMap[priority]||[];
+
+      items=items.filter(x=>{
+        const p=String(x.priority||"")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g,"")
+          .toLowerCase();
+
+        return accepted.includes(p);
+      });
+
+      const pLabel={
+        critical:dashT7661("Crítica","Critical"),
+        high:dashT7661("Alta","High"),
+        medium:dashT7661("Média","Medium"),
+        low:dashT7661("Baixa","Low")
+      }[priority]||"";
+
+      $("executiveDashboardDetailTitle").textContent=
+        `${dashboardDetailTitle7661(kind)} • ${pLabel}`;
+    }
+
+    $("executiveDashboardDetailSubtitle").textContent=
+      `${dashT7661("Escopo","Scope")}: ${
+        d.scope?.allSchools
+          ?dashT7661("Todos os colégios","All Schools")
+          :(d.scope?.schoolName||d.scope?.schoolId||"—")
+      }`;
+
+    $("executiveDashboardDetailStatus").textContent=
+      `${items.length} ${dashT7661("registro(s) exibido(s)","record(s) displayed")}`+
+      (d.truncated
+        ?` • ${dashT7661("lista limitada aos primeiros 500 registros","list limited to the first 500 records")}`
+        :"");
+
+    renderExecutiveDashboardDetails7661(kind,items);
+
+  }catch(e){
+    $("executiveDashboardDetailStatus").textContent=e.message||String(e);
+  }
+}
+
+function closeExecutiveDashboardDetail7661(){
+  $("executiveDashboardDetailModal").style.display="none";
+}
+
+function renderExecutiveDashboardDetails7661(kind,items){
+  if(!items.length){
+    $("executiveDashboardDetailList").innerHTML=
+      `<div class="dashboard-empty">${
+        dashT7661(
+          "Nenhum registro encontrado para este indicador.",
+          "No records found for this indicator."
+        )
+      }</div>`;
+    return;
+  }
+
+  if(items[0].recordType==="WORK_ORDER"){
+    const table=`<div style="overflow:auto">
+      <table class="dashboard-detail-table">
+        <thead>
+          <tr>
+            <th>OC</th>
+            <th>${dashT7661("Colégio","School")}</th>
+            <th>${dashT7661("Ativo","Asset")}</th>
+            <th>${dashT7661("Abertura","Opened")}</th>
+            <th>${dashT7661("Conclusão","Completed")}</th>
+            <th>Status</th>
+            <th>${dashT7661("Categoria","Category")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(x=>`
+            <tr>
+              <td><b>${esc(x.id||"")}</b></td>
+              <td>${esc(x.schoolId||"")} ${esc(x.school||"")}</td>
+              <td>${esc(x.assetId||"")} – ${esc(x.assetName||"")}</td>
+              <td>${dashboardDateTime7661(x.openedAt)}</td>
+              <td>${dashboardDateTime7661(x.completedAt)}</td>
+              <td>${esc(qrStatus7612(x.status||""))}</td>
+              <td>${esc(qrStructured7613(x.category||""))}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+    const mobile=items.map(x=>`
+      <div class="dashboard-detail-card">
+        <strong>${esc(x.id||"")} • ${esc(x.assetId||"")} – ${esc(x.assetName||"")}</strong>
+        <div class="dashboard-detail-meta">${esc(x.schoolId||"")} – ${esc(x.school||"")}</div>
+        <div class="dashboard-detail-meta">${dashT7661("Abertura","Opened")}: ${dashboardDateTime7661(x.openedAt)}</div>
+        <div class="dashboard-detail-meta">${dashT7661("Conclusão","Completed")}: ${dashboardDateTime7661(x.completedAt)}</div>
+        <div class="dashboard-detail-meta">Status: ${esc(qrStatus7612(x.status||""))}</div>
+        <div class="dashboard-detail-meta">${dashT7661("Categoria","Category")}: ${esc(qrStructured7613(x.category||""))}</div>
+        ${x.description?`<div style="margin-top:6px">${esc(x.description)}</div>`:""}
+      </div>
+    `).join("");
+
+    $("executiveDashboardDetailList").innerHTML=table+mobile;
+    return;
+  }
+
+  if(items[0].recordType==="PREVENTIVE"){
+    const statusLabel=x=>{
+      if(x==="COMPLETED")return dashT7661("Realizada","Completed");
+      if(x==="OVERDUE")return dashT7661("Vencida","Overdue");
+      return dashT7661("Programada","Scheduled");
+    };
+
+    const table=`<div style="overflow:auto">
+      <table class="dashboard-detail-table">
+        <thead>
+          <tr>
+            <th>${dashT7661("Colégio","School")}</th>
+            <th>${dashT7661("Ativo","Asset")}</th>
+            <th>${dashT7661("Competência","Period")}</th>
+            <th>Status</th>
+            <th>${dashT7661("Realizada em","Performed")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(x=>`
+            <tr>
+              <td>${esc(x.schoolId||"")} ${esc(x.school||"")}</td>
+              <td>${esc(x.assetId||"")} – ${esc(x.assetName||"")}</td>
+              <td>${esc(dashboardCompetence7661(x.competence))}</td>
+              <td>${statusLabel(x.status)}</td>
+              <td>${dashboardDateTime7661(x.performedAt)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+    const mobile=items.map(x=>`
+      <div class="dashboard-detail-card">
+        <strong>${esc(x.assetId||"")} – ${esc(x.assetName||"")}</strong>
+        <div class="dashboard-detail-meta">${esc(x.schoolId||"")} – ${esc(x.school||"")}</div>
+        <div class="dashboard-detail-meta">${dashT7661("Competência","Period")}: ${esc(dashboardCompetence7661(x.competence))}</div>
+        <div class="dashboard-detail-meta">Status: ${statusLabel(x.status)}</div>
+        <div class="dashboard-detail-meta">${dashT7661("Realizada em","Performed")}: ${dashboardDateTime7661(x.performedAt)}</div>
+      </div>
+    `).join("");
+
+    $("executiveDashboardDetailList").innerHTML=table+mobile;
+    return;
+  }
+
+  if(items[0].recordType==="PENDING_ACTION"){
+    const table=`<div style="overflow:auto">
+      <table class="dashboard-detail-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>${dashT7661("Prioridade","Priority")}</th>
+            <th>${dashT7661("Colégio","School")}</th>
+            <th>${dashT7661("Ativo","Asset")}</th>
+            <th>${dashT7661("Tipo","Type")}</th>
+            <th>Status</th>
+            <th>OC</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(x=>`
+            <tr>
+              <td><b>${esc(x.id||"")}</b></td>
+              <td>${esc(qrPriority7613(x.priority||""))}</td>
+              <td>${esc(x.schoolId||"")} ${esc(x.school||"")}</td>
+              <td>${esc(x.assetId||"")} – ${esc(x.assetName||"")}</td>
+              <td>${esc(qrPendingType7613(x.type||""))}</td>
+              <td>${esc(qrPendingStatus7613(x.status||""))}</td>
+              <td>${esc(x.workOrder||"")}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+    const mobile=items.map(x=>`
+      <div class="dashboard-detail-card">
+        <strong>${esc(x.id||"")} • ${esc(qrPriority7613(x.priority||""))}</strong>
+        <div class="dashboard-detail-meta">${esc(x.schoolId||"")} – ${esc(x.school||"")}</div>
+        <div class="dashboard-detail-meta">${esc(x.assetId||"")} – ${esc(x.assetName||"")}</div>
+        <div class="dashboard-detail-meta">${dashT7661("Tipo","Type")}: ${esc(qrPendingType7613(x.type||""))}</div>
+        <div class="dashboard-detail-meta">Status: ${esc(qrPendingStatus7613(x.status||""))}</div>
+        ${x.description?`<div style="margin-top:6px">${esc(x.description)}</div>`:""}
+      </div>
+    `).join("");
+
+    $("executiveDashboardDetailList").innerHTML=table+mobile;
+    return;
+  }
+
+  if(items[0].recordType==="CHECKLIST"){
+    const table=`<div style="overflow:auto">
+      <table class="dashboard-detail-table">
+        <thead>
+          <tr>
+            <th>${dashT7661("Data","Date")}</th>
+            <th>${dashT7661("Colégio","School")}</th>
+            <th>${dashT7661("Ativo","Asset")}</th>
+            <th>${dashT7661("Item do checklist","Checklist Item")}</th>
+            <th>${dashT7661("Observação","Note")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(x=>`
+            <tr>
+              <td>${dashboardDateTime7661(x.date)}</td>
+              <td>${esc(x.schoolId||"")} ${esc(x.school||"")}</td>
+              <td>${esc(x.assetId||"")} – ${esc(x.assetName||"")}</td>
+              <td>${esc(x.item||"")}</td>
+              <td>${esc(x.note||"")}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+    const mobile=items.map(x=>`
+      <div class="dashboard-detail-card">
+        <strong>${esc(x.assetId||"")} – ${esc(x.assetName||"")}</strong>
+        <div class="dashboard-detail-meta">${esc(x.schoolId||"")} – ${esc(x.school||"")}</div>
+        <div class="dashboard-detail-meta">${dashboardDateTime7661(x.date)}</div>
+        <div style="margin-top:6px">${esc(x.item||"")}</div>
+        ${x.note?`<div class="dashboard-detail-meta">${esc(x.note)}</div>`:""}
+      </div>
+    `).join("");
+
+    $("executiveDashboardDetailList").innerHTML=table+mobile;
+  }
+}
+
+
+$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=function(){if(currentAsset?.id)setOriginAsset(currentAsset.id);requireSystemLogin(()=>{hide("assetScreen");show("searchScreen");openMainMenu();focusBackAssetButton()})};
 $("backAssetButton").onclick=function(){const id=getOriginAsset();if(!id)return;clearOriginAsset();location.href="?id="+encodeURIComponent(id)};
 $("occReportRefresh").onclick=loadOccurrenceReport;$("occReportPdf").onclick=generateOccurrenceReportPdf;["occReportStart","occReportEnd","occReportProvider","occReportCategory","occReportComponent","occReportFloor","occReportLocation"].forEach(id=>$(id).onchange=markOccurrenceReportDirty);$("controlRefresh").onclick=refreshPreventiveControl;$("controlCompetence").onchange=loadPreventiveControl;$("controlProvider").onchange=()=>{if(["MASTER","GESTOR"].includes(systemSession?.perfil))loadPreventiveControl();else renderControlList()};$("controlAll").onclick=()=>setControlMode("all");$("controlPending").onclick=()=>setControlMode("pending");$("controlDone").onclick=()=>setControlMode("done");$("sendMonthlyReport").onclick=sendMonthlyPreventiveReport;
@@ -7536,6 +8778,39 @@ const QR_ROUTINE_HELP_7631 = {
     }
   },
 
+  executiveDashboard:{
+    pt:{
+      title:"📈 Dashboard Executivo",
+      purpose:"Consolida indicadores de OCs, preventivas, pendências e checklists para apoiar a gestão da manutenção.",
+      when:"Use para acompanhar a situação atual, avaliar o desempenho no período e comparar colégios quando o MASTER estiver em Todos os colégios.",
+      steps:[
+        "Selecione o Colégio / Unidade no filtro global.",
+        "Abra Dashboard Executivo.",
+        "Escolha o período desejado.",
+        "Clique em um indicador para visualizar os registros que formam o número.",
+        "Em Todos os colégios, utilize a comparação para identificar diferenças entre unidades."
+      ],
+      rules:"MASTER pode visualizar um colégio ou Todos os colégios. GESTOR permanece restrito ao colégio permitido pelo seu perfil. OCs abertas, atrasadas e pendências representam a posição atual; os demais indicadores respeitam o período selecionado.",
+      access:"Disponível para MASTER e GESTOR.",
+      example:"Exemplo: clicar em OCs atrasadas exibe as OCs abertas que ultrapassaram o SLA configurado."
+    },
+    en:{
+      title:"📈 Executive Dashboard",
+      purpose:"Consolidates work order, preventive maintenance, pending action, and checklist indicators for maintenance management.",
+      when:"Use it to monitor current status, evaluate performance in the selected period, and compare schools when MASTER selects All Schools.",
+      steps:[
+        "Select the School / Unit in the global filter.",
+        "Open Executive Dashboard.",
+        "Choose the desired period.",
+        "Click an indicator to view the records behind the number.",
+        "Under All Schools, use the comparison to identify differences between units."
+      ],
+      rules:"MASTER can view one school or All Schools. MANAGER remains limited to the school allowed by the profile. Open/overdue WOs and pending actions represent current status; the remaining indicators follow the selected period.",
+      access:"Available to MASTER and MANAGER.",
+      example:"Example: clicking Overdue Work Orders shows open WOs that exceeded the configured SLA."
+    }
+  },
+
   company:{
     pt:{
       title:"⚙️ Configuração da Empresa",
@@ -7579,6 +8854,7 @@ const QR_ROUTINE_HELP_MAP_7631 = [
   ["documentsArea","documents"],
   ["occurrenceCatalogArea","catalog"],
   ["maintenancePendingArea","maintenancePending"],
+  ["executiveDashboardArea","executiveDashboard"],
   ["assetManagementPanel","assets"],
   ["schoolsAdminArea","schoolsAdmin"],
   ["documentUploadArea","upload"],
@@ -7787,6 +9063,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.5.1 - Asset Management School filtering fix.
 
 // QRManut USA 7.6.6.0 - Analytics core and assisted occurrence classification.
+
+// QRManut USA 7.6.6.1 - Executive Dashboard with Multi-School drill-down.
 </script>
 
 </body>
