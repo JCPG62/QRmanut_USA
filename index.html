@@ -645,6 +645,39 @@ html,body{max-width:100%;overflow-x:hidden}
   }
 }
 
+
+/* Preventive photo picker – 7.6.4.2 */
+.preventive-photo-picker{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:7px;
+}
+
+.preventive-photo-choose{
+  width:auto;
+  min-width:145px;
+  margin:0;
+  cursor:pointer;
+  text-align:center;
+}
+
+#preventivePhotoFileName{
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:640px){
+  .preventive-photo-picker{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .preventive-photo-choose{
+    width:100%;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1243,7 +1276,13 @@ html,body{max-width:100%;overflow-x:hidden}
   </select></label>
   <div class="muted" id="preventiveActionNotice">Ao salvar a preventiva, esta necessidade será registrada em Pendências / Providências e comunicada aos responsáveis.</div>
 </div>
-<label>Foto / evidência<input id="preventivePhotoInput" type="file" accept="image/*" capture="environment"></label><img id="preventivePhotoPreview" class="photo-preview">
+<label id="preventivePhotoLabel">Foto / evidência</label>
+<div class="preventive-photo-picker">
+  <input id="preventivePhotoInput" type="file" accept="image/*" capture="environment" class="photo-source-hidden">
+  <label id="preventivePhotoChooseButton" for="preventivePhotoInput" class="btn btn-secondary preventive-photo-choose">Escolher foto</label>
+  <span id="preventivePhotoFileName" class="muted">Nenhum arquivo selecionado</span>
+</div>
+<img id="preventivePhotoPreview" class="photo-preview">
 <div id="preventiveDocumentsBox" style="margin-top:14px;padding:12px;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px">
   <div id="preventiveDocumentsTitle" style="font-weight:800">📎 Documentos da preventiva (opcional)</div>
   <div id="preventiveDocumentsHelp" class="muted" style="margin-top:4px">Anexe relatório do prestador, checklist, laudo ou outra evidência em PDF.</div>
@@ -1265,7 +1304,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.4.1</div>
+<div class="footer">QRManut USA • Version 7.6.4.2</div>
 </div>
 <script>
 /* ============================================================
@@ -2339,6 +2378,32 @@ function qrYN7612(v){return v?qrT7612("Sim","Yes"):qrT7612("Não","No");}
 function qrReq7612(v){return v?qrT7612("Obrigatória","Required"):qrT7612("Opcional","Optional");}
 function qrStatus7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {"Ativo":"Active","Inativo":"Inactive","Convite pendente":"Invite pending","Pendente":"Pending","Em andamento":"In Progress","Resolvida":"Resolved"}[s]||s;}
 function qrCompetence7612(v,fallback){const m=String(v||"").match(/^(\d{4})-(\d{2})$/);if(m){const d=new Date(+m[1],+m[2]-1,1,12);return new Intl.DateTimeFormat(qrLanguage==="en-US"?"en-US":"pt-BR",{month:"long",year:"numeric"}).format(d);}if(qrLanguage!=="en-US")return fallback||v||"";let x=String(fallback||"");const M={janeiro:"January",fevereiro:"February",março:"March",abril:"April",maio:"May",junho:"June",julho:"July",agosto:"August",setembro:"September",outubro:"October",novembro:"November",dezembro:"December"};Object.keys(M).forEach(k=>x=x.replace(new RegExp(k,"ig"),M[k]));return x;}
+function qrPreventiveCompetence7642(value){
+  const raw=String(value||"").trim();
+  if(!raw)return "";
+
+  const ym=raw.match(/^(\d{4})-(\d{2})$/);
+  if(ym){
+    const d=new Date(Number(ym[1]),Number(ym[2])-1,1,12,0,0);
+    return new Intl.DateTimeFormat(
+      qrLanguage==="en-US"?"en-US":"pt-BR",
+      {month:"long",year:"numeric"}
+    ).format(d);
+  }
+
+  const parsed=new Date(raw);
+  if(!isNaN(parsed)){
+    return new Intl.DateTimeFormat(
+      qrLanguage==="en-US"?"en-US":"pt-BR",
+      {month:"long",year:"numeric"}
+    ).format(parsed);
+  }
+
+  return qrLanguage==="en-US"
+    ? qrCompetence7612("",raw)
+    : raw;
+}
+
 const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated"};
 function qrAuditAction7612(v){const s=String(v||"");return qrLanguage==="en-US"?(QR_AUDIT_EN_7612[s]||s):s;}
 function qrAuditResult7612(v){const s=String(v||"");return qrLanguage==="en-US"?({SUCESSO:"Success",FALHA:"Failed",BLOQUEADO:"Blocked"}[s]||s):s;}
@@ -2653,7 +2718,7 @@ async function loadPreventiveHistory(){
       <div class="preventive-id">${esc(item.registro)}</div>
       <div class="muted">${esc(formatDate(item.data))}</div>
       <div style="margin-top:7px">
-        <b>${t("Competência","Period")}:</b> ${esc(item.competencia)}<br>
+        <b>${t("Competência","Period")}:</b> ${esc(qrPreventiveCompetence7642(item.competencia))}<br>
         <b>${t("Prestador","Service Provider")}:</b> ${esc(item.prestador)}<br>
         <b>${t("Responsável","Responsible")}:</b> ${esc(item.responsavel)}
       </div>
@@ -2865,6 +2930,10 @@ async function openPreventive(){
   resetPreventiveDocuments7606();
   signatureDirty=false;
   $("preventivePhotoInput").value="";
+  if($("preventivePhotoFileName")){
+    $("preventivePhotoFileName").textContent=
+      qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";
+  }
   $("preventivePhotoPreview").style.display="none";
   $("preventiveMessage").className="message";
   $("preventiveAsset").textContent=currentAsset.id+" – "+currentAsset.nome_do_equipamento;
@@ -3232,7 +3301,7 @@ async function saveManage(){
     $("manageMessage").textContent=e.message;
   }
 }
-$("photoInput").onchange=async function(){if(!this.files[0]){photoData=null;$("photoPreview").style.display="none";return}photoData=await processPhoto(this.files[0]);$("photoPreview").src=photoData.dataUrl;$("photoPreview").style.display="block"};$("preventivePhotoInput").onchange=async function(){if(!this.files[0]){preventivePhotoData=null;$("preventivePhotoPreview").style.display="none";return}preventivePhotoData=await processPhoto(this.files[0]);$("preventivePhotoPreview").src=preventivePhotoData.dataUrl;$("preventivePhotoPreview").style.display="block"};$("preventiveDocumentAddButton").onclick=()=>$("preventiveDocumentInput").click();$("preventiveDocumentInput").onchange=function(){addPreventiveDocuments7606(this.files)};async function handleManageSelectedImage(file,kind){
+$("photoInput").onchange=async function(){if(!this.files[0]){photoData=null;$("photoPreview").style.display="none";return}photoData=await processPhoto(this.files[0]);$("photoPreview").src=photoData.dataUrl;$("photoPreview").style.display="block"};$("preventivePhotoInput").onchange=async function(){if(!this.files[0]){preventivePhotoData=null;if($("preventivePhotoFileName"))$("preventivePhotoFileName").textContent=qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";$("preventivePhotoPreview").style.display="none";return}if($("preventivePhotoFileName"))$("preventivePhotoFileName").textContent=this.files[0].name;preventivePhotoData=await processPhoto(this.files[0]);$("preventivePhotoPreview").src=preventivePhotoData.dataUrl;$("preventivePhotoPreview").style.display="block"};$("preventiveDocumentAddButton").onclick=()=>$("preventiveDocumentInput").click();$("preventiveDocumentInput").onchange=function(){addPreventiveDocuments7606(this.files)};async function handleManageSelectedImage(file,kind){
   if(!file)return;
 
   const isConclusion=kind==="conclusion";
@@ -5527,6 +5596,24 @@ function qrApplyLanguage(lang){
   syncUserSchoolField7620();
   if($("maintenancePendingTitle"))$("maintenancePendingTitle").textContent=qrLanguage==="en-US"?"📌 Pending Actions":"📌 Pendências / Providências";
   if($("maintenancePendingHelp"))$("maintenancePendingHelp").textContent=qrLanguage==="en-US"?"Needs identified during preventive maintenance that require follow-up.":"Necessidades identificadas durante as preventivas e que exigem alguma providência.";
+  if($("preventivePhotoLabel")){
+    $("preventivePhotoLabel").textContent=
+      qrLanguage==="en-US"?"Photo / evidence":"Foto / evidência";
+  }
+
+  if($("preventivePhotoChooseButton")){
+    $("preventivePhotoChooseButton").textContent=
+      qrLanguage==="en-US"?"Choose Photo":"Escolher foto";
+  }
+
+  if(
+    $("preventivePhotoFileName") &&
+    !$("preventivePhotoInput")?.files?.length
+  ){
+    $("preventivePhotoFileName").textContent=
+      qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";
+  }
+
   if($("preventiveChecklistAdminArea")&&!$("preventiveChecklistAdminArea").classList.contains("hidden")&&preventiveChecklistAdminData7640){
     renderPreventiveChecklistAdmin7640();
   }
@@ -6919,6 +7006,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.4.0 - Structured Preventive Maintenance Checklists.
 
 // QRManut USA 7.6.4.1 - Fix: Preventive Checklist JS moved from CSS to script.
+
+// QRManut USA 7.6.4.2 - Preventive Maintenance English text fixes.
 </script>
 
 </body>
