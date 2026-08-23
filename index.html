@@ -966,7 +966,7 @@ html,body{max-width:100%;overflow-x:hidden}
     </div>
   </div>
 
-<div id="companyArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="companyBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><h2>⚙️ Configuração da Empresa</h2><div class="muted">Dados institucionais desta implantação dedicada.</div><div class="admin-grid"><label>ID Empresa<input id="companyId"></label><label>Nome da Empresa *<input id="companyName"></label><label>Nome Fantasia<input id="companyTradeName"></label><label>Tax ID / EIN<input id="companyCnpj"></label><label>E-mail de Manutenção<input id="companyMaintenanceEmail"></label><label>E-mail Administrativo<input id="companyAdminEmail"></label><label>Nome do Sistema *<input id="companySystemName"></label><label>Cor Principal<input id="companyPrimaryColor" type="color" value="#0b315e"></label><label>Fuso Horário<input id="companyTimezone"></label><label>URL Principal<input id="companyMainUrl"></label><label>E-mail de Relatórios<input id="companyReportsEmail"></label><label>Logo (URL)<input id="companyLogo"></label><label class="full">Observações<textarea id="companyNotes" rows="4"></textarea></label></div><label class="switch-row"><input id="companyActive" type="checkbox"> Empresa ativa</label><div class="company-preview"><b>Pré-visualização</b><div id="companyPreviewName" style="margin-top:6px;font-size:1.1rem;font-weight:800"></div><img id="companyLogoPreview" class="company-logo-preview hidden"></div><div id="companyMessage" class="message"></div><div class="occ-report-actions"><button id="saveCompanyConfig" class="btn btn-blue">Salvar configuração</button></div></div></div>
+<div id="companyArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="companyBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><h2>⚙️ Configuração da Empresa</h2><div class="muted">Dados institucionais desta implantação dedicada.</div><div class="admin-grid"><label>ID Empresa<input id="companyId"></label><label>Nome da Empresa *<input id="companyName"></label><label>Nome Fantasia<input id="companyTradeName"></label><label>Tax ID / EIN<input id="companyCnpj"></label><label>E-mail de Manutenção<input id="companyMaintenanceEmail"></label><label>E-mail Administrativo<input id="companyAdminEmail"></label><label>Nome do Sistema *<input id="companySystemName"></label><label>Cor Principal<input id="companyPrimaryColor" type="color" value="#0b315e"></label><label>Fuso Horário<input id="companyTimezone"></label><label>URL Principal<input id="companyMainUrl"></label><label>E-mail de Relatórios<input id="companyReportsEmail"></label><label>Logo (URL)<input id="companyLogo"></label><label id="companyWoSlaLabel">SLA padrão OC (dias)<input id="companyWoSlaDays" type="number" min="1" max="365" step="1" value="7"></label><label class="full">Observações<textarea id="companyNotes" rows="4"></textarea></label></div><label class="switch-row"><input id="companyActive" type="checkbox"> Empresa ativa</label><div class="company-preview"><b>Pré-visualização</b><div id="companyPreviewName" style="margin-top:6px;font-size:1.1rem;font-weight:800"></div><img id="companyLogoPreview" class="company-logo-preview hidden"></div><div id="companyMessage" class="message"></div><div class="occ-report-actions"><button id="saveCompanyConfig" class="btn btn-blue">Salvar configuração</button></div></div></div>
   <div id="providersAdminArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="providersBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2>🏢 Prestadores</h2><div class="muted">Regras operacionais herdadas pelos usuários.</div></div><button id="newProviderButton" class="btn btn-blue">+ Novo prestador</button></div><div id="providersAdminStatus" class="muted" style="margin-top:12px"></div><div id="providersAdminList"></div></div></div>
   <div id="auditArea" class="hidden">
     <div class="card">
@@ -1444,9 +1444,9 @@ html,body{max-width:100%;overflow-x:hidden}
 </div>
 <div id="signatureBox" class="signature-box hidden"><div class="signature-title">✍️ Assinatura do responsável <span id="signatureRequiredText" class="required-yes"></span></div><div class="signature-help">Assine no quadro usando o dedo ou mouse.</div><div class="signature-canvas-wrap"><canvas id="signatureCanvas"></canvas></div><button id="clearSignature" type="button" class="btn btn-secondary" style="margin-top:8px">Limpar assinatura</button></div><div id="preventiveMessage" class="message"></div><div class="modal-actions"><button id="cancelPreventive" class="btn btn-secondary">Cancelar</button><button id="savePreventive" class="btn btn-green">Registrar Preventiva</button></div></div></div>
 
-<div id="reportModal" class="modal"><div class="modal-box"><h2>Reportar Serviço / Anomalia / Reparo</h2><label>Seu nome *<input id="reporterName"></label><label>Contato<input id="reporterContact"></label><label><span id="reportCategoryLabel">Categoria *</span><select id="category"><option value="">Selecione...</option></select></label><label><span id="reportComponentLabel">Componente *</span><select id="component"><option value="">Selecione...</option></select></label><label>Descrição *<textarea id="description" rows="5"></textarea></label><label>Foto<input id="photoInput" type="file" accept="image/*" capture="environment"></label><img id="photoPreview" class="photo-preview"><div id="reportMessage" class="message"></div><div class="modal-actions"><button id="cancelReport" class="btn btn-secondary">Cancelar</button><button id="sendReport" class="btn">Gravar ocorrência</button></div></div></div>
+<div id="reportModal" class="modal"><div class="modal-box"><h2>Reportar Serviço / Anomalia / Reparo</h2><label>Seu nome *<input id="reporterName"></label><label>Contato<input id="reporterContact"></label><label><span id="reportCategoryLabel">Categoria *</span><select id="category"><option value="">Selecione...</option></select></label><label><span id="reportComponentLabel">Componente *</span><select id="component"><option value="">Selecione...</option></select></label><label><span id="reportPerceptionLabel">O que você percebeu? *</span><select id="reportPerception"><option value="">Selecione...</option><option value="NOT_WORKING">Não está funcionando</option><option value="NOISE_VIBRATION">Barulho ou vibração diferente</option><option value="LEAK">Vazamento / água onde não deveria</option><option value="SMELL_SMOKE">Cheiro, fumaça ou gás</option><option value="ALARM_WARNING">Alarme ou aviso</option><option value="PERFORMANCE">Não está funcionando como deveria</option><option value="SERVICE_INSPECTION">Preciso de serviço ou inspeção</option><option value="OTHER">Outro</option></select></label><label>Descrição *<textarea id="description" rows="5"></textarea></label><label>Foto<input id="photoInput" type="file" accept="image/*" capture="environment"></label><img id="photoPreview" class="photo-preview"><div id="reportMessage" class="message"></div><div class="modal-actions"><button id="cancelReport" class="btn btn-secondary">Cancelar</button><button id="sendReport" class="btn">Gravar ocorrência</button></div></div></div>
 
-<div id="manageModal" class="modal"><div class="modal-box"><h2>Gerenciar ocorrência</h2><label>Alterado por *<input id="manageChangedBy"></label><label>Categoria<select id="manageCategory"></select></label><label>Componente<select id="manageComponent"></select></label><label>Descrição<textarea id="manageDescription" rows="4"></textarea></label><label>Status<select id="manageStatus"><option>Aberta</option><option>Em atendimento</option><option>Aguardando peça</option><option>Concluída</option><option>Cancelada</option></select></label><label>Responsável<input id="manageResponsible"></label><label>Solução<textarea id="manageSolution" rows="4"></textarea></label><div id="existingOccurrencePhotoBox" class="hidden" style="margin-top:14px;padding:12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:12px">
+<div id="manageModal" class="modal"><div class="modal-box"><h2>Gerenciar ocorrência</h2><label>Alterado por *<input id="manageChangedBy"></label><label>Categoria<select id="manageCategory"></select></label><label>Componente<select id="manageComponent"></select></label><label>Descrição<textarea id="manageDescription" rows="4"></textarea></label><label>Status<select id="manageStatus"><option>Aberta</option><option>Em atendimento</option><option>Aguardando peça</option><option>Concluída</option><option>Cancelada</option></select></label><label>Responsável<input id="manageResponsible"></label><label>Solução<textarea id="manageSolution" rows="4"></textarea></label><div id="manageClassificationBox" class="hidden" style="margin-top:14px;padding:12px;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px"><div id="manageClassificationTitle" style="font-weight:800">🧠 Classificação assistida</div><div id="manageClassificationSummary" class="muted" style="margin-top:6px"></div><label id="manageClassificationFinalLabel" style="margin-top:10px">Revisar classificação<select id="manageClassificationFinal"><option value="">Sem alteração</option><option value="ANOMALY">Confirmar: Anomalia</option><option value="SERVICE_REQUEST">Confirmar: Solicitação de serviço</option><option value="UNCLASSIFIED">Manter como não classificada</option></select></label><div id="manageClassificationHelp" class="muted" style="margin-top:5px">Somente MASTER/GESTOR pode confirmar ou corrigir a classificação.</div></div><div id="existingOccurrencePhotoBox" class="hidden" style="margin-top:14px;padding:12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:12px">
   <div id="existingOccurrencePhotoTitle" style="font-weight:800;color:#1e3a8a">📷 Foto inicial registrada</div>
   <div id="existingOccurrencePhotoHelp" class="muted" style="margin-top:4px">Esta é a evidência registrada na abertura da ocorrência.</div>
   <a id="existingOccurrencePhotoLink" class="document-open" href="#" target="_blank" rel="noopener" style="margin-top:8px">Abrir foto inicial</a>
@@ -1456,7 +1456,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.5.1</div>
+<div class="footer">QRManut USA • Version 7.6.6.0</div>
 </div>
 <script>
 /* ============================================================
@@ -2560,7 +2560,7 @@ function qrPreventiveCompetence7642(value){
     : raw;
 }
 
-const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated",SCHOOL_CRIADO:"School Created",SCHOOL_ALTERADO:"School Updated",SCHOOL_ATIVADO:"School Activated",SCHOOL_INATIVADO:"School Deactivated"};
+const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated",SCHOOL_CRIADO:"School Created",SCHOOL_ALTERADO:"School Updated",SCHOOL_ATIVADO:"School Activated",SCHOOL_INATIVADO:"School Deactivated",CLASSIFICACAO_OC_REVISADA:"Work Order Classification Reviewed"};
 function qrAuditAction7612(v){const s=String(v||"");return qrLanguage==="en-US"?(QR_AUDIT_EN_7612[s]||s):s;}
 function qrAuditResult7612(v){const s=String(v||"");return qrLanguage==="en-US"?({SUCESSO:"Success",FALHA:"Failed",BLOQUEADO:"Blocked"}[s]||s):s;}
 function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component",CHECKLIST_PREVENTIVA:"Preventive Checklist",ESCOLA:"School / Unit"}[s]||s;}
@@ -3317,8 +3317,8 @@ async function savePreventive(){
   }
 }
 function showPreventiveError(m){$("preventiveMessage").className="message error";$("preventiveMessage").textContent=m}
-async function openReport(){await populateOccurrenceCategorySelect();$("reporterName").value=getSavedResponsible();$("reportMessage").className="message";$("reportMessage").innerHTML="";$("sendReport").disabled=false;$("sendReport").textContent="Gravar ocorrência";$("cancelReport").textContent="Cancelar";$("reportModal").style.display="flex"}
-async function sendReport(){if(reportPosting)return;const name=$("reporterName").value.trim(),description=$("description").value.trim();if(!name||!$("category").value||!$("component").value||!description){$("reportMessage").className="message error";$("reportMessage").textContent="Preencha os campos obrigatórios.";return}saveResponsible(name);reportPosting=true;$("sendReport").disabled=true;$("sendReport").textContent="Gravando...";$("reportMessage").className="message loading";$("reportMessage").textContent="Registrando ocorrência...";try{const r=await apiPost({action:"reportOccurrence",id:currentAsset.id,reportadoPor:name,contato:$("reporterContact").value,categoriaOcorrencia:$("category").value,componenteAfetado:$("component").value,descricao:description,fotoBase64:photoData?.base64||"",fotoNome:photoData?.name||"",fotoMime:photoData?.mime||""});if(!r.ok)throw new Error(r.detail||"Não foi possível registrar a ocorrência.");let n="";if(r.notificacaoPrestador==="Sim")n=`<br><br>📧 <b>Prestador notificado:</b><br>${esc(r.emailPrestador)}`;else if(r.notificacaoPrestador==="Não - sem e-mail")n="<br><br>⚠️ Prestador configurado para receber a ocorrência, mas sem e-mail cadastrado.";else if(r.notificacaoPrestador==="Erro")n="<br><br>⚠️ A ocorrência foi registrada, mas houve erro ao notificar o prestador.";else n="<br><br>ℹ️ Este prestador não está configurado para receber notificações de ocorrência.";$("reportMessage").className="message success";$("reportMessage").innerHTML=`✅ Ocorrência <b>${esc(r.ocorrencia)}</b> registrada com sucesso.${n}`;$("sendReport").textContent="Ocorrência gravada";$("cancelReport").textContent="Fechar"}catch(e){reportPosting=false;$("sendReport").disabled=false;$("sendReport").textContent="Gravar ocorrência";$("reportMessage").className="message error";$("reportMessage").textContent=e.message}}
+async function openReport(){await populateOccurrenceCategorySelect();$("reporterName").value=getSavedResponsible();$("reporterContact").value="";$("category").value="";$("component").innerHTML='<option value="">Selecione...</option>';$("reportPerception").value="";$("description").value="";$("photoInput").value="";photoData=null;$("photoPreview").style.display="none";$("reportMessage").className="message";$("reportMessage").innerHTML="";$("sendReport").disabled=false;$("sendReport").textContent=qrLanguage==="en-US"?"Save Work Order":"Gravar ocorrência";$("cancelReport").textContent=qrLanguage==="en-US"?"Cancel":"Cancelar";$("reportModal").style.display="flex"}
+async function sendReport(){if(reportPosting)return;const name=$("reporterName").value.trim(),description=$("description").value.trim(),perception=$("reportPerception").value;if(!name||!$("category").value||!$("component").value||!perception||!description){$("reportMessage").className="message error";$("reportMessage").textContent=qrLanguage==="en-US"?"Complete the required fields.":"Preencha os campos obrigatórios.";return}saveResponsible(name);reportPosting=true;$("sendReport").disabled=true;$("sendReport").textContent=qrLanguage==="en-US"?"Saving...":"Gravando...";$("reportMessage").className="message loading";$("reportMessage").textContent=qrLanguage==="en-US"?"Saving work order...":"Registrando ocorrência...";try{const r=await apiPost({action:"reportOccurrence",id:currentAsset.id,reportadoPor:name,contato:$("reporterContact").value,categoriaOcorrencia:$("category").value,componenteAfetado:$("component").value,userPerception:perception,descricao:description,fotoBase64:photoData?.base64||"",fotoNome:photoData?.name||"",fotoMime:photoData?.mime||""});if(!r.ok)throw new Error(r.detail||"Não foi possível registrar a ocorrência.");let n="";if(r.notificacaoPrestador==="Sim")n=`<br><br>📧 <b>Prestador notificado:</b><br>${esc(r.emailPrestador)}`;else if(r.notificacaoPrestador==="Não - sem e-mail")n="<br><br>⚠️ Prestador configurado para receber a ocorrência, mas sem e-mail cadastrado.";else if(r.notificacaoPrestador==="Erro")n="<br><br>⚠️ A ocorrência foi registrada, mas houve erro ao notificar o prestador.";else n="<br><br>ℹ️ Este prestador não está configurado para receber notificações de ocorrência.";$("reportMessage").className="message success";$("reportMessage").innerHTML=`✅ Ocorrência <b>${esc(r.ocorrencia)}</b> registrada com sucesso.${n}`;$("sendReport").textContent="Ocorrência gravada";$("cancelReport").textContent="Fechar"}catch(e){reportPosting=false;$("sendReport").disabled=false;$("sendReport").textContent="Gravar ocorrência";$("reportMessage").className="message error";$("reportMessage").textContent=e.message}}
 const CATEGORIES=["Civil","Sanitário","Elétrica","Hidráulica","Climatização","Refrigeração","Utilidades","Segurança","Mobiliário","Equipamento","Outros"],COMPONENTS=["Geral","Piso","Parede","Teto","Porta","Janela","Vaso Sanitário","Pia","Torneira","Descarga","Mictório","Ralo","Luminária","Tomada","Interruptor","Tubulação","Registro","Bomba","Motor","Painel","Ar-condicionado","Mobiliário","Outro"];
 function buildManageDropdowns(){/* 7.4.6: opções carregadas da planilha */}
 function drivePhotoPreviewUrl(url){
@@ -3357,6 +3357,43 @@ function showExistingOccurrencePhoto(item){
   preview.onerror=()=>{preview.style.display="none";};
   preview.src=drivePhotoPreviewUrl(url);
 }
+
+function qrOccurrenceClassificationLabel7660(v){
+  const s=String(v||"").toUpperCase();
+  const en={ANOMALY:"Anomaly",SERVICE_REQUEST:"Service Request",UNCLASSIFIED:"Unclassified"};
+  const pt={ANOMALY:"Anomalia",SERVICE_REQUEST:"Solicitação de serviço",UNCLASSIFIED:"Não classificada"};
+  return (qrLanguage==="en-US"?en:pt)[s]||s||"-";
+}
+function qrOccurrenceIssueLabel7660(v){
+  const s=String(v||"").toUpperCase();
+  const en={LEAK:"Leak",NOISE_VIBRATION:"Noise / Vibration",SMELL_SMOKE_GAS:"Smell / Smoke / Gas",ALARM_WARNING:"Alarm / Warning",ELECTRICAL:"Electrical",BLOCKAGE_OVERFLOW:"Blockage / Overflow",NOT_WORKING:"Not Working",PERFORMANCE:"Performance",DAMAGE:"Damage",SERVICE_INSPECTION:"Service / Inspection",UNCLASSIFIED:"Unclassified"};
+  const pt={LEAK:"Vazamento",NOISE_VIBRATION:"Barulho / Vibração",SMELL_SMOKE_GAS:"Cheiro / Fumaça / Gás",ALARM_WARNING:"Alarme / Aviso",ELECTRICAL:"Elétrico",BLOCKAGE_OVERFLOW:"Entupimento / Transbordamento",NOT_WORKING:"Não funciona",PERFORMANCE:"Desempenho",DAMAGE:"Dano",SERVICE_INSPECTION:"Serviço / Inspeção",UNCLASSIFIED:"Não classificado"};
+  return (qrLanguage==="en-US"?en:pt)[s]||s||"-";
+}
+function showManageClassification7660(occ){
+  const box=$("manageClassificationBox");
+  if(!box)return;
+  const allowed=["MASTER","GESTOR"].includes(systemSession?.perfil);
+  if(!allowed){hide("manageClassificationBox");return;}
+  show("manageClassificationBox");
+  const c=occ?.classification||{};
+  $("manageClassificationFinal").value="";
+  $("manageClassificationTitle").textContent=qrLanguage==="en-US"?"🧠 Assisted Classification":"🧠 Classificação assistida";
+  const finalText=c.finalClassification?qrOccurrenceClassificationLabel7660(c.finalClassification):"-";
+  $("manageClassificationSummary").innerHTML=qrLanguage==="en-US"
+    ?`<b>Suggested:</b> ${esc(qrOccurrenceClassificationLabel7660(c.suggestedClassification))}<br><b>Detected issue:</b> ${esc(qrOccurrenceIssueLabel7660(c.detectedIssueType))}<br><b>Confidence:</b> ${Number(c.confidence||0)}%<br><b>Review required:</b> ${c.reviewRequired?"Yes":"No"}<br><b>Final classification:</b> ${esc(finalText)}`
+    :`<b>Sugerida:</b> ${esc(qrOccurrenceClassificationLabel7660(c.suggestedClassification))}<br><b>Problema detectado:</b> ${esc(qrOccurrenceIssueLabel7660(c.detectedIssueType))}<br><b>Confiança:</b> ${Number(c.confidence||0)}%<br><b>Revisão necessária:</b> ${c.reviewRequired?"Sim":"Não"}<br><b>Classificação final:</b> ${esc(finalText)}`;
+  $("manageClassificationFinalLabel").firstChild.nodeValue=qrLanguage==="en-US"?"Review classification":"Revisar classificação";
+  $("manageClassificationHelp").textContent=qrLanguage==="en-US"?"Only MASTER/MANAGER can confirm or correct the classification.":"Somente MASTER/GESTOR pode confirmar ou corrigir a classificação.";
+  const opts=$("manageClassificationFinal").options;
+  if(opts.length>=4){
+    opts[0].textContent=qrLanguage==="en-US"?"No change":"Sem alteração";
+    opts[1].textContent=qrLanguage==="en-US"?"Confirm: Anomaly":"Confirmar: Anomalia";
+    opts[2].textContent=qrLanguage==="en-US"?"Confirm: Service Request":"Confirmar: Solicitação de serviço";
+    opts[3].textContent=qrLanguage==="en-US"?"Keep Unclassified":"Manter como não classificada";
+  }
+}
+
 function openManage(i){
   selectedOccurrence=history[i];
   correctionPhotoData=null;
@@ -3385,6 +3422,7 @@ function openManage(i){
   $("manageStatus").value=selectedOccurrence.status||"Aberta";
   $("manageResponsible").value=selectedOccurrence.responsavel||"";
   $("manageSolution").value=selectedOccurrence.solucao||"";
+  showManageClassification7660(selectedOccurrence);
 
   /* Mantém visível também uma eventual foto de conclusão já existente. */
   if(selectedOccurrence.fotoConclusao){
@@ -3443,6 +3481,7 @@ async function saveManage(){
       descricaoOcorrencia:$("manageDescription").value,
       categoriaOcorrenciaEdit:$("manageCategory").value,
       componenteAfetadoEdit:$("manageComponent").value,
+      classificationFinal:["MASTER","GESTOR"].includes(systemSession?.perfil)?$("manageClassificationFinal").value:"",
 
       fotoOcorrenciaBase64:correctionPhotoData?.base64||"",
       fotoOcorrenciaNome:correctionPhotoData?.name||"",
@@ -3538,7 +3577,7 @@ async function clearAuditFilters(){$("auditAction").value="";$("auditResult").va
 
 async function loadPublicAppConfig(){try{const r=await api({action:"appconfig"});if(!r.ok||!r.app)return;const a=r.app;document.title=a.nomeSistema||"QRManut";const meta=document.querySelector('meta[name="theme-color"]');if(meta&&a.corPrincipal)meta.setAttribute("content",a.corPrincipal);const t=document.querySelector(".search-title");if(t&&a.nomeSistema)t.textContent=a.nomeSistema;const sub=document.getElementById("qrAppSubtitle");if(sub)sub.textContent=qrLanguage==="en-US"?"Quick Maintenance Management":"Gestão rápida de manutenção"}catch(e){}}
 async function showCompanyTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode acessar esta área.");return}clearTabs();$("tabCompany").classList.add("active");showOnly("companyArea");await loadCompanyConfig()}
-async function loadCompanyConfig(){try{const r=await menuApi({action:"companyconfig"});if(!r.ok)throw new Error(r.detail||"Erro ao carregar configuração.");const c=r.config||{};$("companyId").value=c.idEmpresa||"SCH-0001";$("companyName").value=c.nomeEmpresa||"";$("companyTradeName").value=c.nomeFantasia||"";$("companyCnpj").value=c.cnpj||"";$("companyMaintenanceEmail").value=c.emailManutencao||"";$("companyAdminEmail").value=c.emailAdministrativo||"";$("companyLogo").value=c.logo||"";$("companyPrimaryColor").value=/^#[0-9a-f]{6}$/i.test(c.corPrincipal||"")?c.corPrincipal:"#0b315e";$("companyTimezone").value=c.fusoHorario||"America/New_York";$("companySystemName").value=c.nomeSistema||"QRManut USA";$("companyActive").checked=!!c.empresaAtiva;$("companyMainUrl").value=c.urlPrincipal||"";$("companyReportsEmail").value=c.emailRelatorios||"";$("companyNotes").value=c.observacoes||"";updateCompanyPreview()}catch(e){$("companyMessage").className="message error";$("companyMessage").textContent=e.message}}
+async function loadCompanyConfig(){try{const r=await menuApi({action:"companyconfig"});if(!r.ok)throw new Error(r.detail||"Erro ao carregar configuração.");const c=r.config||{};$("companyId").value=c.idEmpresa||"SCH-0001";$("companyName").value=c.nomeEmpresa||"";$("companyTradeName").value=c.nomeFantasia||"";$("companyCnpj").value=c.cnpj||"";$("companyMaintenanceEmail").value=c.emailManutencao||"";$("companyAdminEmail").value=c.emailAdministrativo||"";$("companyLogo").value=c.logo||"";$("companyPrimaryColor").value=/^#[0-9a-f]{6}$/i.test(c.corPrincipal||"")?c.corPrincipal:"#0b315e";$("companyTimezone").value=c.fusoHorario||"America/New_York";$("companySystemName").value=c.nomeSistema||"QRManut USA";$("companyActive").checked=!!c.empresaAtiva;$("companyMainUrl").value=c.urlPrincipal||"";$("companyReportsEmail").value=c.emailRelatorios||"";$("companyWoSlaDays").value=Number(c.slaOcDias||7)||7;$("companyNotes").value=c.observacoes||"";updateCompanyPreview()}catch(e){$("companyMessage").className="message error";$("companyMessage").textContent=e.message}}
 function updateCompanyPreview(){$("companyPreviewName").textContent=($("companySystemName").value||"QRManut")+" • "+($("companyTradeName").value||$("companyName").value||"");const l=$("companyLogo").value.trim();if(l){$("companyLogoPreview").src=l;show("companyLogoPreview")}else hide("companyLogoPreview")}
 async function saveCompanyConfig(){
   const b=$("saveCompanyConfig");
@@ -3564,6 +3603,7 @@ async function saveCompanyConfig(){
       companyActive:$("companyActive").checked?"Sim":"Não",
       companyMainUrl:$("companyMainUrl").value.trim(),
       companyReportsEmail:$("companyReportsEmail").value.trim(),
+      companyWoSlaDays:$("companyWoSlaDays").value,
       companyNotes:$("companyNotes").value.trim()
     });
     if(!r.ok)throw new Error(r.detail||"Erro ao salvar.");
@@ -5213,6 +5253,7 @@ const QR_ROUTINE_PT_EN={
   "Empresa ativa":"Active company",
   "Pré-visualização":"Preview",
   "Salvar configuração":"Save Configuration",
+  "SLA padrão OC (dias)":"Default WO SLA (days)",
 
   "🏢 Prestadores":"🏢 Service Providers",
   "Regras operacionais herdadas pelos usuários.":"Operational rules inherited by linked users.",
@@ -5303,6 +5344,15 @@ const QR_ROUTINE_PT_EN={
   "Registrar Preventiva":"Register Preventive Maintenance",
 
   "Seu nome *":"Your name *",
+  "O que você percebeu? *":"What did you notice? *",
+  "Não está funcionando":"Not working",
+  "Barulho ou vibração diferente":"Unusual noise or vibration",
+  "Vazamento / água onde não deveria":"Leak / water where it should not be",
+  "Cheiro, fumaça ou gás":"Smell, smoke, or gas",
+  "Alarme ou aviso":"Alarm or warning",
+  "Não está funcionando como deveria":"Not performing as expected",
+  "Preciso de serviço ou inspeção":"I need service or inspection",
+  "Outro":"Other",
   "Contato":"Contact",
   "Descrição *":"Description *",
   "Foto":"Photo",
@@ -7735,6 +7785,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.5.0 - School / Unit Management + scoped Asset Management.
 
 // QRManut USA 7.6.5.1 - Asset Management School filtering fix.
+
+// QRManut USA 7.6.6.0 - Analytics core and assisted occurrence classification.
 </script>
 
 </body>
