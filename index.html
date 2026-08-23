@@ -678,6 +678,13 @@ html,body{max-width:100%;overflow-x:hidden}
   }
 }
 
+
+/* Preventive submit busy state – 7.6.4.3 */
+#savePreventive[aria-busy="true"]{
+  cursor:wait;
+  opacity:.82;
+}
+
 </style>
 </head>
 <body>
@@ -1304,7 +1311,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.4.2</div>
+<div class="footer">QRManut USA • Version 7.6.4.3</div>
 </div>
 <script>
 /* ============================================================
@@ -2936,6 +2943,13 @@ async function openPreventive(){
   }
   $("preventivePhotoPreview").style.display="none";
   $("preventiveMessage").className="message";
+  $("preventiveMessage").textContent="";
+  $("savePreventive").disabled=false;
+  $("cancelPreventive").disabled=false;
+  $("savePreventive").setAttribute("aria-busy","false");
+  $("savePreventive").textContent=qrLanguage==="en-US"
+    ?"Register Preventive Maintenance"
+    :"Registrar Preventiva";
   $("preventiveAsset").textContent=currentAsset.id+" – "+currentAsset.nome_do_equipamento;
   $("preventivePeriodicity").textContent=currentAsset.periodicidade
     ?(qrLanguage==="en-US"?qrTranslateExactText(currentAsset.periodicidade):currentAsset.periodicidade)
@@ -3026,18 +3040,33 @@ async function savePreventive(){
   }
 
   saveResponsible(responsible);
-  const signature=getSignatureData();
 
+  // 7.6.4.3 - feedback visual imediato ao clique.
+  // O botão muda de estado antes de gerar assinatura, serializar imagens
+  // ou iniciar a chamada ao Apps Script.
   preventivePosting=true;
   $("savePreventive").disabled=true;
   $("cancelPreventive").disabled=true;
-  $("savePreventive").textContent=qrLanguage==="en-US"?"Saving...":"Registrando preventiva...";
+  $("savePreventive").setAttribute("aria-busy","true");
+  $("savePreventive").textContent=qrLanguage==="en-US"
+    ?"⏳ Registering..."
+    :"⏳ Registrando...";
   $("preventiveMessage").className="message loading";
   $("preventiveMessage").textContent=qrLanguage==="en-US"
-    ?"Please wait. The preventive maintenance record is being saved."
-    :"Aguarde. O registro está sendo processado. Não pressione o botão novamente.";
+    ?"Please wait. The preventive maintenance record is being processed."
+    :"Aguarde. A preventiva está sendo registrada. Não pressione o botão novamente.";
 
   try{
+    // Garante que o navegador desenhe o novo texto/estado do botão
+    // antes de qualquer processamento mais pesado.
+    await new Promise(resolve=>{
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(resolve);
+      });
+    });
+
+    const signature=getSignatureData();
+
     const r=await apiPost({
       action:"registerPreventive",
       id:currentAsset.id,
@@ -3099,6 +3128,7 @@ async function savePreventive(){
       preventivePosting=false;
       $("savePreventive").disabled=false;
       $("cancelPreventive").disabled=false;
+      $("savePreventive").setAttribute("aria-busy","false");
       $("savePreventive").textContent=qrLanguage==="en-US"
         ?"Retry document upload"
         :"Tentar enviar documentos novamente";
@@ -3112,6 +3142,7 @@ async function savePreventive(){
       $("preventiveModal").style.display="none";
       $("savePreventive").disabled=false;
       $("cancelPreventive").disabled=false;
+      $("savePreventive").setAttribute("aria-busy","false");
       $("savePreventive").textContent=qrLanguage==="en-US"
         ?"Register Preventive Maintenance"
         :"Registrar Preventiva";
@@ -3129,6 +3160,7 @@ async function savePreventive(){
     preventivePosting=false;
     $("savePreventive").disabled=false;
     $("cancelPreventive").disabled=false;
+    $("savePreventive").setAttribute("aria-busy","false");
     $("savePreventive").textContent=qrLanguage==="en-US"
       ?"Register Preventive Maintenance"
       :"Registrar Preventiva";
@@ -7008,6 +7040,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.4.1 - Fix: Preventive Checklist JS moved from CSS to script.
 
 // QRManut USA 7.6.4.2 - Preventive Maintenance English text fixes.
+
+// QRManut USA 7.6.4.3 - Immediate feedback on preventive maintenance registration.
 </script>
 
 </body>
