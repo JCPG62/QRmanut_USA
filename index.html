@@ -685,6 +685,56 @@ html,body{max-width:100%;overflow-x:hidden}
   opacity:.82;
 }
 
+
+/* ============================================================
+ * SCHOOL / UNIT MANAGEMENT – 7.6.5.0
+ * ============================================================ */
+
+.school-admin-card{
+  border:1px solid #dbe5ef;
+  border-radius:13px;
+  padding:14px;
+  background:#fff;
+  margin-bottom:9px;
+}
+
+.school-admin-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.school-admin-metrics{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.school-admin-address{
+  margin-top:7px;
+  color:#52687d;
+  font-size:13px;
+}
+
+.school-admin-inactive{
+  opacity:.70;
+  background:#f8fafc;
+}
+
+.asset-scope-chip{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#e8f1fb;
+  color:#244d73;
+  font-size:12px;
+  font-weight:800;
+}
+
 </style>
 </head>
 <body>
@@ -719,6 +769,7 @@ html,body{max-width:100%;overflow-x:hidden}
     <button id="tabOccurrenceCatalog" class="menu-button hidden">🧩 Categorias e Componentes</button>
     <button id="tabMaintenancePending" class="menu-button hidden">📌 Pendências / Providências</button>
 <button id="tabAssetManagement" class="menu-button hidden" type="button">🏷️ <span data-i18n="assetManagement">Gestão de Ativos</span></button>
+    <button id="tabSchoolsAdmin" class="menu-button hidden" type="button">🏫 School / Unit Management</button>
 
     <button id="tabDocumentUpload" class="menu-button upload-doc hidden">📤 Upload de Documentos</button>
     <button id="tabUsers" class="menu-button users hidden">👥 Gestão de Usuários</button>
@@ -1019,6 +1070,32 @@ html,body{max-width:100%;overflow-x:hidden}
 </div>
 
 
+
+<section id="schoolsAdminArea" class="hidden" style="margin-top:16px">
+  <div class="card">
+    <div class="back-asset-wrap">
+      <button id="schoolsAdminBackMenu" class="back-asset-btn">← Back to Main Menu</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <h2 id="schoolsAdminTitle">🏫 School / Unit Management</h2>
+        <div id="schoolsAdminHelp" class="muted">
+          Add, edit, activate, or deactivate schools without editing the spreadsheet.
+        </div>
+      </div>
+      <button id="newSchoolAdminButton" class="btn btn-primary" type="button">+ New School / Unit</button>
+    </div>
+
+    <div style="margin-top:14px">
+      <input id="schoolsAdminSearch" type="search" placeholder="Search school / unit..." style="width:100%">
+    </div>
+
+    <div id="schoolsAdminStatus" class="muted" style="margin-top:12px"></div>
+    <div id="schoolsAdminList" style="margin-top:14px"></div>
+  </div>
+</section>
+
 <section id="assetManagementPanel" class="hidden" style="margin-top:16px">
   <div class="card">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
@@ -1028,12 +1105,77 @@ html,body{max-width:100%;overflow-x:hidden}
       </div>
       <button id="assetNewButton" class="btn btn-primary" type="button">+ <span data-i18n="newAsset">Novo Ativo</span></button>
     </div>
-    <div style="margin-top:14px">
+    <div id="assetScopeStatus" class="muted" style="margin-top:12px"></div>
+    <div style="margin-top:10px">
       <input id="assetSearch" type="search" placeholder="Buscar ativo..." style="width:100%">
     </div>
     <div id="assetList" style="margin-top:14px"></div>
   </div>
 </section>
+
+
+<div id="schoolAdminModal" class="modal">
+  <div class="modal-box" style="max-width:760px">
+    <h2 id="schoolAdminModalTitle">🏫 New School / Unit</h2>
+
+    <input id="schoolAdminId" type="hidden">
+
+    <div class="asset-existing-id" style="margin-bottom:14px">
+      <div id="schoolAdminIdLabel" class="muted">School ID</div>
+      <div id="schoolAdminIdPreview" class="asset-id-value">SCH-004</div>
+      <div id="schoolAdminIdHelp" class="muted" style="margin-top:3px">
+        School ID is generated automatically and cannot be changed after creation.
+      </div>
+    </div>
+
+    <div class="admin-grid">
+      <label id="schoolAdminNameLabel">School / Unit Name *
+        <input id="schoolAdminName">
+      </label>
+
+      <label id="schoolAdminTypeLabel">School Type
+        <input id="schoolAdminType" list="schoolTypeSuggestions">
+        <datalist id="schoolTypeSuggestions">
+          <option value="Elementary School"></option>
+          <option value="Middle School"></option>
+          <option value="High School"></option>
+          <option value="K-8 School"></option>
+          <option value="K-12 School"></option>
+          <option value="Administrative Building"></option>
+          <option value="Other"></option>
+        </datalist>
+      </label>
+
+      <label id="schoolAdminAddressLabel" class="full">Address
+        <input id="schoolAdminAddress">
+      </label>
+
+      <label id="schoolAdminCityLabel">City
+        <input id="schoolAdminCity">
+      </label>
+
+      <label id="schoolAdminStateLabel">State
+        <input id="schoolAdminState" maxlength="10" value="NJ">
+      </label>
+
+      <label class="switch-row">
+        <input id="schoolAdminActive" type="checkbox" checked>
+        <span id="schoolAdminActiveLabel">Active</span>
+      </label>
+
+      <label id="schoolAdminNotesLabel" class="full">Notes
+        <textarea id="schoolAdminNotes" rows="3"></textarea>
+      </label>
+    </div>
+
+    <div id="schoolAdminMessage" class="message"></div>
+
+    <div class="modal-actions">
+      <button id="cancelSchoolAdmin" class="btn btn-secondary">Cancel</button>
+      <button id="saveSchoolAdmin" class="btn btn-blue">Save School / Unit</button>
+    </div>
+  </div>
+</div>
 
 <div id="assetEditModal" class="modal">
   <div class="modal-box" style="max-width:920px">
@@ -1092,7 +1234,10 @@ html,body{max-width:100%;overflow-x:hidden}
       <div class="asset-form-grid">
         <label>Nome do Equipamento *<input id="assetName"></label>
         <label>Status<select id="assetStatus"></select></label>
-        <label id="assetSchoolLabel">Colégio / Unidade *<select id="assetSchool"></select></label>
+        <label id="assetSchoolLabel">Colégio / Unidade *
+          <select id="assetSchool"></select>
+          <div id="assetSchoolHelp" class="muted" style="margin-top:4px"></div>
+        </label>
         <label id="assetBuildingLabel">Prédio / Building<input id="assetBuilding"></label>
         <label id="assetRoomLabel">Sala / Room<input id="assetRoom"></label>
         <label>Tipo de Ativo<select id="assetAssetType"></select></label>
@@ -1311,7 +1456,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.4.3</div>
+<div class="footer">QRManut USA • Version 7.6.5.0</div>
 </div>
 <script>
 /* ============================================================
@@ -1738,6 +1883,10 @@ async function refreshCurrentSchoolScopedView7622(){
     await loadAssets760();
     return;
   }
+  if(!$("schoolsAdminArea").classList.contains("hidden")){
+    await loadSchoolsAdmin7650();
+    return;
+  }
 
   // 7.6.2.5 - Search follows an explicit three-step flow:
   // select school -> type asset -> press Search.
@@ -1817,8 +1966,8 @@ async function changeGlobalSchoolScope7622(requestedSchoolId){
   }
 }
 
-function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement")}
-function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
+function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement")}
+function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
 async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;fn()}else openMainMenu()}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
@@ -1847,7 +1996,7 @@ async function requirePreventiveLogin(nextAction,provider){
 }
 function processPhoto(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>MAX_DIM||h>MAX_DIM){if(w>h){h=Math.round(h*MAX_DIM/w);w=MAX_DIM}else{w=Math.round(w*MAX_DIM/h);h=MAX_DIM}}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);const url=c.toDataURL("image/jpeg",QUALITY);resolve({base64:url.split(",")[1],dataUrl:url,mime:"image/jpeg",name:"foto_"+Date.now()+".jpg"})};img.src=e.target.result};reader.onerror=reject;reader.readAsDataURL(file)})}
 function setupSignatureCanvas(){const c=$("signatureCanvas"),rect=c.getBoundingClientRect(),ratio=window.devicePixelRatio||1;c.width=Math.floor(rect.width*ratio);c.height=Math.floor(180*ratio);signatureCtx=c.getContext("2d");signatureCtx.scale(ratio,ratio);signatureCtx.lineWidth=2;signatureCtx.lineCap="round";signatureCtx.lineJoin="round";clearSignatureCanvas()}function clearSignatureCanvas(){const c=$("signatureCanvas");if(!signatureCtx)return;signatureCtx.save();signatureCtx.setTransform(1,0,0,1,0,0);signatureCtx.fillStyle="#fff";signatureCtx.fillRect(0,0,c.width,c.height);signatureCtx.restore();signatureDirty=false}function signaturePoint(e){const r=$("signatureCanvas").getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}function signatureStart(e){e.preventDefault();signatureDrawing=true;const p=signaturePoint(e);signatureCtx.beginPath();signatureCtx.moveTo(p.x,p.y);signatureDirty=true}function signatureMove(e){if(!signatureDrawing)return;e.preventDefault();const p=signaturePoint(e);signatureCtx.lineTo(p.x,p.y);signatureCtx.stroke()}function signatureEnd(){signatureDrawing=false}function getSignatureData(){if(!signatureDirty)return null;const u=$("signatureCanvas").toDataURL("image/png");return{base64:u.split(",")[1],mime:"image/png"}}
-function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
+function showOnly(a){["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","occurrenceCatalogArea","maintenancePendingArea","assetManagementPanel","schoolsAdminArea"].forEach(hide);show(a)}function clearTabs(){["tabSearch","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement","tabSchoolsAdmin"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
 async function showAuditTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode consultar a auditoria.");return}clearTabs();$("tabAudit").classList.add("active");showOnly("auditArea");setDefaultAuditDates();await loadAuditFilters();await loadAudit()}
 
 function isoDateLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -2411,10 +2560,10 @@ function qrPreventiveCompetence7642(value){
     : raw;
 }
 
-const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated"};
+const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated",SCHOOL_CRIADO:"School Created",SCHOOL_ALTERADO:"School Updated",SCHOOL_ATIVADO:"School Activated",SCHOOL_INATIVADO:"School Deactivated"};
 function qrAuditAction7612(v){const s=String(v||"");return qrLanguage==="en-US"?(QR_AUDIT_EN_7612[s]||s):s;}
 function qrAuditResult7612(v){const s=String(v||"");return qrLanguage==="en-US"?({SUCESSO:"Success",FALHA:"Failed",BLOQUEADO:"Blocked"}[s]||s):s;}
-function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component",CHECKLIST_PREVENTIVA:"Preventive Checklist"}[s]||s;}
+function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component",CHECKLIST_PREVENTIVA:"Preventive Checklist",ESCOLA:"School / Unit"}[s]||s;}
 
 function renderPreventiveControl(){
   const d=preventiveControlData,s=d.summary,t=qrT7612;
@@ -3905,7 +4054,371 @@ function togglePreventiveActionFields(){
 
 
 
+
+/* ============================================================
+ * SCHOOL / UNIT MANAGEMENT – 7.6.5.0
+ * ============================================================ */
+
+function schoolT7650(pt,en){
+  return qrLanguage==="en-US"?en:pt;
+}
+
+async function showSchoolsAdminTab7650(){
+  if(systemSession?.perfil!=="MASTER"){
+    return alert(
+      schoolT7650(
+        "Somente MASTER pode administrar colégios/unidades.",
+        "Only MASTER can manage schools / units."
+      )
+    );
+  }
+
+  clearTabs();
+  $("tabSchoolsAdmin").classList.add("active");
+  showOnly("schoolsAdminArea");
+
+  await loadSchoolsAdmin7650();
+}
+
+async function loadSchoolsAdmin7650(){
+  $("schoolsAdminStatus").textContent=
+    schoolT7650("Carregando colégios...","Loading schools...");
+
+  try{
+    const r=await menuApi({action:"schoolsadmin"});
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        schoolT7650(
+          "Erro ao carregar colégios.",
+          "Unable to load schools."
+        )
+      );
+    }
+
+    qrSchoolsAdmin7650=r.data||{schools:[],nextId:"SCH-001"};
+
+    renderSchoolsAdmin7650();
+  }catch(e){
+    $("schoolsAdminStatus").textContent=e.message||String(e);
+    $("schoolsAdminList").innerHTML="";
+  }
+}
+
+function renderSchoolsAdmin7650(){
+  const q=String($("schoolsAdminSearch").value||"").trim().toLowerCase();
+
+  const all=qrSchoolsAdmin7650.schools||[];
+
+  const items=all.filter(s=>[
+    s.idEscola,s.escola,s.tipo,s.endereco,s.cidade,s.estado,s.observacoes
+  ].join(" ").toLowerCase().includes(q));
+
+  $("schoolsAdminTitle").textContent=
+    schoolT7650(
+      "🏫 Gestão de Colégios / Unidades",
+      "🏫 School / Unit Management"
+    );
+
+  $("schoolsAdminHelp").textContent=
+    schoolT7650(
+      "Cadastre, edite, ative ou inative colégios sem alterar diretamente a planilha.",
+      "Add, edit, activate, or deactivate schools without editing the spreadsheet."
+    );
+
+  $("newSchoolAdminButton").textContent=
+    schoolT7650("+ Novo Colégio / Unidade","+ New School / Unit");
+
+  $("schoolsAdminSearch").placeholder=
+    schoolT7650("Buscar colégio / unidade...","Search school / unit...");
+
+  $("schoolsAdminBackMenu").textContent=
+    schoolT7650("← Voltar ao Menu Principal","← Back to Main Menu");
+
+  $("schoolsAdminStatus").textContent=
+    schoolT7650(
+      `${items.length} de ${all.length} colégio(s)/unidade(s).`,
+      `${items.length} of ${all.length} school(s) / unit(s).`
+    );
+
+  $("schoolsAdminList").innerHTML=items.length
+    ?items.map(s=>{
+      const inactive=!s.ativa;
+
+      const address=[
+        s.endereco,
+        [s.cidade,s.estado].filter(Boolean).join(", ")
+      ].filter(Boolean).join(" • ");
+
+      return `<div class="school-admin-card ${inactive?"school-admin-inactive":""}">
+        <div class="school-admin-head">
+          <div>
+            <div style="font-weight:900">${esc(s.idEscola)} – ${esc(s.escola)}</div>
+            <div class="muted">${esc(s.tipo||schoolT7650("Tipo não informado","Type not specified"))}</div>
+
+            <div class="school-admin-metrics">
+              <span class="tag">${s.ativa?"✅ "+schoolT7650("Ativo","Active"):"⛔ "+schoolT7650("Inativo","Inactive")}</span>
+              <span class="tag">🏷️ ${Number(s.assets||0)} ${schoolT7650("ativos","assets")}</span>
+              <span class="tag">👥 ${Number(s.users||0)} ${schoolT7650("usuários","users")}</span>
+            </div>
+
+            ${address?`<div class="school-admin-address">📍 ${esc(address)}</div>`:""}
+            ${s.observacoes?`<div class="muted" style="margin-top:6px">${esc(s.observacoes)}</div>`:""}
+          </div>
+
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-secondary" type="button"
+              onclick="editSchoolAdmin7650('${esc(s.idEscola)}')">
+              ${schoolT7650("Editar","Edit")}
+            </button>
+
+            <button class="btn btn-secondary" type="button"
+              onclick="toggleSchoolAdmin7650('${esc(s.idEscola)}',${!s.ativa})">
+              ${s.ativa
+                ?schoolT7650("Inativar","Deactivate")
+                :schoolT7650("Ativar","Activate")}
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join("")
+    :`<div class="muted">${
+      schoolT7650(
+        "Nenhum colégio/unidade encontrado.",
+        "No school / unit found."
+      )
+    }</div>`;
+}
+
+function applySchoolAdminLanguage7650(){
+  $("schoolAdminIdLabel").textContent=
+    schoolT7650("School ID","School ID");
+
+  $("schoolAdminIdHelp").textContent=
+    schoolT7650(
+      "O School ID é gerado automaticamente e não pode ser alterado após a criação.",
+      "School ID is generated automatically and cannot be changed after creation."
+    );
+
+  $("schoolAdminNameLabel").firstChild.nodeValue=
+    schoolT7650("Nome do Colégio / Unidade *","School / Unit Name *");
+
+  $("schoolAdminTypeLabel").firstChild.nodeValue=
+    schoolT7650("Tipo de Colégio","School Type");
+
+  $("schoolAdminAddressLabel").firstChild.nodeValue=
+    schoolT7650("Endereço","Address");
+
+  $("schoolAdminCityLabel").firstChild.nodeValue=
+    schoolT7650("Cidade","City");
+
+  $("schoolAdminStateLabel").firstChild.nodeValue=
+    schoolT7650("Estado","State");
+
+  $("schoolAdminActiveLabel").textContent=
+    schoolT7650("Ativo","Active");
+
+  $("schoolAdminNotesLabel").firstChild.nodeValue=
+    schoolT7650("Observações","Notes");
+
+  $("cancelSchoolAdmin").textContent=
+    schoolT7650("Cancelar","Cancel");
+
+  $("saveSchoolAdmin").textContent=
+    schoolT7650("Salvar Colégio / Unidade","Save School / Unit");
+}
+
+function openNewSchoolAdmin7650(){
+  $("schoolAdminId").value="";
+  $("schoolAdminIdPreview").textContent=
+    qrSchoolsAdmin7650.nextId||"SCH-001";
+  $("schoolAdminName").value="";
+  $("schoolAdminType").value="";
+  $("schoolAdminAddress").value="";
+  $("schoolAdminCity").value="";
+  $("schoolAdminState").value="NJ";
+  $("schoolAdminActive").checked=true;
+  $("schoolAdminNotes").value="";
+  $("schoolAdminMessage").className="message";
+  $("schoolAdminMessage").textContent="";
+
+  $("schoolAdminModalTitle").textContent=
+    schoolT7650(
+      "🏫 Novo Colégio / Unidade",
+      "🏫 New School / Unit"
+    );
+
+  applySchoolAdminLanguage7650();
+
+  $("schoolAdminModal").style.display="flex";
+
+  setTimeout(()=>$("schoolAdminName").focus(),80);
+}
+
+function editSchoolAdmin7650(id){
+  const s=(qrSchoolsAdmin7650.schools||[]).find(
+    x=>String(x.idEscola)===String(id)
+  );
+
+  if(!s)return;
+
+  $("schoolAdminId").value=s.idEscola||"";
+  $("schoolAdminIdPreview").textContent=s.idEscola||"";
+  $("schoolAdminName").value=s.escola||"";
+  $("schoolAdminType").value=s.tipo||"";
+  $("schoolAdminAddress").value=s.endereco||"";
+  $("schoolAdminCity").value=s.cidade||"";
+  $("schoolAdminState").value=s.estado||"";
+  $("schoolAdminActive").checked=!!s.ativa;
+  $("schoolAdminNotes").value=s.observacoes||"";
+  $("schoolAdminMessage").className="message";
+  $("schoolAdminMessage").textContent="";
+
+  $("schoolAdminModalTitle").textContent=
+    schoolT7650(
+      "🏫 Editar Colégio / Unidade",
+      "🏫 Edit School / Unit"
+    );
+
+  applySchoolAdminLanguage7650();
+
+  $("schoolAdminModal").style.display="flex";
+}
+
+async function saveSchoolAdmin7650(){
+  const name=String($("schoolAdminName").value||"").trim();
+
+  if(!name){
+    $("schoolAdminMessage").className="message error";
+    $("schoolAdminMessage").textContent=
+      schoolT7650(
+        "Informe o nome do colégio/unidade.",
+        "Enter the school / unit name."
+      );
+    return;
+  }
+
+  const btn=$("saveSchoolAdmin");
+  const editedId=String($("schoolAdminId").value||"").trim();
+
+  btn.disabled=true;
+  btn.textContent=schoolT7650("Salvando...","Saving...");
+
+  $("schoolAdminMessage").className="message loading";
+  $("schoolAdminMessage").textContent=
+    schoolT7650(
+      "Salvando cadastro...",
+      "Saving school / unit..."
+    );
+
+  try{
+    const r=await menuApiPost({
+      action:"saveschooladmin",
+      schoolAdminId:editedId,
+      schoolAdminName:name,
+      schoolAdminType:$("schoolAdminType").value.trim(),
+      schoolAdminAddress:$("schoolAdminAddress").value.trim(),
+      schoolAdminCity:$("schoolAdminCity").value.trim(),
+      schoolAdminState:$("schoolAdminState").value.trim(),
+      schoolAdminActive:$("schoolAdminActive").checked?"Sim":"Não",
+      schoolAdminNotes:$("schoolAdminNotes").value.trim()
+    });
+
+    if(!r.ok)throw new Error(r.detail||r.error||"");
+
+    $("schoolAdminMessage").className="message success";
+    $("schoolAdminMessage").textContent=
+      schoolT7650(
+        "Colégio/unidade salvo com sucesso.",
+        "School / unit saved successfully."
+      );
+
+    // If the currently selected school was edited, refresh the stored scope
+    // so its name/status is immediately consistent.
+    if(
+      editedId &&
+      activeSchoolId7622() &&
+      String(activeSchoolId7622()).toUpperCase()===editedId.toUpperCase()
+    ){
+      await changeGlobalSchoolScope7622(editedId);
+    }else{
+      await loadGlobalSchoolScope7622();
+    }
+
+    await loadSchoolsAdmin7650();
+
+    setTimeout(()=>{
+      $("schoolAdminModal").style.display="none";
+    },450);
+
+  }catch(e){
+    $("schoolAdminMessage").className="message error";
+    $("schoolAdminMessage").textContent=e.message||String(e);
+  }finally{
+    btn.disabled=false;
+    btn.textContent=
+      schoolT7650(
+        "Salvar Colégio / Unidade",
+        "Save School / Unit"
+      );
+  }
+}
+
+async function toggleSchoolAdmin7650(id,active){
+  const school=(qrSchoolsAdmin7650.schools||[]).find(
+    x=>String(x.idEscola)===String(id)
+  );
+
+  if(!school)return;
+
+  const question=active
+    ?schoolT7650(
+      `Ativar ${school.escola}?`,
+      `Activate ${school.escola}?`
+    )
+    :schoolT7650(
+      `Inativar ${school.escola}? Os ativos e usuários permanecerão no histórico.`,
+      `Deactivate ${school.escola}? Assets and users will remain in the history.`
+    );
+
+  if(!confirm(question))return;
+
+  try{
+    const r=await menuApiPost({
+      action:"setschoolactiveadmin",
+      schoolAdminId:id,
+      schoolAdminActive:active?"Sim":"Não"
+    });
+
+    if(!r.ok)throw new Error(r.detail||r.error||"");
+
+    // If MASTER just deactivated the school currently selected in the
+    // global filter, return immediately to All Schools.
+    if(
+      !active &&
+      activeSchoolId7622() &&
+      String(activeSchoolId7622()).toUpperCase()===String(id).toUpperCase()
+    ){
+      stickySchoolId7626="";
+      stickySchoolName7626="";
+      await changeGlobalSchoolScope7622("");
+    }else{
+      await loadGlobalSchoolScope7622();
+    }
+
+    await loadSchoolsAdmin7650();
+
+  }catch(e){
+    alert(e.message||String(e));
+  }
+}
+
+
 let qrAssets760=[],qrAssetTypes760=[],qrAssetOptions7610={};
+let qrAssetScope7650={schoolId:"",schoolName:"",allSchools:false};
+let qrAssetLoadSeq7650=0;
+let qrSchoolsAdmin7650={schools:[],nextId:"SCH-001"};
 
 function assetApi760(action,payload={}){
   if(!systemSession?.systemSessionToken){
@@ -3995,11 +4508,27 @@ function assetFillManagementOptions7610(){
     school.innerHTML=`<option value="">${qrLanguage==="en-US"?"Select school...":"Selecione o colégio..."}</option>`+
       schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.display||((x.idEscola||"")+" – "+(x.escola||"")))}</option>`).join("");
     const activeScope=activeSchoolId7622();
+    const help=$("assetSchoolHelp");
+
     if(systemSession?.perfil==="GESTOR"||activeScope){
       school.value=activeScope||systemSession.idEscola||"";
       school.disabled=true;
+
+      const selectedName=(schools||[]).find(x=>x.idEscola===school.value)?.escola||school.value;
+
+      if(help){
+        help.textContent=qrLanguage==="en-US"
+          ?`New assets will be registered in ${selectedName}.`
+          :`Novos ativos serão cadastrados em ${selectedName}.`;
+      }
     }else{
       school.disabled=false;
+
+      if(help){
+        help.textContent=qrLanguage==="en-US"
+          ?"All Schools is selected. Choose the school for this asset before saving."
+          :"Todos os colégios está selecionado. Escolha o colégio deste ativo antes de salvar.";
+      }
     }
   }
 
@@ -4046,17 +4575,61 @@ function assetProviderPayload7610(){
 
 
 async function loadAssets760(){
+  const loadSeq=++qrAssetLoadSeq7650;
+  const requestedSchoolId=selectedSchoolId7626();
+
+  if($("assetScopeStatus")){
+    $("assetScopeStatus").textContent=
+      qrLanguage==="en-US"
+        ?"Loading assets for the selected School / Unit..."
+        :"Carregando ativos do Colégio / Unidade selecionado...";
+  }
+
   const r=await assetApi760("listassets760");
+
+  if(loadSeq!==qrAssetLoadSeq7650)return;
+
   if(!r.ok)throw new Error(r.detail||r.error||"Erro ao carregar ativos.");
-  qrAssets760=r.items||[];
+
+  // Ignore an older response if the MASTER changed School while the request
+  // was still running.
+  if(
+    systemSession?.perfil==="MASTER" &&
+    String(requestedSchoolId||"")!==String(selectedSchoolId7626()||"")
+  ){
+    return loadAssets760();
+  }
+
+  const responseScope=String(r.scopeSchoolId||"");
+
+  qrAssets760=(r.items||[]).filter(a=>{
+    if(!responseScope)return true;
+    return String(a.idEscola||"").toUpperCase()===responseScope.toUpperCase();
+  });
+
+  qrAssetScope7650={
+    schoolId:responseScope,
+    schoolName:String(r.scopeSchoolName||""),
+    allSchools:!!r.allSchools
+  };
+
   qrAssetTypes760=r.types||[];
   qrAssetOptions7610=r.options||{};
+
   assetFillTypes760();
   assetFillManagementOptions7610();
   renderAssets760();
 }
 
 function renderAssets760(){
+  if($("assetScopeStatus")){
+    const scopeName=qrAssetScope7650.schoolName||qrAssetScope7650.schoolId;
+
+    $("assetScopeStatus").innerHTML=qrAssetScope7650.allSchools
+      ?`<span class="asset-scope-chip">🏫 ${qrLanguage==="en-US"?"All Schools":"Todos os colégios"}</span> • ${qrAssets760.length} ${qrLanguage==="en-US"?"assets":"ativos"}`
+      :`<span class="asset-scope-chip">🏫 ${esc(scopeName||"")}</span> • ${qrAssets760.length} ${qrLanguage==="en-US"?"assets":"ativos"}`;
+  }
+
   const q=String($("assetSearch").value||"").toLowerCase();
   const items=qrAssets760.filter(a=>[
     a.id,a.nome,a.fabricante,a.modelo,a.numeroSerie,a.categoria,a.tipoDeAtivo,
@@ -4114,7 +4687,34 @@ function openAssetModal760(a){
   $("assetName").value=a?.nome||"";
   assetSetAssistedValue7610("assetStatus",null,a?.status||"Ativo");
   if($("assetSchool")){
-    $("assetSchool").value=activeSchoolId7622()||(a?.idEscola||"");
+    const activeScope=activeSchoolId7622();
+
+    if(a){
+      $("assetSchool").value=activeScope||(a?.idEscola||"");
+    }else{
+      // 7.6.5.0:
+      // Specific School selected -> new asset is automatically assigned there.
+      // All Schools -> user must explicitly choose a School / Unit.
+      $("assetSchool").value=activeScope||"";
+    }
+
+    const selectedName=(qrAssetOptions7610.schools||[]).find(
+      x=>x.idEscola===$("assetSchool").value
+    )?.escola||$("assetSchool").value;
+
+    if($("assetSchoolHelp")){
+      $("assetSchoolHelp").textContent=activeScope
+        ?(
+          qrLanguage==="en-US"
+            ?`This asset belongs to the selected School / Unit: ${selectedName}.`
+            :`Este ativo pertence ao Colégio / Unidade selecionado: ${selectedName}.`
+        )
+        :(
+          qrLanguage==="en-US"
+            ?"All Schools is selected. Select the School / Unit for this asset."
+            :"Todos os colégios está selecionado. Selecione o Colégio / Unidade deste ativo."
+        );
+    }
   }
   $("assetBuilding").value=a?.building||"";
   $("assetRoom").value=a?.room||"";
@@ -4172,8 +4772,16 @@ async function saveAsset760(){
   if(!name)return alert(qrLanguage==="en-US"?"Enter the asset name.":"Informe o nome do equipamento.");
   if(!existing&&!$("assetTypeCode").value)return alert(qrLanguage==="en-US"?"Select the asset type/code before saving.":"Selecione o tipo/sigla do ativo antes de salvar.");
   if(!existing&&(!id||id==="—"))return alert(qrLanguage==="en-US"?"Generate the asset ID before saving.":"Gere o ID do ativo antes de salvar.");
-  const schoolId=activeSchoolId7622()||String($("assetSchool")?.value||"");
-  if(!schoolId)return alert(qrLanguage==="en-US"?"Select the school/unit.":"Selecione o colégio/unidade.");
+  const selectedScopeSchool=activeSchoolId7622();
+  const schoolId=selectedScopeSchool||String($("assetSchool")?.value||"");
+
+  if(!schoolId){
+    return alert(
+      qrLanguage==="en-US"
+        ?"All Schools is selected. Choose the School / Unit for the new asset."
+        :"Todos os colégios está selecionado. Escolha o Colégio / Unidade do novo ativo."
+    );
+  }
 
   const provider=assetProviderPayload7610();
   const btn=$("assetSave");
@@ -4412,6 +5020,7 @@ const QR_TEXT={
     tabOccurrenceCatalog:"🧩 Categorias e Componentes",
     tabMaintenancePending:"📌 Pendências / Providências",
     tabAssetManagement:"🏷️ Gestão de Ativos",
+    tabSchoolsAdmin:"🏫 Gestão de Colégios / Unidades",
     tabDocumentUpload:"📤 Upload de Documentos",
     tabUsers:"👥 Gestão de Usuários",
     tabAudit:"🧾 Auditoria",
@@ -4455,6 +5064,7 @@ const QR_TEXT={
     tabOccurrenceCatalog:"🧩 Categories & Components",
     tabMaintenancePending:"📌 Pending Actions",
     tabAssetManagement:"🏷️ Asset Management",
+    tabSchoolsAdmin:"🏫 School / Unit Management",
     tabDocumentUpload:"📤 Upload Documents",
     tabUsers:"👥 User Management",
     tabAudit:"🧾 Audit",
@@ -5628,6 +6238,14 @@ function qrApplyLanguage(lang){
   syncUserSchoolField7620();
   if($("maintenancePendingTitle"))$("maintenancePendingTitle").textContent=qrLanguage==="en-US"?"📌 Pending Actions":"📌 Pendências / Providências";
   if($("maintenancePendingHelp"))$("maintenancePendingHelp").textContent=qrLanguage==="en-US"?"Needs identified during preventive maintenance that require follow-up.":"Necessidades identificadas durante as preventivas e que exigem alguma providência.";
+  if($("schoolsAdminArea")&&!$("schoolsAdminArea").classList.contains("hidden")&&qrSchoolsAdmin7650){
+    renderSchoolsAdmin7650();
+  }
+
+  if($("schoolAdminModal")&&$("schoolAdminModal").style.display==="flex"){
+    applySchoolAdminLanguage7650();
+  }
+
   if($("preventivePhotoLabel")){
     $("preventivePhotoLabel").textContent=
       qrLanguage==="en-US"?"Photo / evidence":"Foto / evidência";
@@ -5751,6 +6369,12 @@ qrInstallLocalizedDateControls();
 async function main(){buildManageDropdowns();setupPasswordToggles();readPreventiveSession();readSystemSession();setupInstallExperience();await loadPublicAppConfig();qrApplyLanguage(qrLanguage);if(await openSetPasswordFromUrl())return;$("controlCompetence").value=currentCompetence();setDefaultOccurrenceReportDates();const id=getId();if(!id||id==="EQBUSCA"){clearOriginAsset();show("searchScreen");if(await systemSessionIsValid())openMainMenu();else showMenuGate();return}await loadAsset(id)}main();
 
 $("tabAssetManagement").onclick=openAssetManagement760;
+$("tabSchoolsAdmin").onclick=showSchoolsAdminTab7650;
+$("schoolsAdminBackMenu").onclick=showSearchTab;
+$("newSchoolAdminButton").onclick=openNewSchoolAdmin7650;
+$("schoolsAdminSearch").oninput=renderSchoolsAdmin7650;
+$("cancelSchoolAdmin").onclick=()=>$("schoolAdminModal").style.display="none";
+$("saveSchoolAdmin").onclick=saveSchoolAdmin7650;
 $("assetNewButton").onclick=()=>openAssetModal760(null);
 $("assetCancel").onclick=()=>$("assetEditModal").style.display="none";
 $("assetSave").onclick=()=>saveAsset760().catch(e=>alert(e.message));
@@ -6798,6 +7422,39 @@ const QR_ROUTINE_HELP_7631 = {
     }
   },
 
+  schoolsAdmin:{
+    pt:{
+      title:"🏫 Gestão de Colégios / Unidades",
+      purpose:"Permite cadastrar, editar, ativar e inativar colégios/unidades sem acessar diretamente a planilha.",
+      when:"Use quando uma nova escola entrar no grupo ou quando dados cadastrais de uma unidade precisarem ser atualizados.",
+      steps:[
+        "Abra Gestão de Colégios / Unidades no Menu Principal.",
+        "Clique em Novo Colégio / Unidade.",
+        "Informe nome, tipo, endereço, cidade e estado.",
+        "Salve. O School ID é gerado automaticamente.",
+        "A nova escola passa a ficar disponível nos filtros, Gestão de Ativos e Gestão de Usuários."
+      ],
+      rules:"O School ID não pode ser alterado depois da criação. Escolas com histórico não são excluídas fisicamente; podem ser inativadas e reativadas.",
+      access:"Rotina exclusiva do perfil MASTER.",
+      example:"Exemplo: ao cadastrar uma quarta escola, o sistema gera SCH-004 automaticamente."
+    },
+    en:{
+      title:"🏫 School / Unit Management",
+      purpose:"Allows schools / units to be created, edited, activated, and deactivated without directly editing the spreadsheet.",
+      when:"Use this when a new school joins the group or when a unit's registration information needs to be updated.",
+      steps:[
+        "Open School / Unit Management from the Main Menu.",
+        "Click New School / Unit.",
+        "Enter name, type, address, city, and state.",
+        "Save. The School ID is generated automatically.",
+        "The new school becomes available in filters, Asset Management, and User Management."
+      ],
+      rules:"School ID cannot be changed after creation. Schools with history are not physically deleted; they can be deactivated and reactivated.",
+      access:"MASTER profile only.",
+      example:"Example: when the fourth school is created, the system automatically generates SCH-004."
+    }
+  },
+
   company:{
     pt:{
       title:"⚙️ Configuração da Empresa",
@@ -6842,6 +7499,7 @@ const QR_ROUTINE_HELP_MAP_7631 = [
   ["occurrenceCatalogArea","catalog"],
   ["maintenancePendingArea","maintenancePending"],
   ["assetManagementPanel","assets"],
+  ["schoolsAdminArea","schoolsAdmin"],
   ["documentUploadArea","upload"],
   ["usersArea","users"],
   ["auditArea","audit"],
@@ -7042,6 +7700,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.4.2 - Preventive Maintenance English text fixes.
 
 // QRManut USA 7.6.4.3 - Immediate feedback on preventive maintenance registration.
+
+// QRManut USA 7.6.5.0 - School / Unit Management + scoped Asset Management.
 </script>
 
 </body>
