@@ -1376,6 +1376,16 @@ button.dashboard-kpi-card:hover{
   outline:none;
 }
 
+
+/* Record & Evidence Management – 7.6.7.0 */
+.occurrence-file-box{margin-top:14px;padding:12px;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px}
+.occurrence-document-list{display:grid;gap:6px;margin-top:7px}
+.occurrence-document-item{padding:8px 10px;border:1px solid #e2e8f0;border-radius:9px;background:#fff}
+.record-management-actions,.preventive-evidence-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.btn-danger{background:#b42318!important;color:#fff!important}
+.btn-danger-secondary{background:#fff!important;color:#b42318!important;border:1px solid #d92d20!important}
+.delete-warning-box{margin:10px 0;padding:11px 12px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;border-radius:10px;line-height:1.45}
+@media(max-width:640px){.record-management-actions,.preventive-evidence-actions{display:grid;grid-template-columns:1fr}.record-management-actions button,.preventive-evidence-actions button{width:100%}}
 </style>
 </head>
 <body>
@@ -1766,7 +1776,7 @@ button.dashboard-kpi-card:hover{
       </div>
       <div class="upload-file-box">
         <div id="uploadDocumentFileLabel" style="font-weight:700">Arquivo PDF *</div>
-        <button id="uploadDocumentChooseFileButton" type="button" class="btn btn-secondary" style="margin-top:9px">📎 Escolher arquivo PDF</button>
+        <button id="uploadDocumentChooseFileButton" type="button" class="btn btn-secondary" style="margin-top:9px">📎 Escolher arquivo ou foto PDF</button>
         <input id="uploadDocumentFile" class="photo-source-hidden" type="file" accept="application/pdf,.pdf">
         <div id="uploadDocumentFileName" class="upload-file-name">Nenhum arquivo selecionado.</div>
       </div>
@@ -2118,6 +2128,44 @@ button.dashboard-kpi-card:hover{
 
 
 
+<div id="recordDeleteModal7670" class="modal">
+  <div class="modal-box" style="max-width:620px">
+    <h2 id="recordDeleteTitle7670">🗑️ Excluir registro</h2>
+    <div id="recordDeleteWarning7670" class="delete-warning-box"></div>
+    <input id="recordDeleteType7670" type="hidden">
+    <input id="recordDeleteId7670" type="hidden">
+    <label id="recordDeleteReasonLabel7670">Motivo da exclusão *
+      <textarea id="recordDeleteReason7670" rows="4"></textarea>
+    </label>
+    <div id="recordDeleteMessage7670" class="message"></div>
+    <div class="modal-actions">
+      <button id="recordDeleteCancel7670" class="btn btn-secondary" type="button">Cancelar</button>
+      <button id="recordDeleteConfirm7670" class="btn btn-danger" type="button">Excluir registro</button>
+    </div>
+  </div>
+</div>
+
+<div id="preventivePhotoReplaceModal7670" class="modal">
+  <div class="modal-box" style="max-width:620px">
+    <h2 id="preventivePhotoReplaceTitle7670">📷 Substituir foto da preventiva</h2>
+    <div id="preventivePhotoReplaceRecord7670" class="preventive-info"></div>
+    <input id="preventivePhotoReplaceId7670" type="hidden">
+    <div class="photo-source-actions" style="margin-top:12px">
+      <button id="preventivePhotoReplaceCamera7670" type="button" class="btn btn-blue">📷 Tirar nova foto</button>
+      <button id="preventivePhotoReplaceAttach7670" type="button" class="btn btn-secondary">🖼️ Escolher imagem</button>
+    </div>
+    <input id="preventivePhotoReplaceCameraInput7670" class="photo-source-hidden" type="file" accept="image/*" capture="environment">
+    <input id="preventivePhotoReplaceInput7670" class="photo-source-hidden" type="file" accept="image/*">
+    <div id="preventivePhotoReplaceStatus7670" class="muted" style="margin-top:7px"></div>
+    <img id="preventivePhotoReplacePreview7670" class="photo-preview">
+    <div id="preventivePhotoReplaceMessage7670" class="message"></div>
+    <div class="modal-actions">
+      <button id="preventivePhotoReplaceCancel7670" class="btn btn-secondary" type="button">Cancelar</button>
+      <button id="preventivePhotoReplaceSave7670" class="btn btn-blue" type="button">Substituir foto</button>
+    </div>
+  </div>
+</div>
+
 <div id="problemAssetDetailModal" class="modal">
   <div class="modal-box problem-asset-detail-box">
     <div class="problem-asset-detail-head">
@@ -2321,7 +2369,16 @@ button.dashboard-kpi-card:hover{
 </div>
 <div id="signatureBox" class="signature-box hidden"><div class="signature-title">✍️ Assinatura do responsável <span id="signatureRequiredText" class="required-yes"></span></div><div class="signature-help">Assine no quadro usando o dedo ou mouse.</div><div class="signature-canvas-wrap"><canvas id="signatureCanvas"></canvas></div><button id="clearSignature" type="button" class="btn btn-secondary" style="margin-top:8px">Limpar assinatura</button></div><div id="preventiveMessage" class="message"></div><div class="modal-actions"><button id="cancelPreventive" class="btn btn-secondary">Cancelar</button><button id="savePreventive" class="btn btn-green">Registrar Preventiva</button></div></div></div>
 
-<div id="reportModal" class="modal"><div class="modal-box"><h2>Reportar Serviço / Anomalia / Reparo</h2><label>Seu nome *<input id="reporterName"></label><label>Contato<input id="reporterContact"></label><label><span id="reportCategoryLabel">Categoria *</span><select id="category"><option value="">Selecione...</option></select></label><label><span id="reportComponentLabel">Componente *</span><select id="component"><option value="">Selecione...</option></select></label><label><span id="reportPerceptionLabel">O que você percebeu? *</span><select id="reportPerception"><option value="">Selecione...</option><option value="NOT_WORKING">Não está funcionando</option><option value="NOISE_VIBRATION">Barulho ou vibração diferente</option><option value="LEAK">Vazamento / água onde não deveria</option><option value="SMELL_SMOKE">Cheiro, fumaça ou gás</option><option value="ALARM_WARNING">Alarme ou aviso</option><option value="PERFORMANCE">Não está funcionando como deveria</option><option value="SERVICE_INSPECTION">Preciso de serviço ou inspeção</option><option value="OTHER">Outro</option></select></label><label>Descrição *<textarea id="description" rows="5"></textarea></label><label>Foto<input id="photoInput" type="file" accept="image/*" capture="environment"></label><img id="photoPreview" class="photo-preview"><div id="reportMessage" class="message"></div><div class="modal-actions"><button id="cancelReport" class="btn btn-secondary">Cancelar</button><button id="sendReport" class="btn">Gravar ocorrência</button></div></div></div>
+<div id="reportModal" class="modal"><div class="modal-box"><h2>Reportar Serviço / Anomalia / Reparo</h2><label>Seu nome *<input id="reporterName"></label><label>Contato<input id="reporterContact"></label><label><span id="reportCategoryLabel">Categoria *</span><select id="category"><option value="">Selecione...</option></select></label><label><span id="reportComponentLabel">Componente *</span><select id="component"><option value="">Selecione...</option></select></label><label><span id="reportPerceptionLabel">O que você percebeu? *</span><select id="reportPerception"><option value="">Selecione...</option><option value="NOT_WORKING">Não está funcionando</option><option value="NOISE_VIBRATION">Barulho ou vibração diferente</option><option value="LEAK">Vazamento / água onde não deveria</option><option value="SMELL_SMOKE">Cheiro, fumaça ou gás</option><option value="ALARM_WARNING">Alarme ou aviso</option><option value="PERFORMANCE">Não está funcionando como deveria</option><option value="SERVICE_INSPECTION">Preciso de serviço ou inspeção</option><option value="OTHER">Outro</option></select></label><label>Descrição *<textarea id="description" rows="5"></textarea></label><label>Foto<input id="photoInput" type="file" accept="image/*" capture="environment"></label><img id="photoPreview" class="photo-preview">
+<div class="occurrence-file-box">
+  <div id="reportOccurrenceFileTitle" style="font-weight:800">📎 Arquivo ou foto complementar (opcional)</div>
+  <div id="reportOccurrenceFileHelp" class="muted" style="margin-top:4px">PDF, Word, Excel, CSV, TXT, JPG/JPEG, PNG ou HEIC/HEIF • até 8 MB.</div>
+  <button id="reportOccurrenceFileChoose" type="button" class="btn btn-secondary" style="margin-top:8px">📎 Escolher arquivo ou foto</button>
+  <input id="reportOccurrenceFileInput" class="photo-source-hidden" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.heic,.heif,image/jpeg,image/png,image/heic,image/heif">
+  <div id="reportOccurrenceFileName" class="muted" style="margin-top:6px">Nenhum arquivo selecionado.</div>
+  <label id="reportOccurrenceFileDescriptionLabel">Descrição do arquivo (opcional)<input id="reportOccurrenceFileDescription"></label>
+</div>
+<div id="reportMessage" class="message"></div><div class="modal-actions"><button id="cancelReport" class="btn btn-secondary">Cancelar</button><button id="sendReport" class="btn">Gravar ocorrência</button></div></div></div>
 
 <div id="manageModal" class="modal"><div class="modal-box"><h2>Gerenciar ocorrência</h2><label>Alterado por *<input id="manageChangedBy"></label><label>Categoria<select id="manageCategory"></select></label><label>Componente<select id="manageComponent"></select></label><label>Descrição<textarea id="manageDescription" rows="4"></textarea></label><label>Status<select id="manageStatus"><option>Aberta</option><option>Em atendimento</option><option>Aguardando peça</option><option>Concluída</option><option>Cancelada</option></select></label><label>Responsável<input id="manageResponsible"></label><label>Solução<textarea id="manageSolution" rows="4"></textarea></label><div id="manageClassificationBox" class="hidden" style="margin-top:14px;padding:12px;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px"><div id="manageClassificationTitle" style="font-weight:800">🧠 Classificação assistida</div><div id="manageClassificationSummary" class="muted" style="margin-top:6px"></div><label id="manageClassificationFinalLabel" style="margin-top:10px">Revisar classificação<select id="manageClassificationFinal"><option value="">Sem alteração</option><option value="ANOMALY">Confirmar: Anomalia</option><option value="SERVICE_REQUEST">Confirmar: Solicitação de serviço</option><option value="UNCLASSIFIED">Manter como não classificada</option></select></label><div id="manageClassificationHelp" class="muted" style="margin-top:5px">Somente MASTER/GESTOR pode confirmar ou corrigir a classificação.</div></div><div id="existingOccurrencePhotoBox" class="hidden" style="margin-top:14px;padding:12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:12px">
   <div id="existingOccurrencePhotoTitle" style="font-weight:800;color:#1e3a8a">📷 Foto inicial registrada</div>
@@ -2329,11 +2386,23 @@ button.dashboard-kpi-card:hover{
   <a id="existingOccurrencePhotoLink" class="document-open" href="#" target="_blank" rel="noopener" style="margin-top:8px">Abrir foto inicial</a>
   <img id="existingOccurrencePhotoPreview" class="photo-preview" alt="Foto inicial da ocorrência" style="margin-top:10px">
 </div>
-<label>Adicionar nova foto da ocorrência / correção</label><div class="photo-source-actions"><button type="button" id="manageOccurrenceCameraButton" class="btn btn-blue">📷 Tirar foto</button><button type="button" id="manageOccurrenceAttachButton" class="btn btn-secondary">🖼️ Anexar imagem</button></div><input id="manageOccurrenceCameraInput" class="photo-source-hidden" type="file" accept="image/*" capture="environment"><input id="manageOccurrencePhotoInput" class="photo-source-hidden" type="file" accept="image/*"><div id="manageOccurrencePhotoStatus" class="muted" style="margin-top:5px"></div><img id="manageOccurrencePhotoPreview" class="photo-preview"><div id="conclusionPhotoArea" class="hidden"><label>Foto da conclusão</label><div class="photo-source-actions"><button type="button" id="conclusionCameraButton" class="btn btn-blue">📷 Tirar foto</button><button type="button" id="conclusionAttachButton" class="btn btn-secondary">🖼️ Anexar imagem</button></div><input id="conclusionCameraInput" class="photo-source-hidden" type="file" accept="image/*" capture="environment"><input id="conclusionPhotoInput" class="photo-source-hidden" type="file" accept="image/*"><div id="conclusionPhotoStatus" class="muted" style="margin-top:5px"></div><img id="conclusionPhotoPreview" class="photo-preview"></div><div id="manageMessage" class="message"></div><div class="modal-actions"><button id="cancelManage" class="btn btn-secondary">Cancelar</button><button id="saveManage" class="btn">Salvar alterações</button></div></div></div>
+<label id="manageOccurrencePhotoLabel">Substituir foto da ocorrência</label>
+<div id="manageOccurrencePhotoHelp" class="muted" style="margin-top:3px">Ao salvar uma nova foto, ela substituirá a foto atual do registro.</div>
+<div class="photo-source-actions"><button type="button" id="manageOccurrenceCameraButton" class="btn btn-blue">📷 Tirar foto</button><button type="button" id="manageOccurrenceAttachButton" class="btn btn-secondary">🖼️ Anexar imagem</button></div><input id="manageOccurrenceCameraInput" class="photo-source-hidden" type="file" accept="image/*" capture="environment"><input id="manageOccurrencePhotoInput" class="photo-source-hidden" type="file" accept="image/*"><div id="manageOccurrencePhotoStatus" class="muted" style="margin-top:5px"></div><img id="manageOccurrencePhotoPreview" class="photo-preview"><div id="conclusionPhotoArea" class="hidden"><label id="conclusionPhotoLabel">Foto da conclusão / substituir foto</label><div class="photo-source-actions"><button type="button" id="conclusionCameraButton" class="btn btn-blue">📷 Tirar foto</button><button type="button" id="conclusionAttachButton" class="btn btn-secondary">🖼️ Anexar imagem</button></div><input id="conclusionCameraInput" class="photo-source-hidden" type="file" accept="image/*" capture="environment"><input id="conclusionPhotoInput" class="photo-source-hidden" type="file" accept="image/*"><div id="conclusionPhotoStatus" class="muted" style="margin-top:5px"></div><img id="conclusionPhotoPreview" class="photo-preview"></div><div class="occurrence-file-box">
+  <div id="manageOccurrenceFilesTitle" style="font-weight:800">📎 Arquivos e fotos complementares</div>
+  <div id="manageOccurrenceExistingFiles" style="margin-top:7px"></div>
+  <div class="section" style="margin-top:10px;padding-top:10px">
+    <button id="manageOccurrenceFileChoose" type="button" class="btn btn-secondary">📎 Acrescentar arquivo ou foto</button>
+    <input id="manageOccurrenceFileInput" class="photo-source-hidden" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.heic,.heif,image/jpeg,image/png,image/heic,image/heif">
+    <div id="manageOccurrenceFileName" class="muted" style="margin-top:6px">Nenhum novo arquivo selecionado.</div>
+    <label id="manageOccurrenceFileDescriptionLabel">Descrição do arquivo (opcional)<input id="manageOccurrenceFileDescription"></label>
+  </div>
+</div>
+<div id="manageMessage" class="message"></div><div class="modal-actions"><button id="cancelManage" class="btn btn-secondary">Cancelar</button><button id="saveManage" class="btn">Salvar alterações</button></div></div></div>
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.6.5</div>
+<div class="footer">QRManut USA • Version 7.6.7.1</div>
 </div>
 <script>
 /* ============================================================
@@ -2351,6 +2420,11 @@ let executiveDashboardDetailKind7661="";
 let problemAssetsData7662=null;
 let problemAssetsLoading7662=false;
 let problemAssetDetailData7662=null;
+let reportOccurrenceFile7670=null;
+let manageOccurrenceFile7670=null;
+let preventivePhotoReplacement7670=null;
+let recordDeletePosting7670=false;
+let preventivePhotoReplacePosting7670=false;
 let preventiveChecklistData7640=null;
 let preventiveChecklistAdminData7640=null;
 let preventiveChecklistAdminEditing7640=null;
@@ -3239,6 +3313,7 @@ function renderOccurrenceReport(){
       `<div class="occ-report-links">`+
         `${item.fotoAbertura?`<a href="${esc(item.fotoAbertura)}" target="_blank" rel="noopener">📷 ${t("Foto da abertura","Opening photo")}</a>`:""}`+
         `${item.fotoConclusao?`<a href="${esc(item.fotoConclusao)}" target="_blank" rel="noopener">📷 ${t("Foto da conclusão","Completion photo")}</a>`:""}`+
+        `${(item.documentos||[]).map(d=>`<a href="${esc(d.linkDrive||"")}" target="_blank" rel="noopener">📎 ${esc(d.nomeArquivo||t("Arquivo","File"))}</a>`).join("")}`+
       `</div>`+
       `<a class="open-button" href="?id=${encodeURIComponent(normalizeId(item.id))}">${t("Abrir ficha","Open record")}</a>`+
     `</div>`
@@ -3569,10 +3644,10 @@ function qrPreventiveCompetence7642(value){
     : raw;
 }
 
-const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated",SCHOOL_CRIADO:"School Created",SCHOOL_ALTERADO:"School Updated",SCHOOL_ATIVADO:"School Activated",SCHOOL_INATIVADO:"School Deactivated",CLASSIFICACAO_OC_REVISADA:"Work Order Classification Reviewed"};
+const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated",SCHOOL_CRIADO:"School Created",SCHOOL_ALTERADO:"School Updated",SCHOOL_ATIVADO:"School Activated",SCHOOL_INATIVADO:"School Deactivated",CLASSIFICACAO_OC_REVISADA:"Work Order Classification Reviewed",OC_EXCLUIDA:"Work Order Deleted",PREVENTIVA_EXCLUIDA:"Preventive Record Deleted",FOTO_OC_SUBSTITUIDA:"Work Order Photo Replaced",FOTO_CONCLUSAO_OC_SUBSTITUIDA:"Conclusion Photo Replaced",FOTO_PREVENTIVA_SUBSTITUIDA:"Preventive Photo Replaced",DOCUMENTO_OC_ENVIADO:"Work Order File Uploaded"};
 function qrAuditAction7612(v){const s=String(v||"");return qrLanguage==="en-US"?(QR_AUDIT_EN_7612[s]||s):s;}
 function qrAuditResult7612(v){const s=String(v||"");return qrLanguage==="en-US"?({SUCESSO:"Success",FALHA:"Failed",BLOQUEADO:"Blocked"}[s]||s):s;}
-function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component",CHECKLIST_PREVENTIVA:"Preventive Checklist",ESCOLA:"School / Unit"}[s]||s;}
+function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component",CHECKLIST_PREVENTIVA:"Preventive Checklist",ESCOLA:"School / Unit",DOCUMENTO_OC:"Work Order File"}[s]||s;}
 
 function renderPreventiveControl(){
   const d=preventiveControlData,s=d.summary,t=qrT7612;
@@ -3859,7 +3934,27 @@ function renderHistory(items){
 function renderHistoryItem(i){
   const x=history[i];if(!x)return;selectedOccurrence=x;
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
-  $("historyDetail").innerHTML=`<div class="history-card"><b>${esc(x.ocorrencia)}</b><div class="muted">${esc(formatDate(x.data))}</div><span class="tag">${esc(qrLanguage==="en-US"?qrTranslateExactText(x.status):x.status)}</span>${x.categoriaOcorrencia?`<span class="tag">${esc(x.categoriaOcorrencia)}</span>`:""}${x.componenteAfetado?`<span class="tag">${esc(x.componenteAfetado)}</span>`:""}<div style="margin-top:8px"><b>${t("Descrição","Description")}:</b><br>${esc(x.descricao)}</div>${x.foto?`<div style="margin-top:8px"><a href="${esc(x.foto)}" target="_blank">📷 ${t("Ver foto","View photo")}</a></div>`:""}${x.solucao?`<div style="margin-top:8px"><b>${t("Solução","Solution")}:</b><br>${esc(x.solucao)}</div>`:""}${systemSession&&sessionAllowsAssetSchool7620(currentAsset)&&systemSession.perfil!=="CONSULTA"&&(["MASTER","GESTOR"].includes(systemSession.perfil)||systemSession.podeAtenderOC)?`<button class="btn" style="width:100%;margin-top:12px" onclick="openManage(${i})">${t("Gerenciar ocorrência","Manage Work Order")}</button>`:""}</div>`;
+  const canManage=systemSession&&sessionAllowsAssetSchool7620(currentAsset)&&systemSession.perfil!=="CONSULTA"&&(["MASTER","GESTOR"].includes(systemSession.perfil)||systemSession.podeAtenderOC);
+  const canDelete=systemSession&&sessionAllowsAssetSchool7620(currentAsset)&&["MASTER","GESTOR"].includes(systemSession.perfil);
+  const docs=(x.documentos||[]).length
+    ?`<div style="margin-top:9px"><b>📎 ${t("Arquivos da ocorrência","Work Order Files")}:</b>${occurrenceDocumentsHtml7670(x.documentos||[])}</div>`
+    :"";
+  const actions=(canManage||canDelete)?`<div class="record-management-actions">
+    ${canManage?`<button class="btn" type="button" onclick="openManage(${i})">${t("Gerenciar ocorrência","Manage Work Order")}</button>`:""}
+    ${canDelete?`<button class="btn btn-danger-secondary" type="button" onclick="requestDeleteRecord7670('OCCURRENCE','${esc(x.ocorrencia)}')">🗑️ ${t("Excluir ocorrência","Delete Work Order")}</button>`:""}
+  </div>`:"";
+  $("historyDetail").innerHTML=`<div class="history-card">
+    <b>${esc(x.ocorrencia)}</b>
+    <div class="muted">${esc(formatDate(x.data))}</div>
+    <span class="tag">${esc(qrLanguage==="en-US"?qrTranslateExactText(x.status):x.status)}</span>
+    ${x.categoriaOcorrencia?`<span class="tag">${esc(x.categoriaOcorrencia)}</span>`:""}
+    ${x.componenteAfetado?`<span class="tag">${esc(x.componenteAfetado)}</span>`:""}
+    <div style="margin-top:8px"><b>${t("Descrição","Description")}:</b><br>${esc(x.descricao)}</div>
+    ${x.foto?`<div style="margin-top:8px"><a href="${esc(x.foto)}" target="_blank" rel="noopener">📷 ${t("Ver foto","View photo")}</a></div>`:""}
+    ${docs}
+    ${x.solucao?`<div style="margin-top:8px"><b>${t("Solução","Solution")}:</b><br>${esc(x.solucao)}</div>`:""}
+    ${actions}
+  </div>`;
 }
 async function loadPreventiveHistory(){
   const r=await api({action:"preventivehistory",id:currentAsset.id,systemSession:systemSession.systemSessionToken});
@@ -3892,6 +3987,12 @@ async function loadPreventiveHistory(){
       ${item.assinatura?`<div style="margin-top:8px"><a href="${esc(item.assinatura)}" target="_blank" rel="noopener">✍️ ${t("Ver assinatura","View signature")}</a></div>`:""}
       ${checklistHtml}
       ${docsHtml}
+      ${systemSession&&systemSession.perfil!=="CONSULTA"?`
+        <div class="preventive-evidence-actions">
+          <button class="btn btn-secondary" type="button" onclick="openPreventivePhotoReplace7670('${esc(item.registro)}')">📷 ${t("Substituir foto","Replace Photo")}</button>
+          ${["MASTER","GESTOR"].includes(systemSession.perfil)?`<button class="btn btn-danger-secondary" type="button" onclick="requestDeleteRecord7670('PREVENTIVE','${esc(item.registro)}')">🗑️ ${t("Excluir preventiva","Delete Preventive")}</button>`:""}
+        </div>
+      `:""}
     </div>`;
   }).join("");
 }
@@ -4326,8 +4427,271 @@ async function savePreventive(){
   }
 }
 function showPreventiveError(m){$("preventiveMessage").className="message error";$("preventiveMessage").textContent=m}
-async function openReport(){await populateOccurrenceCategorySelect();$("reporterName").value=getSavedResponsible();$("reporterContact").value="";$("category").value="";$("component").innerHTML='<option value="">Selecione...</option>';$("reportPerception").value="";$("description").value="";$("photoInput").value="";photoData=null;$("photoPreview").style.display="none";$("reportMessage").className="message";$("reportMessage").innerHTML="";$("sendReport").disabled=false;$("sendReport").textContent=qrLanguage==="en-US"?"Save Work Order":"Gravar ocorrência";$("cancelReport").textContent=qrLanguage==="en-US"?"Cancel":"Cancelar";$("reportModal").style.display="flex"}
-async function sendReport(){if(reportPosting)return;const name=$("reporterName").value.trim(),description=$("description").value.trim(),perception=$("reportPerception").value;if(!name||!$("category").value||!$("component").value||!perception||!description){$("reportMessage").className="message error";$("reportMessage").textContent=qrLanguage==="en-US"?"Complete the required fields.":"Preencha os campos obrigatórios.";return}saveResponsible(name);reportPosting=true;$("sendReport").disabled=true;$("sendReport").textContent=qrLanguage==="en-US"?"Saving...":"Gravando...";$("reportMessage").className="message loading";$("reportMessage").textContent=qrLanguage==="en-US"?"Saving work order...":"Registrando ocorrência...";try{const r=await apiPost({action:"reportOccurrence",id:currentAsset.id,reportadoPor:name,contato:$("reporterContact").value,categoriaOcorrencia:$("category").value,componenteAfetado:$("component").value,userPerception:perception,descricao:description,fotoBase64:photoData?.base64||"",fotoNome:photoData?.name||"",fotoMime:photoData?.mime||""});if(!r.ok)throw new Error(r.detail||"Não foi possível registrar a ocorrência.");let n="";if(r.notificacaoPrestador==="Sim")n=`<br><br>📧 <b>Prestador notificado:</b><br>${esc(r.emailPrestador)}`;else if(r.notificacaoPrestador==="Não - sem e-mail")n="<br><br>⚠️ Prestador configurado para receber a ocorrência, mas sem e-mail cadastrado.";else if(r.notificacaoPrestador==="Erro")n="<br><br>⚠️ A ocorrência foi registrada, mas houve erro ao notificar o prestador.";else n="<br><br>ℹ️ Este prestador não está configurado para receber notificações de ocorrência.";$("reportMessage").className="message success";$("reportMessage").innerHTML=`✅ Ocorrência <b>${esc(r.ocorrencia)}</b> registrada com sucesso.${n}`;$("sendReport").textContent="Ocorrência gravada";$("cancelReport").textContent="Fechar"}catch(e){reportPosting=false;$("sendReport").disabled=false;$("sendReport").textContent="Gravar ocorrência";$("reportMessage").className="message error";$("reportMessage").textContent=e.message}}
+
+/* ============================================================
+ * RECORD & EVIDENCE MANAGEMENT – 7.6.7.0
+ * ============================================================ */
+function evidenceT7670(pt,en){return qrLanguage==="en-US"?en:pt}
+
+function occurrenceFileAllowed7670(file){
+  return !!file && /\.(pdf|doc|docx|xls|xlsx|csv|txt|jpg|jpeg|png|heic|heif)$/i.test(String(file.name||""));
+}
+
+function readFileDataUrl7670(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(String(r.result||""));
+    r.onerror=()=>reject(new Error(evidenceT7670("Não foi possível ler o arquivo.","Unable to read the file.")));
+    r.readAsDataURL(file);
+  });
+}
+
+async function prepareOccurrenceFile7670(file,target){
+  if(!occurrenceFileAllowed7670(file)){
+    throw new Error(evidenceT7670("Arquivo não permitido. Use PDF, Word, Excel, CSV, TXT, JPG/JPEG, PNG ou HEIC/HEIF.","File type not allowed. Use PDF, Word, Excel, CSV, TXT, JPG/JPEG, PNG, or HEIC/HEIF."));
+  }
+  if(file.size>8*1024*1024){
+    throw new Error(evidenceT7670("O arquivo ultrapassa o limite de 8 MB.","The file exceeds the 8 MB limit."));
+  }
+  const item={name:file.name,mime:file.type||"application/octet-stream",base64:await readFileDataUrl7670(file)};
+  if(target==="report"){
+    reportOccurrenceFile7670=item;
+    $("reportOccurrenceFileName").textContent=file.name;
+  }else{
+    manageOccurrenceFile7670=item;
+    $("manageOccurrenceFileName").textContent=file.name;
+  }
+}
+
+function resetReportOccurrenceFile7670(){
+  reportOccurrenceFile7670=null;
+  if($("reportOccurrenceFileInput"))$("reportOccurrenceFileInput").value="";
+  if($("reportOccurrenceFileDescription"))$("reportOccurrenceFileDescription").value="";
+  if($("reportOccurrenceFileName"))$("reportOccurrenceFileName").textContent=evidenceT7670("Nenhum arquivo selecionado.","No file selected.");
+}
+
+function resetManageOccurrenceFile7670(){
+  manageOccurrenceFile7670=null;
+  if($("manageOccurrenceFileInput"))$("manageOccurrenceFileInput").value="";
+  if($("manageOccurrenceFileDescription"))$("manageOccurrenceFileDescription").value="";
+  if($("manageOccurrenceFileName"))$("manageOccurrenceFileName").textContent=evidenceT7670("Nenhum novo arquivo selecionado.","No new file selected.");
+}
+
+function occurrenceDocumentsHtml7670(items){
+  items=Array.isArray(items)?items:[];
+  if(!items.length)return `<div class="muted">${evidenceT7670("Nenhum arquivo anexado.","No file attached.")}</div>`;
+  return `<div class="occurrence-document-list">${items.map(d=>`
+    <div class="occurrence-document-item">
+      <a href="${esc(d.linkDrive||"")}" target="_blank" rel="noopener">📎 ${esc(d.nomeArquivo||evidenceT7670("Arquivo","File"))}</a>
+      ${d.descricao?`<div class="muted">${esc(d.descricao)}</div>`:""}
+    </div>`).join("")}</div>`;
+}
+
+function applyEvidenceLanguage7670(){
+  if($("reportOccurrenceFileTitle")){
+    $("reportOccurrenceFileTitle").textContent=evidenceT7670("📎 Arquivo ou foto complementar (opcional)","📎 Work Order File or Additional Photo (optional)");
+    $("reportOccurrenceFileHelp").textContent=evidenceT7670("PDF, Word, Excel, CSV, TXT, JPG/JPEG, PNG ou HEIC/HEIF • até 8 MB.","PDF, Word, Excel, CSV, TXT, JPG/JPEG, PNG, or HEIC/HEIF • up to 8 MB.");
+    $("reportOccurrenceFileChoose").textContent=evidenceT7670("📎 Escolher arquivo ou foto","📎 Choose File or Photo");
+  }
+  if($("manageOccurrencePhotoLabel")){
+    $("manageOccurrencePhotoLabel").textContent=evidenceT7670("Substituir foto da ocorrência","Replace Work Order Photo");
+    $("manageOccurrencePhotoHelp").textContent=evidenceT7670("Ao salvar uma nova foto, ela substituirá a foto atual do registro.","When saved, the new photo replaces the current record photo.");
+  }
+  if($("manageOccurrenceFilesTitle")){
+    $("manageOccurrenceFilesTitle").textContent=evidenceT7670("📎 Arquivos e fotos complementares","📎 Work Order Files and Additional Photos");
+    $("manageOccurrenceFileChoose").textContent=evidenceT7670("📎 Acrescentar arquivo ou foto","📎 Add File or Photo");
+  }
+  if($("conclusionPhotoLabel")){
+    $("conclusionPhotoLabel").textContent=evidenceT7670("Foto da conclusão / substituir foto","Conclusion photo / replace photo");
+  }
+}
+
+function requestDeleteRecord7670(type,id){
+  if(!["MASTER","GESTOR"].includes(systemSession?.perfil||"")){
+    return alert(evidenceT7670("Somente MASTER ou GESTOR pode excluir registros.","Only MASTER or MANAGER can delete records."));
+  }
+  const preventive=type==="PREVENTIVE";
+  $("recordDeleteType7670").value=type;
+  $("recordDeleteId7670").value=id;
+  $("recordDeleteReason7670").value="";
+  $("recordDeleteMessage7670").className="message";
+  $("recordDeleteMessage7670").textContent="";
+  $("recordDeleteTitle7670").textContent=preventive
+    ?evidenceT7670(`🗑️ Excluir preventiva ${id}`,`🗑️ Delete Preventive ${id}`)
+    :evidenceT7670(`🗑️ Excluir ocorrência ${id}`,`🗑️ Delete Work Order ${id}`);
+  $("recordDeleteWarning7670").textContent=preventive
+    ?evidenceT7670("A preventiva deixará de aparecer no histórico e nos indicadores. A Auditoria conservará usuário, data e motivo.","The preventive record will disappear from history and indicators. Audit retains the user, date, and reason.")
+    :evidenceT7670("A ocorrência deixará de aparecer no histórico, relatórios e indicadores. A Auditoria conservará usuário, data e motivo.","The work order will disappear from history, reports, and indicators. Audit retains the user, date, and reason.");
+  $("recordDeleteReasonLabel7670").firstChild.nodeValue=evidenceT7670("Motivo da exclusão * ","Deletion reason * ");
+  $("recordDeleteCancel7670").textContent=evidenceT7670("Cancelar","Cancel");
+  $("recordDeleteConfirm7670").textContent=evidenceT7670("Excluir registro","Delete Record");
+  $("recordDeleteModal7670").style.display="flex";
+  setTimeout(()=>$("recordDeleteReason7670").focus(),50);
+}
+
+function closeDeleteRecord7670(){
+  if(!recordDeletePosting7670)$("recordDeleteModal7670").style.display="none";
+}
+
+async function confirmDeleteRecord7670(){
+  if(recordDeletePosting7670)return;
+  const type=$("recordDeleteType7670").value,id=$("recordDeleteId7670").value,reason=$("recordDeleteReason7670").value.trim();
+  if(reason.length<3){
+    $("recordDeleteMessage7670").className="message error";
+    $("recordDeleteMessage7670").textContent=evidenceT7670("Informe o motivo da exclusão.","Enter the deletion reason.");
+    return;
+  }
+  recordDeletePosting7670=true;
+  const btn=$("recordDeleteConfirm7670");
+  btn.disabled=true;btn.textContent=evidenceT7670("Excluindo...","Deleting...");
+  $("recordDeleteMessage7670").className="message loading";
+  $("recordDeleteMessage7670").textContent=evidenceT7670("Processando exclusão controlada...","Processing controlled deletion...");
+  try{
+    const payload={action:type==="PREVENTIVE"?"deletePreventive":"deleteOccurrence",deleteReason:reason};
+    if(type==="PREVENTIVE")payload.preventiveRecord=id;else payload.ocorrencia=id;
+    const r=await menuApiPost(payload);
+    if(!r.ok)throw new Error(r.detail||r.error||evidenceT7670("Não foi possível excluir o registro.","Unable to delete the record."));
+    $("recordDeleteMessage7670").className="message success";
+    $("recordDeleteMessage7670").textContent=evidenceT7670("Registro excluído e gravado na Auditoria.","Record deleted and logged in Audit.");
+    setTimeout(()=>location.reload(),600);
+  }catch(e){
+    recordDeletePosting7670=false;btn.disabled=false;btn.textContent=evidenceT7670("Excluir registro","Delete Record");
+    $("recordDeleteMessage7670").className="message error";$("recordDeleteMessage7670").textContent=e.message||String(e);
+  }
+}
+
+function openPreventivePhotoReplace7670(registro){
+  preventivePhotoReplacement7670=null;
+  $("preventivePhotoReplaceId7670").value=registro;
+  $("preventivePhotoReplaceRecord7670").textContent=registro;
+  $("preventivePhotoReplaceCameraInput7670").value="";
+  $("preventivePhotoReplaceInput7670").value="";
+  $("preventivePhotoReplacePreview7670").style.display="none";
+  $("preventivePhotoReplaceStatus7670").textContent="";
+  $("preventivePhotoReplaceMessage7670").className="message";
+  $("preventivePhotoReplaceTitle7670").textContent=evidenceT7670("📷 Substituir foto da preventiva","📷 Replace Preventive Photo");
+  $("preventivePhotoReplaceCamera7670").textContent=evidenceT7670("📷 Tirar nova foto","📷 Take New Photo");
+  $("preventivePhotoReplaceAttach7670").textContent=evidenceT7670("🖼️ Escolher imagem","🖼️ Choose Image");
+  $("preventivePhotoReplaceCancel7670").textContent=evidenceT7670("Cancelar","Cancel");
+  $("preventivePhotoReplaceSave7670").textContent=evidenceT7670("Substituir foto","Replace Photo");
+  $("preventivePhotoReplaceModal7670").style.display="flex";
+}
+
+async function handlePreventiveReplacementFile7670(file){
+  if(!file)return;
+  preventivePhotoReplacement7670=await processPhoto(file);
+  $("preventivePhotoReplaceStatus7670").textContent=file.name;
+  $("preventivePhotoReplacePreview7670").src=preventivePhotoReplacement7670.dataUrl;
+  $("preventivePhotoReplacePreview7670").style.display="block";
+}
+
+async function savePreventivePhotoReplacement7670(){
+  if(preventivePhotoReplacePosting7670)return;
+  if(!preventivePhotoReplacement7670){
+    $("preventivePhotoReplaceMessage7670").className="message error";
+    $("preventivePhotoReplaceMessage7670").textContent=evidenceT7670("Selecione a nova foto.","Select the new photo.");
+    return;
+  }
+  preventivePhotoReplacePosting7670=true;
+  const btn=$("preventivePhotoReplaceSave7670");
+  btn.disabled=true;btn.textContent=evidenceT7670("Substituindo...","Replacing...");
+  try{
+    const r=await menuApiPost({
+      action:"replacePreventivePhoto",
+      preventiveRecord:$("preventivePhotoReplaceId7670").value,
+      photoBase64:preventivePhotoReplacement7670.base64||"",
+      photoName:preventivePhotoReplacement7670.name||"",
+      photoMime:preventivePhotoReplacement7670.mime||""
+    });
+    if(!r.ok)throw new Error(r.detail||r.error||evidenceT7670("Não foi possível substituir a foto.","Unable to replace the photo."));
+    $("preventivePhotoReplaceMessage7670").className="message success";
+    $("preventivePhotoReplaceMessage7670").textContent=evidenceT7670("Foto substituída com sucesso.","Photo replaced successfully.");
+    setTimeout(async()=>{preventivePhotoReplacePosting7670=false;btn.disabled=false;$("preventivePhotoReplaceModal7670").style.display="none";await loadPreventiveHistory();},400);
+  }catch(e){
+    preventivePhotoReplacePosting7670=false;btn.disabled=false;btn.textContent=evidenceT7670("Substituir foto","Replace Photo");
+    $("preventivePhotoReplaceMessage7670").className="message error";$("preventivePhotoReplaceMessage7670").textContent=e.message||String(e);
+  }
+}
+function closePreventivePhotoReplace7670(){
+  if(!preventivePhotoReplacePosting7670)$("preventivePhotoReplaceModal7670").style.display="none";
+}
+
+
+async function openReport(){
+  await populateOccurrenceCategorySelect();
+  resetReportOccurrenceFile7670();
+  applyEvidenceLanguage7670();
+  $("reporterName").value=getSavedResponsible();
+  $("reporterContact").value="";
+  $("category").value="";
+  $("component").innerHTML='<option value="">Selecione...</option>';
+  $("reportPerception").value="";
+  $("description").value="";
+  $("photoInput").value="";
+  photoData=null;
+  $("photoPreview").style.display="none";
+  $("reportMessage").className="message";
+  $("reportMessage").innerHTML="";
+  $("sendReport").disabled=false;
+  $("sendReport").textContent=qrLanguage==="en-US"?"Save Work Order":"Gravar ocorrência";
+  $("cancelReport").textContent=qrLanguage==="en-US"?"Cancel":"Cancelar";
+  $("reportModal").style.display="flex";
+}
+async function sendReport(){
+  if(reportPosting)return;
+  const name=$("reporterName").value.trim();
+  const description=$("description").value.trim();
+  const perception=$("reportPerception").value;
+  if(!name||!$("category").value||!$("component").value||!perception||!description){
+    $("reportMessage").className="message error";
+    $("reportMessage").textContent=qrLanguage==="en-US"?"Complete the required fields.":"Preencha os campos obrigatórios.";
+    return;
+  }
+  saveResponsible(name);
+  reportPosting=true;
+  $("sendReport").disabled=true;
+  $("sendReport").textContent=qrLanguage==="en-US"?"Saving...":"Gravando...";
+  $("reportMessage").className="message loading";
+  $("reportMessage").textContent=qrLanguage==="en-US"?"Saving work order...":"Registrando ocorrência...";
+  try{
+    const r=await apiPost({
+      action:"reportOccurrence",
+      id:currentAsset.id,
+      reportadoPor:name,
+      contato:$("reporterContact").value,
+      categoriaOcorrencia:$("category").value,
+      componenteAfetado:$("component").value,
+      userPerception:perception,
+      descricao:description,
+      fotoBase64:photoData?.base64||"",
+      fotoNome:photoData?.name||"",
+      fotoMime:photoData?.mime||"",
+      occurrenceDocumentBase64:reportOccurrenceFile7670?.base64||"",
+      occurrenceDocumentName:reportOccurrenceFile7670?.name||"",
+      occurrenceDocumentMime:reportOccurrenceFile7670?.mime||"",
+      occurrenceDocumentDescription:$("reportOccurrenceFileDescription").value.trim()
+    });
+    if(!r.ok)throw new Error(r.detail||"Não foi possível registrar a ocorrência.");
+    let n="";
+    if(r.notificacaoPrestador==="Sim")n=`<br><br>📧 <b>Prestador notificado:</b><br>${esc(r.emailPrestador)}`;
+    else if(r.notificacaoPrestador==="Não - sem e-mail")n="<br><br>⚠️ Prestador configurado para receber a ocorrência, mas sem e-mail cadastrado.";
+    else if(r.notificacaoPrestador==="Erro")n="<br><br>⚠️ A ocorrência foi registrada, mas houve erro ao notificar o prestador.";
+    else n="<br><br>ℹ️ Este prestador não está configurado para receber notificações de ocorrência.";
+    let fileNote="";
+    if(r.documento)fileNote=qrLanguage==="en-US"?`<br>📎 File attached: <b>${esc(r.documento.nomeArquivo||"")}</b>`:`<br>📎 Arquivo anexado: <b>${esc(r.documento.nomeArquivo||"")}</b>`;
+    else if(r.documentoErro)fileNote=qrLanguage==="en-US"?`<br>⚠️ Work order saved, but the file could not be attached: ${esc(r.documentoErro)}`:`<br>⚠️ A ocorrência foi salva, mas o arquivo não pôde ser anexado: ${esc(r.documentoErro)}`;
+    $("reportMessage").className="message success";
+    $("reportMessage").innerHTML=`✅ Ocorrência <b>${esc(r.ocorrencia)}</b> registrada com sucesso.${fileNote}${n}`;
+    $("sendReport").textContent=qrLanguage==="en-US"?"Work Order Saved":"Ocorrência gravada";
+    $("cancelReport").textContent=qrLanguage==="en-US"?"Close":"Fechar";
+  }catch(e){
+    reportPosting=false;
+    $("sendReport").disabled=false;
+    $("sendReport").textContent=qrLanguage==="en-US"?"Save Work Order":"Gravar ocorrência";
+    $("reportMessage").className="message error";
+    $("reportMessage").textContent=e.message;
+  }
+}
 const CATEGORIES=["Civil","Sanitário","Elétrica","Hidráulica","Climatização","Refrigeração","Utilidades","Segurança","Mobiliário","Equipamento","Outros"],COMPONENTS=["Geral","Piso","Parede","Teto","Porta","Janela","Vaso Sanitário","Pia","Torneira","Descarga","Mictório","Ralo","Luminária","Tomada","Interruptor","Tubulação","Registro","Bomba","Motor","Painel","Ar-condicionado","Mobiliário","Outro"];
 function buildManageDropdowns(){/* 7.4.6: opções carregadas da planilha */}
 function drivePhotoPreviewUrl(url){
@@ -4407,6 +4771,10 @@ function openManage(i){
   selectedOccurrence=history[i];
   correctionPhotoData=null;
   conclusionPhotoData=null;
+  resetManageOccurrenceFile7670();
+  applyEvidenceLanguage7670();
+  $("manageOccurrenceExistingFiles").innerHTML=
+    occurrenceDocumentsHtml7670(selectedOccurrence.documentos||[]);
 
   $("manageOccurrencePhotoInput").value="";
   $("manageOccurrenceCameraInput").value="";
@@ -4498,7 +4866,11 @@ async function saveManage(){
 
       fotoConclusaoBase64:conclusionPhotoData?.base64||"",
       fotoConclusaoNome:conclusionPhotoData?.name||"",
-      fotoConclusaoMime:conclusionPhotoData?.mime||""
+      fotoConclusaoMime:conclusionPhotoData?.mime||"",
+      occurrenceDocumentBase64:manageOccurrenceFile7670?.base64||"",
+      occurrenceDocumentName:manageOccurrenceFile7670?.name||"",
+      occurrenceDocumentMime:manageOccurrenceFile7670?.mime||"",
+      occurrenceDocumentDescription:$("manageOccurrenceFileDescription").value.trim()
     };
 
     const r=await apiPost(payload);
@@ -4510,8 +4882,9 @@ async function saveManage(){
     $("manageMessage").className="message success";
 
     let evidence="";
-    if(r.fotoCorrecaoSalva)evidence+="<br>📷 Foto da ocorrência salva.";
-    if(r.fotoConclusaoSalva)evidence+="<br>📷 Foto da conclusão salva.";
+    if(r.fotoCorrecaoSalva)evidence+=qrLanguage==="en-US"?"<br>📷 Work order photo replaced.":"<br>📷 Foto da ocorrência substituída.";
+    if(r.fotoConclusaoSalva)evidence+=qrLanguage==="en-US"?"<br>📷 Conclusion photo replaced.":"<br>📷 Foto da conclusão substituída.";
+    if(r.documento)evidence+=qrLanguage==="en-US"?`<br>📎 File attached: ${esc(r.documento.nomeArquivo||"")}`:`<br>📎 Arquivo anexado: ${esc(r.documento.nomeArquivo||"")}`;
 
     $("manageMessage").innerHTML="✅ Alterações salvas com sucesso."+evidence;
 
@@ -4530,6 +4903,18 @@ async function saveManage(){
     $("manageMessage").textContent=e.message;
   }
 }
+$("reportOccurrenceFileChoose").onclick=()=>$("reportOccurrenceFileInput").click();
+$("reportOccurrenceFileInput").onchange=async function(){try{if(this.files[0])await prepareOccurrenceFile7670(this.files[0],"report")}catch(e){reportOccurrenceFile7670=null;this.value="";$("reportOccurrenceFileName").textContent=e.message;alert(e.message)}};
+$("manageOccurrenceFileChoose").onclick=()=>$("manageOccurrenceFileInput").click();
+$("manageOccurrenceFileInput").onchange=async function(){try{if(this.files[0])await prepareOccurrenceFile7670(this.files[0],"manage")}catch(e){manageOccurrenceFile7670=null;this.value="";$("manageOccurrenceFileName").textContent=e.message;alert(e.message)}};
+$("recordDeleteCancel7670").onclick=closeDeleteRecord7670;
+$("recordDeleteConfirm7670").onclick=confirmDeleteRecord7670;
+$("preventivePhotoReplaceCamera7670").onclick=()=>$("preventivePhotoReplaceCameraInput7670").click();
+$("preventivePhotoReplaceAttach7670").onclick=()=>$("preventivePhotoReplaceInput7670").click();
+$("preventivePhotoReplaceCameraInput7670").onchange=async function(){try{if(this.files[0])await handlePreventiveReplacementFile7670(this.files[0])}catch(e){alert(e.message)}};
+$("preventivePhotoReplaceInput7670").onchange=async function(){try{if(this.files[0])await handlePreventiveReplacementFile7670(this.files[0])}catch(e){alert(e.message)}};
+$("preventivePhotoReplaceCancel7670").onclick=closePreventivePhotoReplace7670;
+$("preventivePhotoReplaceSave7670").onclick=savePreventivePhotoReplacement7670;
 $("photoInput").onchange=async function(){if(!this.files[0]){photoData=null;$("photoPreview").style.display="none";return}photoData=await processPhoto(this.files[0]);$("photoPreview").src=photoData.dataUrl;$("photoPreview").style.display="block"};$("preventivePhotoInput").onchange=async function(){if(!this.files[0]){preventivePhotoData=null;if($("preventivePhotoFileName"))$("preventivePhotoFileName").textContent=qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";$("preventivePhotoPreview").style.display="none";return}if($("preventivePhotoFileName"))$("preventivePhotoFileName").textContent=this.files[0].name;preventivePhotoData=await processPhoto(this.files[0]);$("preventivePhotoPreview").src=preventivePhotoData.dataUrl;$("preventivePhotoPreview").style.display="block"};$("preventiveDocumentAddButton").onclick=()=>$("preventiveDocumentInput").click();$("preventiveDocumentInput").onchange=function(){addPreventiveDocuments7606(this.files)};async function handleManageSelectedImage(file,kind){
   if(!file)return;
 
@@ -6118,7 +6503,7 @@ const QR_TEXT={
     documentSearchButton:"Buscar documentos",
     sendDocumentUpload:"Enviar documento",
     clearDocumentUpload:"Limpar campos",
-    uploadDocumentChooseFileButton:"📎 Escolher arquivo PDF",
+    uploadDocumentChooseFileButton:"📎 Escolher arquivo ou foto PDF",
     documentUploadBackMenu:"← Voltar ao Menu Principal",
     companyBackMenu:"← Voltar ao Menu Principal",
     providersBackMenu:"← Voltar ao Menu Principal",
@@ -7263,6 +7648,10 @@ function qrApplyLanguage(lang){
     applyProblemAssetsLanguage7662();
   }
 
+  if($("reportOccurrenceFileTitle")){
+    applyEvidenceLanguage7670();
+  }
+
   // Headings/labels that have no functional event attached.
   const safeText=[
     ["#systemLoginModal h2","🔐 Acesso ao QRManut","🔐 QRManut Access"],
@@ -7329,7 +7718,7 @@ function qrApplyLanguage(lang){
     loadDocumentFilters().then(()=>searchDocuments()).catch(()=>{});
   }
   if($("uploadDocumentFileLabel"))$("uploadDocumentFileLabel").textContent=qrLanguage==="en-US"?"PDF File *":"Arquivo PDF *";
-  if($("uploadDocumentChooseFileButton"))$("uploadDocumentChooseFileButton").textContent=qrLanguage==="en-US"?"📎 Choose PDF File":"📎 Escolher arquivo PDF";
+  if($("uploadDocumentChooseFileButton"))$("uploadDocumentChooseFileButton").textContent=qrLanguage==="en-US"?"📎 Choose PDF File":"📎 Escolher arquivo ou foto PDF";
   if($("uploadDocumentFileName")&&!documentUploadFileData)$("uploadDocumentFileName").textContent=qrLanguage==="en-US"?"No file selected.":"Nenhum arquivo selecionado.";
 
 
@@ -10457,6 +10846,10 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.6.4 - Fix missing structured/priority/pending translation helpers.
 
 // QRManut USA 7.6.6.5 - Global routine auto-scroll and focus at routine start.
+
+// QRManut USA 7.6.7.0 - Record & Evidence Management.
+
+// QRManut USA 7.6.7.1 - occurrence attachments accept documents and photos.
 </script>
 
 </body>
