@@ -1883,7 +1883,7 @@ button.dashboard-kpi-card:hover{
   </div>
 
 <div id="companyArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="companyBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><h2>⚙️ Configuração da Empresa</h2><div class="muted">Dados institucionais desta implantação dedicada.</div><div class="admin-grid"><label>ID Empresa<input id="companyId"></label><label>Nome da Empresa *<input id="companyName"></label><label>Nome Fantasia<input id="companyTradeName"></label><label>Tax ID / EIN<input id="companyCnpj"></label><label>E-mail de Manutenção<input id="companyMaintenanceEmail"></label><label>E-mail Administrativo<input id="companyAdminEmail"></label><label>Nome do Sistema *<input id="companySystemName"></label><label>Cor Principal<input id="companyPrimaryColor" type="color" value="#0b315e"></label><label>Fuso Horário<input id="companyTimezone"></label><label>URL Principal<input id="companyMainUrl"></label><label>E-mail de Relatórios<input id="companyReportsEmail"></label><label>Logo (URL)<input id="companyLogo"></label><label id="companyWoSlaLabel">SLA padrão OC (dias)<input id="companyWoSlaDays" type="number" min="1" max="365" step="1" value="7"></label><label class="full">Observações<textarea id="companyNotes" rows="4"></textarea></label></div><label class="switch-row"><input id="companyActive" type="checkbox"> Empresa ativa</label><div class="company-preview"><b>Pré-visualização</b><div id="companyPreviewName" style="margin-top:6px;font-size:1.1rem;font-weight:800"></div><img id="companyLogoPreview" class="company-logo-preview hidden"></div><div id="companyMessage" class="message"></div><div class="occ-report-actions"><button id="saveCompanyConfig" class="btn btn-blue">Salvar configuração</button></div></div></div>
-  <div id="providersAdminArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="providersBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2>🏢 Prestadores</h2><div class="muted">Regras operacionais herdadas pelos usuários.</div></div><button id="newProviderButton" class="btn btn-blue">+ Novo prestador</button></div><div id="providersAdminStatus" class="muted" style="margin-top:12px"></div><div id="providersAdminList"></div></div></div>
+  <div id="providersAdminArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="providersBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2>🏢 Prestadores</h2><div id="providersAreaHelp7674" class="muted">Consulta de prestadores e contatos. Edição exclusiva do MASTER.</div></div><button id="newProviderButton" class="btn btn-blue">+ Novo prestador</button></div><div id="providersAdminStatus" class="muted" style="margin-top:12px"></div><div id="providersAdminList"></div></div></div>
   <div id="auditArea" class="hidden">
     <div class="card">
       <h2 style="margin-bottom:5px">🧾 Auditoria</h2>
@@ -2374,6 +2374,35 @@ button.dashboard-kpi-card:hover{
 
     <div class="modal-actions">
       <button id="providerContactClose7672" class="btn btn-secondary" type="button">Fechar</button>
+      <button id="providerContactEdit7674" class="btn btn-blue hidden" type="button">✏️ Editar prestador</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="userContactEditModal7674" class="modal">
+  <div class="modal-box" style="max-width:620px">
+    <h2 id="userContactEditTitle7674">👤 Editar contato do usuário</h2>
+
+    <input id="userContactEditId7674" type="hidden">
+
+    <div id="userContactEditInfo7674" class="preventive-info"></div>
+
+    <label id="userContactEditNameLabel7674">
+      Nome *
+      <input id="userContactEditName7674" autocomplete="name">
+    </label>
+
+    <label id="userContactEditEmailLabel7674">
+      E-mail *
+      <input id="userContactEditEmail7674" type="email" autocomplete="email">
+    </label>
+
+    <div id="userContactEditMessage7674" class="message"></div>
+
+    <div class="modal-actions">
+      <button id="cancelUserContactEdit7674" class="btn btn-secondary" type="button">Cancelar</button>
+      <button id="saveUserContactEdit7674" class="btn btn-blue" type="button">Salvar alterações</button>
     </div>
   </div>
 </div>
@@ -2543,7 +2572,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.7.2</div>
+<div class="footer">QRManut USA • Version 7.6.7.4</div>
 </div>
 <script>
 /* ============================================================
@@ -2554,7 +2583,7 @@ button.dashboard-kpi-card:hover{
  * ============================================================ */
 const API_URL="https://script.google.com/macros/s/AKfycbw3LRRcmSLHN71jZvV1odXk_ySncmjs6F_Sfofcdz86jludpL6_7rwbSkdjwB5DKTl7ig/exec";
 const TOKEN="";const SYSTEM_SESSION_KEY="qrmanut_system_session";const RESPONSIBLE_KEY="qrmanut_responsavel";const PREVENTIVE_SESSION_KEY="qrmanut_preventive_session";const ORIGIN_ASSET_KEY="qrmanut_origin_asset";const MAX_DIM=1280;const QUALITY=.72;
-let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[];
+let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[],usersAdminData7674=[],providerContactIndex7674=null;
 let executiveDashboardData7661=null;
 let executiveDashboardLoading7661=false;
 let executiveDashboardDetailKind7661="";
@@ -3074,7 +3103,7 @@ async function changeGlobalSchoolScope7622(requestedSchoolId){
   }
 }
 
-function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession.perfil==="MASTER"?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabExecutiveDashboard"):hide("tabExecutiveDashboard");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabProblemAssets"):hide("tabProblemAssets")}
+function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabExecutiveDashboard"):hide("tabExecutiveDashboard");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabProblemAssets"):hide("tabProblemAssets")}
 function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
@@ -5177,6 +5206,8 @@ function openProviderContact7672(index){
   const p=providersAdminData[index];
   if(!p)return;
 
+  providerContactIndex7674=index;
+
   const displayName=p.nomeFantasia||p.nome||p.idPrestador||"";
 
   $("providerContactTitle7672").textContent=
@@ -5248,6 +5279,16 @@ function openProviderContact7672(index){
   $("providerContactClose7672").textContent=
     providerT7672("Fechar","Close");
 
+  const editButton7674=$("providerContactEdit7674");
+
+  if(systemSession?.perfil==="MASTER"){
+    editButton7674.textContent=
+      providerT7672("✏️ Editar prestador","✏️ Edit Service Provider");
+    show("providerContactEdit7674");
+  }else{
+    hide("providerContactEdit7674");
+  }
+
   $("providerContactModal7672").style.display="flex";
 }
 
@@ -5255,13 +5296,53 @@ function closeProviderContact7672(){
   $("providerContactModal7672").style.display="none";
 }
 
+function editProviderFromContact7674(){
+  if(systemSession?.perfil!=="MASTER"){
+    return alert(
+      qrLanguage==="en-US"
+        ?"Only MASTER can edit service providers."
+        :"Somente MASTER pode editar prestadores."
+    );
+  }
 
-async function showProvidersAdminTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode administrar prestadores.");return}clearTabs();$("tabProvidersAdmin").classList.add("active");showOnly("providersAdminArea");await loadProvidersAdmin()}
+  const index=providerContactIndex7674;
+
+  if(index===null || index===undefined || !providersAdminData[index]){
+    return;
+  }
+
+  closeProviderContact7672();
+  openProviderModal(index);
+}
+
+
+async function showProvidersAdminTab(){
+  if(!systemSession){
+    return requireSystemLogin(showProvidersAdminTab);
+  }
+
+  clearTabs();
+  $("tabProvidersAdmin").classList.add("active");
+  showOnly("providersAdminArea");
+
+  if(systemSession.perfil==="MASTER"){
+    show("newProviderButton");
+  }else{
+    hide("newProviderButton");
+  }
+
+  $("providersAreaHelp7674").textContent=
+    qrLanguage==="en-US"
+      ?"Service provider and contact consultation. Editing is restricted to MASTER."
+      :"Consulta de prestadores e contatos. Edição exclusiva do MASTER.";
+
+  await loadProvidersAdmin();
+}
 async function loadProvidersAdmin(){
   const t=qrT7612;
 
   try{
-    const r=await menuApi({action:"providersadmin"});
+    const r=await menuApi({action:"providercontacts"});
 
     if(!r.ok){
       throw new Error(
@@ -5334,12 +5415,14 @@ async function loadProvidersAdmin(){
               👁️ ${t("Consultar","View")}
             </button>
 
-            <button
-              class="btn btn-blue"
-              type="button"
-              onclick="openProviderModal(${i})">
-              ${t("Editar","Edit")}
-            </button>
+            ${systemSession?.perfil==="MASTER"?`
+              <button
+                class="btn btn-blue"
+                type="button"
+                onclick="openProviderModal(${i})">
+                ${t("Editar","Edit")}
+              </button>
+            `:""}
           </div>
         </div>
       `).join("");
@@ -5349,6 +5432,14 @@ async function loadProvidersAdmin(){
   }
 }
 function openProviderModal(i){
+  if(systemSession?.perfil!=="MASTER"){
+    return alert(
+      qrLanguage==="en-US"
+        ?"Only MASTER can create or edit service providers."
+        :"Somente MASTER pode cadastrar ou editar prestadores."
+    );
+  }
+
   const p=(i===null||i===undefined)?null:providersAdminData[i];
 
   $("providerModalTitle").textContent=p
@@ -6721,6 +6812,7 @@ async function loadUsers(){
     }
 
     const items=u.users||[];
+    usersAdminData7674=items;
     $("usersStatus").textContent=`${items.length} ${t("usuário(s)","user(s)")}`;
     $("usersList").innerHTML=items.map(x=>`<div class="user-card">
       <b>${esc(x.nome)}</b>
@@ -6735,6 +6827,13 @@ async function loadUsers(){
         ${x.ultimoLogin?`<br><b>${t("Último login","Last login")}:</b> ${esc(formatDate(x.ultimoLogin))}`:""}
       </div>
       <div class="user-actions">
+        <button
+          class="btn btn-blue"
+          type="button"
+          onclick="openEditUserContact7674('${esc(x.idUsuario)}')">
+          ✏️ ${t("Editar contato","Edit Contact")}
+        </button>
+
         ${x.status!=="Inativo"
           ?`<button class="btn btn-secondary" onclick="resendInviteUser('${esc(x.idUsuario)}')">${t("Reenviar convite","Resend invite")}</button><button class="btn" onclick="setUserStatus('${esc(x.idUsuario)}','Inativo')">${t("Inativar","Deactivate")}</button>`
           :`<button class="btn btn-green" onclick="setUserStatus('${esc(x.idUsuario)}','Ativo')">${t("Reativar","Reactivate")}</button>`}
@@ -6746,6 +6845,117 @@ async function loadUsers(){
     $("usersStatus").textContent=e.message;
   }
 }
+
+
+function openEditUserContact7674(userId){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+
+  const u=usersAdminData7674.find(x=>
+    String(x.idUsuario||"")===String(userId||"")
+  );
+
+  if(!u){
+    return alert(t("Usuário não encontrado.","User not found."));
+  }
+
+  $("userContactEditId7674").value=u.idUsuario||"";
+  $("userContactEditName7674").value=u.nome||"";
+  $("userContactEditEmail7674").value=u.email||"";
+
+  $("userContactEditTitle7674").textContent=
+    t("👤 Editar contato do usuário","👤 Edit User Contact");
+
+  $("userContactEditNameLabel7674").childNodes[0].nodeValue=
+    t("Nome *","Name *");
+
+  $("userContactEditEmailLabel7674").childNodes[0].nodeValue=
+    t("E-mail *","Email *");
+
+  $("cancelUserContactEdit7674").textContent=
+    t("Cancelar","Cancel");
+
+  $("saveUserContactEdit7674").textContent=
+    t("Salvar alterações","Save Changes");
+
+  $("userContactEditInfo7674").innerHTML=
+    `<b>${esc(u.nome||u.usuario||u.idUsuario||"")}</b>`+
+    `<br><span class="muted">ID: ${esc(u.idUsuario||"")} • Login: ${esc(u.usuario||"")} • ${esc(u.perfil||"")}</span>`+
+    `${u.escola?`<br><span class="muted">${t("Colégio","School")}: ${esc(u.escola)} (${esc(u.idEscola||"")})</span>`:""}`+
+    `${u.prestador?`<br><span class="muted">${t("Prestador","Service Provider")}: ${esc(u.prestador)}</span>`:""}`;
+
+  $("userContactEditMessage7674").className="message";
+  $("userContactEditMessage7674").textContent="";
+
+  $("userContactEditModal7674").style.display="flex";
+
+  setTimeout(()=>{
+    try{$("userContactEditName7674").focus()}catch(_){}
+  },80);
+}
+
+function closeEditUserContact7674(){
+  $("userContactEditModal7674").style.display="none";
+}
+
+async function saveEditUserContact7674(){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const btn=$("saveUserContactEdit7674");
+
+  if(btn.dataset.loading==="1")return;
+
+  const userId=$("userContactEditId7674").value.trim();
+  const name=$("userContactEditName7674").value.trim();
+  const email=$("userContactEditEmail7674").value.trim();
+
+  if(!name||!email){
+    $("userContactEditMessage7674").className="message error";
+    $("userContactEditMessage7674").textContent=
+      t("Informe nome e e-mail.","Enter name and email.");
+    return;
+  }
+
+  btn.dataset.loading="1";
+  btn.disabled=true;
+  btn.textContent=t("Salvando...","Saving...");
+
+  try{
+    const r=await menuApiPost({
+      action:"updateUserContact",
+      userId:userId,
+      userName:name,
+      userEmail:email
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        t(
+          "Não foi possível atualizar o contato.",
+          "Unable to update the contact."
+        )
+      );
+    }
+
+    $("userContactEditMessage7674").className="message success";
+    $("userContactEditMessage7674").textContent=
+      t("✅ Contato atualizado.","✅ Contact updated.");
+
+    await loadUsers();
+
+    setTimeout(()=>{
+      closeEditUserContact7674();
+    },500);
+
+  }catch(e){
+    $("userContactEditMessage7674").className="message error";
+    $("userContactEditMessage7674").textContent=e.message;
+  }finally{
+    btn.disabled=false;
+    btn.textContent=t("Salvar alterações","Save Changes");
+    delete btn.dataset.loading;
+  }
+}
+
 
 function openNewUser(){
   $("userName").value="";
@@ -7625,7 +7835,7 @@ function qrTranslateRoutineScreens(){
     "searchArea","pendingArea","occurrenceReportArea","documentsArea",
     "documentUploadArea","companyArea","providersAdminArea","auditArea",
     "usersArea","preventiveControlArea","assetScreen","systemLoginModal",
-    "forgotPasswordModal","setPasswordModal","userModal","providerModal","providerContactModal7672",
+    "forgotPasswordModal","setPasswordModal","userModal","userContactEditModal7674","providerModal","providerContactModal7672",
     "preventiveModal","reportModal","manageModal",
     "assetManagementPanel","assetEditModal",
     "occurrenceCatalogArea","maintenancePendingArea"
@@ -8190,7 +8400,7 @@ document.getElementById("qrLangEn").addEventListener("click",function(){
   qrTranslateRoutineScreens();
 });
 
-$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
+$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
   captureSchoolSelection7626(this);
 };
 
@@ -11224,6 +11434,10 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.7.1 - occurrence attachments accept documents and photos.
 
 // QRManut USA 7.6.7.2 - Provider phone, contact person, contact email, call and mail actions.
+
+// QRManut USA 7.6.7.3 - provider contact persistence backend fix.
+
+// QRManut USA 7.6.7.4 - user contact editing and provider consultation permissions.
 </script>
 
 </body>
