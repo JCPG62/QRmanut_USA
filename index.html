@@ -1386,6 +1386,99 @@ button.dashboard-kpi-card:hover{
 .btn-danger-secondary{background:#fff!important;color:#b42318!important;border:1px solid #d92d20!important}
 .delete-warning-box{margin:10px 0;padding:11px 12px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;border-radius:10px;line-height:1.45}
 @media(max-width:640px){.record-management-actions,.preventive-evidence-actions{display:grid;grid-template-columns:1fr}.record-management-actions button,.preventive-evidence-actions button{width:100%}}
+
+/* ============================================================
+ * PROVIDER CONTACT MANAGEMENT – 7.6.7.2
+ * ============================================================ */
+
+.provider-contact-edit-box{
+  margin-top:14px;
+  padding:12px;
+  border:1px solid #bfdbfe;
+  border-radius:12px;
+  background:#f8fbff;
+}
+
+.provider-contact-edit-title{
+  color:#1e3a8a;
+  font-weight:800;
+  margin-bottom:2px;
+}
+
+.provider-contact-view{
+  display:grid;
+  gap:9px;
+  margin-top:14px;
+}
+
+.provider-contact-view-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px;
+  border:1px solid #e2e8f0;
+  border-radius:11px;
+  background:#fff;
+}
+
+.provider-contact-view-grow{
+  flex:1;
+  min-width:0;
+}
+
+.provider-contact-view-label{
+  color:#64748b;
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.025em;
+}
+
+.provider-contact-view-value{
+  margin-top:4px;
+  color:#0f172a;
+  font-weight:700;
+  overflow-wrap:anywhere;
+}
+
+.provider-contact-action{
+  flex:0 0 auto;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  white-space:nowrap;
+}
+
+.provider-admin-actions7672{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+@media(max-width:600px){
+  .provider-contact-view-row{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .provider-contact-action{
+    width:100%;
+  }
+
+  .provider-admin-actions7672{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .provider-admin-actions7672 button{
+    width:100%;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2235,7 +2328,55 @@ button.dashboard-kpi-card:hover{
 <div id="setPasswordModal" class="modal"><div class="modal-box"><h2 id="setPasswordTitle">Criar senha</h2><div id="setPasswordUser" class="preventive-info"></div><label>Nova senha<div class="password-wrap"><input id="newPassword" type="password" autocomplete="new-password"><button type="button" class="password-toggle" data-password-target="newPassword" aria-label="Mostrar senha" title="Mostrar senha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></button></div></label><label>Confirmar senha<div class="password-wrap"><input id="confirmPassword" type="password" autocomplete="new-password"><button type="button" class="password-toggle" data-password-target="confirmPassword" aria-label="Mostrar senha" title="Mostrar senha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></button></div></label><div class="password-rules">Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e caractere especial.</div><div id="setPasswordMessage" class="message"></div><div class="modal-actions"><button id="saveNewPassword" class="btn btn-blue">Salvar senha</button></div></div></div>
 
 
-<div id="providerModal" class="modal"><div class="modal-box"><h2 id="providerModalTitle">🏢 Prestador</h2><input id="providerId" type="hidden"><label>Nome/Razão Social *<input id="providerName"></label><label>Nome Fantasia<input id="providerTradeName"></label><div class="admin-grid"><label class="switch-row"><input id="providerActive" type="checkbox"> Ativo</label><label class="switch-row"><input id="providerRequireSignature" type="checkbox"> Exigir assinatura</label><label class="switch-row"><input id="providerPhotoRequired" type="checkbox"> Foto obrigatória</label><label class="switch-row"><input id="providerObservationRequired" type="checkbox"> Observação obrigatória</label><label class="switch-row"><input id="providerCanPreventive" type="checkbox"> Pode registrar preventiva</label><label class="switch-row"><input id="providerCanOccurrence" type="checkbox"> Pode atender OC</label><label class="switch-row"><input id="providerNotifyOccurrence" type="checkbox"> Notificar OC</label><label class="switch-row"><input id="providerSendReport" type="checkbox"> Enviar relatório</label></div><label>E-mail OC<input id="providerOccurrenceEmail"></label><label>E-mail Relatório<input id="providerReportEmail"></label><label>Observações<textarea id="providerNotes" rows="4"></textarea></label><div id="providerMessage" class="message"></div><div class="modal-actions"><button id="cancelProvider" class="btn btn-secondary">Cancelar</button><button id="saveProvider" class="btn btn-blue">Salvar prestador</button></div></div></div>
+<div id="providerModal" class="modal"><div class="modal-box"><h2 id="providerModalTitle">🏢 Prestador</h2><input id="providerId" type="hidden"><label>Nome/Razão Social *<input id="providerName"></label><label>Nome Fantasia<input id="providerTradeName"></label>
+<div class="provider-contact-edit-box">
+  <div class="provider-contact-edit-title">☎️ Dados de Contato</div>
+  <div class="admin-grid">
+    <label>Telefone<input id="providerPhone" type="tel" inputmode="tel" placeholder="+1 732 555 1234"></label>
+    <label>Responsável de Contato<input id="providerContactResponsible"></label>
+    <label class="full">E-mail de Contato<input id="providerContactEmail" type="email" autocomplete="email"></label>
+  </div>
+</div>
+<div class="admin-grid"><label class="switch-row"><input id="providerActive" type="checkbox"> Ativo</label><label class="switch-row"><input id="providerRequireSignature" type="checkbox"> Exigir assinatura</label><label class="switch-row"><input id="providerPhotoRequired" type="checkbox"> Foto obrigatória</label><label class="switch-row"><input id="providerObservationRequired" type="checkbox"> Observação obrigatória</label><label class="switch-row"><input id="providerCanPreventive" type="checkbox"> Pode registrar preventiva</label><label class="switch-row"><input id="providerCanOccurrence" type="checkbox"> Pode atender OC</label><label class="switch-row"><input id="providerNotifyOccurrence" type="checkbox"> Notificar OC</label><label class="switch-row"><input id="providerSendReport" type="checkbox"> Enviar relatório</label></div><label>E-mail OC<input id="providerOccurrenceEmail"></label><label>E-mail Relatório<input id="providerReportEmail"></label><label>Observações<textarea id="providerNotes" rows="4"></textarea></label><div id="providerMessage" class="message"></div><div class="modal-actions"><button id="cancelProvider" class="btn btn-secondary">Cancelar</button><button id="saveProvider" class="btn btn-blue">Salvar prestador</button></div></div></div>
+
+
+<div id="providerContactModal7672" class="modal">
+  <div class="modal-box" style="max-width:660px">
+    <h2 id="providerContactTitle7672">🏢 Consultar Prestador</h2>
+    <div id="providerContactCompany7672" class="preventive-info"></div>
+
+    <div class="provider-contact-view">
+      <div class="provider-contact-view-row">
+        <div>
+          <div id="providerContactResponsibleLabel7672" class="provider-contact-view-label">Responsável de Contato</div>
+          <div id="providerContactResponsibleValue7672" class="provider-contact-view-value">—</div>
+        </div>
+      </div>
+
+      <div class="provider-contact-view-row">
+        <div class="provider-contact-view-grow">
+          <div id="providerContactPhoneLabel7672" class="provider-contact-view-label">Telefone</div>
+          <div id="providerContactPhoneValue7672" class="provider-contact-view-value">—</div>
+        </div>
+        <a id="providerContactPhoneCall7672" class="btn btn-green provider-contact-action hidden" href="#" rel="noopener">📞 Ligar</a>
+      </div>
+
+      <div class="provider-contact-view-row">
+        <div class="provider-contact-view-grow">
+          <div id="providerContactEmailLabel7672" class="provider-contact-view-label">E-mail de Contato</div>
+          <div id="providerContactEmailValue7672" class="provider-contact-view-value">—</div>
+        </div>
+        <a id="providerContactEmailSend7672" class="btn btn-blue provider-contact-action hidden" href="#">✉️ Enviar e-mail</a>
+      </div>
+    </div>
+
+    <div id="providerContactNoData7672" class="muted hidden" style="margin-top:10px"></div>
+
+    <div class="modal-actions">
+      <button id="providerContactClose7672" class="btn btn-secondary" type="button">Fechar</button>
+    </div>
+  </div>
+</div>
 
 <div id="userModal" class="modal"><div class="modal-box"><h2>👤 Novo usuário</h2><label>Nome *<input id="userName"></label><label>Usuário/Login *<input id="userLogin"></label><label>E-mail *<input id="userEmail" type="email"></label><label>Perfil *<select id="userProfile"><option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option></select></label><label id="userSchoolLabel">Colégio / Unidade<select id="userSchool"><option value="">Todas / sem vínculo específico</option></select></label><div id="userSchoolHelp" class="system-login-note">GESTOR deve estar vinculado a um colégio. MASTER mantém acesso a todas as unidades.</div><label>Prestador<select id="userProvider"><option value="">Vínculo interno / sem prestador</option></select></label><div id="userMessage" class="message"></div><div class="modal-actions"><button id="cancelUser" class="btn btn-secondary">Cancelar</button><button id="saveUser" class="btn btn-blue">Criar e enviar convite</button></div></div></div>
 
@@ -2402,7 +2543,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.7.1</div>
+<div class="footer">QRManut USA • Version 7.6.7.2</div>
 </div>
 <script>
 /* ============================================================
@@ -5013,12 +5154,231 @@ async function saveCompanyConfig(){
     delete b.dataset.loading;
   }
 }
-async function showProvidersAdminTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode administrar prestadores.");return}clearTabs();$("tabProvidersAdmin").classList.add("active");showOnly("providersAdminArea");await loadProvidersAdmin()}
-async function loadProvidersAdmin(){
-  const t=qrT7612;try{const r=await menuApi({action:"providersadmin"});if(!r.ok)throw new Error(r.detail||t("Erro ao carregar.","Error loading service providers."));providersAdminData=r.providers||[];$("providersAdminStatus").textContent=`${providersAdminData.length} ${t("prestador(es)","service provider(s)")}`;$("providersAdminList").innerHTML=providersAdminData.map((p,i)=>`<div class="provider-admin-card"><b>${esc(p.nomeFantasia||p.nome)}</b><div class="search-result-data"><b>ID:</b> ${esc(p.idPrestador)}<br><b>Status:</b> ${p.ativo?t("Ativo","Active"):t("Inativo","Inactive")}<br><b>${t("Preventiva","Preventive Maintenance")}:</b> ${qrYN7612(p.podeRegistrarPreventiva)} • <b>${t("Atender OC","Handle Work Orders")}:</b> ${qrYN7612(p.podeAtenderOC)}<br><b>${t("Assinatura","Signature")}:</b> ${qrReq7612(p.exigirAssinatura)} • <b>${t("Foto","Photo")}:</b> ${qrReq7612(p.fotoObrigatoria)}<br><b>${t("Notificar OC","Notify Work Order")}:</b> ${qrYN7612(p.notificarOC)}${p.emailOC?` • ${esc(p.emailOC)}`:""}<br><b>${t("Relatório","Report")}:</b> ${qrYN7612(p.enviarRelatorio)}${p.emailRelatorio?` • ${esc(p.emailRelatorio)}`:""}</div><button class="btn btn-blue" style="margin-top:10px" onclick="openProviderModal(${i})">${t("Editar","Edit")}</button></div>`).join("")}catch(e){$("providersAdminStatus").textContent=e.message}
+
+/* ============================================================
+ * PROVIDER CONTACT MANAGEMENT – 7.6.7.2
+ * ============================================================ */
+
+function providerT7672(pt,en){
+  return qrLanguage==="en-US"?en:pt;
 }
 
-function openProviderModal(i){const p=(i===null||i===undefined)?null:providersAdminData[i];$("providerModalTitle").textContent=p?(qrLanguage==="en-US"?"🏢 Edit Service Provider":"🏢 Editar Prestador"):(qrLanguage==="en-US"?"🏢 New Service Provider":"🏢 Novo Prestador");$("providerId").value=p?.idPrestador||"";$("providerName").value=p?.nome||"";$("providerTradeName").value=p?.nomeFantasia||"";$("providerActive").checked=p?!!p.ativo:true;$("providerRequireSignature").checked=p?!!p.exigirAssinatura:false;$("providerPhotoRequired").checked=p?!!p.fotoObrigatoria:false;$("providerObservationRequired").checked=p?!!p.observacaoObrigatoria:false;$("providerCanPreventive").checked=p?!!p.podeRegistrarPreventiva:true;$("providerCanOccurrence").checked=p?!!p.podeAtenderOC:true;$("providerNotifyOccurrence").checked=p?!!p.notificarOC:false;$("providerOccurrenceEmail").value=p?.emailOC||"";$("providerSendReport").checked=p?!!p.enviarRelatorio:false;$("providerReportEmail").value=p?.emailRelatorio||"";$("providerNotes").value=p?.observacoes||"";$("providerMessage").className="message";$("providerModal").style.display="flex"}
+function providerPhoneDial7672(value){
+  const raw=String(value||"").trim();
+  if(!raw)return "";
+
+  const hasPlus=raw.startsWith("+");
+  const digits=raw.replace(/\D/g,"");
+
+  return (hasPlus?"+":"")+digits;
+}
+
+function openProviderContact7672(index){
+  const p=providersAdminData[index];
+  if(!p)return;
+
+  const displayName=p.nomeFantasia||p.nome||p.idPrestador||"";
+
+  $("providerContactTitle7672").textContent=
+    providerT7672("🏢 Consultar Prestador","🏢 View Service Provider");
+
+  $("providerContactCompany7672").innerHTML=
+    `<b>${esc(displayName)}</b>`+
+    `${p.nome&&p.nome!==displayName?`<br><span class="muted">${esc(p.nome)}</span>`:""}`+
+    `<br><span class="muted">ID: ${esc(p.idPrestador||"")}</span>`;
+
+  $("providerContactResponsibleLabel7672").textContent=
+    providerT7672("Responsável de Contato","Contact Person");
+
+  $("providerContactPhoneLabel7672").textContent=
+    providerT7672("Telefone","Phone");
+
+  $("providerContactEmailLabel7672").textContent=
+    providerT7672("E-mail de Contato","Contact Email");
+
+  $("providerContactResponsibleValue7672").textContent=
+    p.responsavelContato||"—";
+
+  $("providerContactPhoneValue7672").textContent=
+    p.telefone||"—";
+
+  $("providerContactEmailValue7672").textContent=
+    p.emailContato||"—";
+
+  const call=$("providerContactPhoneCall7672");
+  const dial=providerPhoneDial7672(p.telefone);
+
+  if(dial){
+    call.href="tel:"+dial;
+    call.textContent=providerT7672("📞 Ligar","📞 Call");
+    show("providerContactPhoneCall7672");
+  }else{
+    call.removeAttribute("href");
+    hide("providerContactPhoneCall7672");
+  }
+
+  const email=$("providerContactEmailSend7672");
+
+  if(String(p.emailContato||"").trim()){
+    email.href="mailto:"+String(p.emailContato||"").trim();
+    email.textContent=providerT7672("✉️ Enviar e-mail","✉️ Send Email");
+    show("providerContactEmailSend7672");
+  }else{
+    email.removeAttribute("href");
+    hide("providerContactEmailSend7672");
+  }
+
+  const hasData=!!(
+    String(p.responsavelContato||"").trim() ||
+    String(p.telefone||"").trim() ||
+    String(p.emailContato||"").trim()
+  );
+
+  if(hasData){
+    hide("providerContactNoData7672");
+  }else{
+    $("providerContactNoData7672").textContent=
+      providerT7672(
+        "Nenhum dado de contato cadastrado para este prestador.",
+        "No contact information is registered for this service provider."
+      );
+    show("providerContactNoData7672");
+  }
+
+  $("providerContactClose7672").textContent=
+    providerT7672("Fechar","Close");
+
+  $("providerContactModal7672").style.display="flex";
+}
+
+function closeProviderContact7672(){
+  $("providerContactModal7672").style.display="none";
+}
+
+
+async function showProvidersAdminTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode administrar prestadores.");return}clearTabs();$("tabProvidersAdmin").classList.add("active");showOnly("providersAdminArea");await loadProvidersAdmin()}
+async function loadProvidersAdmin(){
+  const t=qrT7612;
+
+  try{
+    const r=await menuApi({action:"providersadmin"});
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        t("Erro ao carregar.","Error loading service providers.")
+      );
+    }
+
+    providersAdminData=r.providers||[];
+
+    $("providersAdminStatus").textContent=
+      `${providersAdminData.length} ${t("prestador(es)","service provider(s)")}`;
+
+    if(!providersAdminData.length){
+      $("providersAdminList").innerHTML=
+        `<div class="document-empty">${t(
+          "Nenhum prestador cadastrado.",
+          "No service providers registered."
+        )}</div>`;
+      return;
+    }
+
+    $("providersAdminList").innerHTML=
+      providersAdminData.map((p,i)=>`
+        <div class="provider-admin-card">
+          <b>${esc(p.nomeFantasia||p.nome)}</b>
+
+          <div class="search-result-data">
+            <b>ID:</b> ${esc(p.idPrestador)}<br>
+            <b>Status:</b> ${p.ativo?t("Ativo","Active"):t("Inativo","Inactive")}<br>
+
+            ${p.responsavelContato
+              ?`<b>${t("Responsável","Contact")}:</b> ${esc(p.responsavelContato)}<br>`
+              :""}
+
+            ${p.telefone
+              ?`<b>${t("Telefone","Phone")}:</b> ${esc(p.telefone)}<br>`
+              :""}
+
+            ${p.emailContato
+              ?`<b>${t("E-mail de Contato","Contact Email")}:</b> ${esc(p.emailContato)}<br>`
+              :""}
+
+            <b>${t("Preventiva","Preventive Maintenance")}:</b>
+            ${qrYN7612(p.podeRegistrarPreventiva)}
+            •
+            <b>${t("Atender OC","Handle Work Orders")}:</b>
+            ${qrYN7612(p.podeAtenderOC)}<br>
+
+            <b>${t("Assinatura","Signature")}:</b>
+            ${qrReq7612(p.exigirAssinatura)}
+            •
+            <b>${t("Foto","Photo")}:</b>
+            ${qrReq7612(p.fotoObrigatoria)}<br>
+
+            <b>${t("Notificar OC","Notify Work Order")}:</b>
+            ${qrYN7612(p.notificarOC)}
+            ${p.emailOC?` • ${esc(p.emailOC)}`:""}<br>
+
+            <b>${t("Relatório","Report")}:</b>
+            ${qrYN7612(p.enviarRelatorio)}
+            ${p.emailRelatorio?` • ${esc(p.emailRelatorio)}`:""}
+          </div>
+
+          <div class="provider-admin-actions7672">
+            <button
+              class="btn btn-secondary"
+              type="button"
+              onclick="openProviderContact7672(${i})">
+              👁️ ${t("Consultar","View")}
+            </button>
+
+            <button
+              class="btn btn-blue"
+              type="button"
+              onclick="openProviderModal(${i})">
+              ${t("Editar","Edit")}
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+  }catch(e){
+    $("providersAdminStatus").textContent=e.message;
+  }
+}
+function openProviderModal(i){
+  const p=(i===null||i===undefined)?null:providersAdminData[i];
+
+  $("providerModalTitle").textContent=p
+    ?(qrLanguage==="en-US"?"🏢 Edit Service Provider":"🏢 Editar Prestador")
+    :(qrLanguage==="en-US"?"🏢 New Service Provider":"🏢 Novo Prestador");
+
+  $("providerId").value=p?.idPrestador||"";
+  $("providerName").value=p?.nome||"";
+  $("providerTradeName").value=p?.nomeFantasia||"";
+
+  $("providerPhone").value=p?.telefone||"";
+  $("providerContactResponsible").value=p?.responsavelContato||"";
+  $("providerContactEmail").value=p?.emailContato||"";
+
+  $("providerActive").checked=p?!!p.ativo:true;
+  $("providerRequireSignature").checked=p?!!p.exigirAssinatura:false;
+  $("providerPhotoRequired").checked=p?!!p.fotoObrigatoria:false;
+  $("providerObservationRequired").checked=p?!!p.observacaoObrigatoria:false;
+  $("providerCanPreventive").checked=p?!!p.podeRegistrarPreventiva:true;
+  $("providerCanOccurrence").checked=p?!!p.podeAtenderOC:true;
+  $("providerNotifyOccurrence").checked=p?!!p.notificarOC:false;
+  $("providerOccurrenceEmail").value=p?.emailOC||"";
+  $("providerSendReport").checked=p?!!p.enviarRelatorio:false;
+  $("providerReportEmail").value=p?.emailRelatorio||"";
+  $("providerNotes").value=p?.observacoes||"";
+
+  $("providerMessage").className="message";
+  $("providerMessage").textContent="";
+  $("providerModal").style.display="flex";
+}
 async function saveProviderAdmin(){
   const b=$("saveProvider");
   if(!b || b.dataset.loading==="1")return;
@@ -5034,6 +5394,9 @@ async function saveProviderAdmin(){
       providerId:id,
       providerName:$("providerName").value.trim(),
       providerTradeName:$("providerTradeName").value.trim(),
+      providerPhone:$("providerPhone").value.trim(),
+      providerContactResponsible:$("providerContactResponsible").value.trim(),
+      providerContactEmail:$("providerContactEmail").value.trim(),
       providerActive:$("providerActive").checked?"Sim":"Não",
       providerRequireSignature:$("providerRequireSignature").checked?"Sim":"Não",
       providerPhotoRequired:$("providerPhotoRequired").checked?"Sim":"Não",
@@ -6727,6 +7090,15 @@ const QR_ROUTINE_PT_EN={
   "Enviar relatório":"Send report",
   "E-mail OC":"Work Order Email",
   "E-mail Relatório":"Report Email",
+  "Telefone":"Phone",
+  "Responsável de Contato":"Contact Person",
+  "E-mail de Contato":"Contact Email",
+  "☎️ Dados de Contato":"☎️ Contact Details",
+  "🏢 Consultar Prestador":"🏢 View Service Provider",
+  "Consultar":"View",
+  "Ligar":"Call",
+  "Enviar e-mail":"Send Email",
+  "Fechar":"Close",
   "Salvar prestador":"Save Provider",
 
   "🛠️ Registrar Manutenção Preventiva":"🛠️ Register Preventive Maintenance",
@@ -7253,7 +7625,7 @@ function qrTranslateRoutineScreens(){
     "searchArea","pendingArea","occurrenceReportArea","documentsArea",
     "documentUploadArea","companyArea","providersAdminArea","auditArea",
     "usersArea","preventiveControlArea","assetScreen","systemLoginModal",
-    "forgotPasswordModal","setPasswordModal","userModal","providerModal",
+    "forgotPasswordModal","setPasswordModal","userModal","providerModal","providerContactModal7672",
     "preventiveModal","reportModal","manageModal",
     "assetManagementPanel","assetEditModal",
     "occurrenceCatalogArea","maintenancePendingArea"
@@ -7818,7 +8190,7 @@ document.getElementById("qrLangEn").addEventListener("click",function(){
   qrTranslateRoutineScreens();
 });
 
-$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
+$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
   captureSchoolSelection7626(this);
 };
 
@@ -10850,6 +11222,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.7.0 - Record & Evidence Management.
 
 // QRManut USA 7.6.7.1 - occurrence attachments accept documents and photos.
+
+// QRManut USA 7.6.7.2 - Provider phone, contact person, contact email, call and mail actions.
 </script>
 
 </body>
