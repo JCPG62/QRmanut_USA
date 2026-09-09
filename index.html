@@ -1910,7 +1910,21 @@ button.dashboard-kpi-card:hover{
         <div><h2 style="margin-bottom:4px">👥 Gestão de Usuários</h2><div class="muted">Cada funcionário deve possuir um usuário individual.</div></div>
         <button id="newUserButton" class="btn btn-blue">+ Novo usuário</button>
       </div>
-      <div id="usersStatus" class="muted" style="margin-top:12px"></div><div id="usersList"></div>
+      <div id="usersStatus" class="muted" style="margin-top:12px"></div>
+      <div id="usersList"></div>
+
+      <div id="userRequestsAdmin7680" class="hidden" style="margin-top:24px">
+        <hr style="border:0;border-top:1px solid #ddd;margin:20px 0">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+          <div>
+            <h3 id="userRequestsTitle7680" style="margin:0">📨 Solicitações de Cadastro</h3>
+            <div id="userRequestsHelp7680" class="muted">Solicitações aguardando análise do MASTER.</div>
+          </div>
+          <button id="userRequestsRefresh7680" class="btn btn-secondary" type="button">Atualizar</button>
+        </div>
+        <div id="userRequestsStatus7680" class="muted" style="margin-top:10px"></div>
+        <div id="userRequestsList7680"></div>
+      </div>
     </div>
   </div>
   <div id="preventiveControlArea" class="hidden">
@@ -2321,9 +2335,92 @@ button.dashboard-kpi-card:hover{
   </div>
 </div>
 
-<div id="systemLoginModal" class="modal"><div class="modal-box"><h2>🔐 Acesso ao QRManut</h2><div class="system-login-note">O acesso ao Menu Principal é individual e controlado por perfil e escopo.</div><label>Usuário ou e-mail<input id="systemUsername" autocomplete="username"></label><label>Senha<div class="password-wrap"><input id="systemPassword" type="password" autocomplete="current-password"><button type="button" class="password-toggle" data-password-target="systemPassword" aria-label="Mostrar senha" title="Mostrar senha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></button></div></label><button id="forgotPasswordButton" class="auth-link" type="button">Esqueci minha senha</button><div id="systemLoginMessage" class="message"></div><div class="modal-actions"><button id="cancelSystemLogin" class="btn btn-secondary">Cancelar</button><button id="sendSystemLogin" class="btn btn-blue">Entrar</button></div></div></div>
+<div id="systemLoginModal" class="modal">
+  <div class="modal-box">
+    <h2 id="systemLoginTitle7680">🔐 Acesso ao QRManut</h2>
+    <div id="systemLoginNote7680" class="system-login-note">O acesso ao Menu Principal é individual e controlado por perfil e escopo.</div>
 
-<div id="forgotPasswordModal" class="modal"><div class="modal-box"><h2>🔑 Recuperar senha</h2><div class="muted">Informe seu usuário ou e-mail. Se o cadastro existir, o QRManut enviará as instruções.</div><label>Usuário ou e-mail<input id="recoveryIdentifier"></label><div id="recoveryMessage" class="message"></div><div class="modal-actions"><button id="cancelRecovery" class="btn btn-secondary">Cancelar</button><button id="sendRecovery" class="btn btn-blue">Enviar instruções</button></div></div></div>
+    <label id="systemUsernameLabel7680">Usuário/Login ou e-mail
+      <input id="systemUsername" autocomplete="username">
+    </label>
+
+    <label id="systemPasswordLabel7680">Senha
+      <div class="password-wrap">
+        <input id="systemPassword" type="password" autocomplete="current-password">
+        <button type="button" class="password-toggle" data-password-target="systemPassword" aria-label="Mostrar senha" title="Mostrar senha">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg>
+        </button>
+      </div>
+    </label>
+
+    <button id="forgotPasswordButton" class="auth-link" type="button">Esqueci minha senha</button>
+
+    <div class="system-login-note" style="margin-top:14px">
+      <b id="firstAccessTitle7680">Primeiro acesso ao QRManut?</b>
+      <div id="firstAccessHelp7680" style="margin-top:4px">Se você ainda não possui usuário, solicite seu cadastro ao administrador.</div>
+      <button id="requestAccessButton7680" class="auth-link" type="button" style="margin-top:7px">Solicitar cadastro</button>
+    </div>
+
+    <div id="systemLoginMessage" class="message"></div>
+
+    <div class="modal-actions">
+      <button id="cancelSystemLogin" class="btn btn-secondary">Cancelar</button>
+      <button id="sendSystemLogin" class="btn btn-blue">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="forgotPasswordModal" class="modal">
+  <div class="modal-box">
+    <h2 id="recoveryTitle7680">🔑 Recuperar senha</h2>
+    <div id="recoveryHelp7680" class="muted">Informe seu usuário ou e-mail para verificar a situação do cadastro.</div>
+
+    <label id="recoveryIdentifierLabel7680">Usuário ou e-mail
+      <input id="recoveryIdentifier" autocomplete="username">
+    </label>
+
+    <div id="recoveryMessage" class="message"></div>
+
+    <button id="recoveryRequestAccess7680" class="btn btn-secondary hidden" type="button">Solicitar cadastro</button>
+
+    <div class="modal-actions">
+      <button id="cancelRecovery" class="btn btn-secondary">Cancelar</button>
+      <button id="sendRecovery" class="btn btn-blue">Enviar instruções</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="accessRequestModal7680" class="modal">
+  <div class="modal-box" style="max-width:650px">
+    <h2 id="accessRequestTitle7680">👤 Solicitar cadastro</h2>
+    <div id="accessRequestHelp7680" class="system-login-note">Preencha os dados abaixo. O administrador analisará sua solicitação dentro do QRManut.</div>
+
+    <label id="accessRequestNameLabel7680">Nome completo *
+      <input id="accessRequestName7680" autocomplete="name">
+    </label>
+
+    <label id="accessRequestLoginLabel7680">Login desejado *
+      <input id="accessRequestLogin7680" autocomplete="username">
+    </label>
+
+    <label id="accessRequestEmailLabel7680">E-mail
+      <input id="accessRequestEmail7680" type="email" autocomplete="email">
+    </label>
+
+    <label id="accessRequestPhoneLabel7680">Telefone
+      <input id="accessRequestPhone7680" type="tel" inputmode="tel" autocomplete="tel">
+    </label>
+
+    <div id="accessRequestMessage7680" class="message"></div>
+
+    <div class="modal-actions">
+      <button id="accessRequestCancel7680" class="btn btn-secondary" type="button">Cancelar</button>
+      <button id="accessRequestSend7680" class="btn btn-blue" type="button">Enviar solicitação</button>
+      <button id="accessRequestReturn7680" class="btn btn-green hidden" type="button">Voltar ao login</button>
+    </div>
+  </div>
+</div>
 
 <div id="setPasswordModal" class="modal"><div class="modal-box"><h2 id="setPasswordTitle">Criar senha</h2><div id="setPasswordUser" class="preventive-info"></div><label>Nova senha<div class="password-wrap"><input id="newPassword" type="password" autocomplete="new-password"><button type="button" class="password-toggle" data-password-target="newPassword" aria-label="Mostrar senha" title="Mostrar senha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></button></div></label><label>Confirmar senha<div class="password-wrap"><input id="confirmPassword" type="password" autocomplete="new-password"><button type="button" class="password-toggle" data-password-target="confirmPassword" aria-label="Mostrar senha" title="Mostrar senha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></button></div></label><div class="password-rules">Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e caractere especial.</div><div id="setPasswordMessage" class="message"></div><div class="modal-actions"><button id="saveNewPassword" class="btn btn-blue">Salvar senha</button></div></div></div>
 
@@ -2380,6 +2477,57 @@ button.dashboard-kpi-card:hover{
 </div>
 
 
+
+<div id="adminUserPasswordModal7680" class="modal">
+  <div class="modal-box" style="max-width:620px">
+    <h2 id="adminUserPasswordTitle7680">🔐 Definir senha</h2>
+    <div id="adminUserPasswordInfo7680" class="preventive-info"></div>
+    <input id="adminUserPasswordId7680" type="hidden">
+
+    <label id="adminUserPasswordLabel7680">Nova senha
+      <div class="password-wrap">
+        <input id="adminUserPassword7680" type="password" autocomplete="new-password">
+        <button type="button" class="password-toggle" data-password-target="adminUserPassword7680" aria-label="Mostrar senha" title="Mostrar senha">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg>
+        </button>
+      </div>
+    </label>
+
+    <label id="adminUserPasswordConfirmLabel7680">Confirmar senha
+      <div class="password-wrap">
+        <input id="adminUserPasswordConfirm7680" type="password" autocomplete="new-password">
+        <button type="button" class="password-toggle" data-password-target="adminUserPasswordConfirm7680" aria-label="Mostrar senha" title="Mostrar senha">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg>
+        </button>
+      </div>
+    </label>
+
+    <div id="adminUserPasswordRules7680" class="password-rules">Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e caractere especial.</div>
+    <div id="adminUserPasswordMessage7680" class="message"></div>
+
+    <div class="modal-actions">
+      <button id="adminUserPasswordCancel7680" class="btn btn-secondary" type="button">Cancelar</button>
+      <button id="adminUserPasswordSave7680" class="btn btn-blue" type="button">Salvar senha</button>
+    </div>
+  </div>
+</div>
+
+<div id="rejectUserRequestModal7680" class="modal">
+  <div class="modal-box" style="max-width:600px">
+    <h2 id="rejectUserRequestTitle7680">Recusar solicitação</h2>
+    <input id="rejectUserRequestId7680" type="hidden">
+    <div id="rejectUserRequestInfo7680" class="preventive-info"></div>
+    <label id="rejectUserRequestReasonLabel7680">Motivo / observação (opcional)
+      <textarea id="rejectUserRequestReason7680" rows="4"></textarea>
+    </label>
+    <div id="rejectUserRequestMessage7680" class="message"></div>
+    <div class="modal-actions">
+      <button id="rejectUserRequestCancel7680" class="btn btn-secondary" type="button">Cancelar</button>
+      <button id="rejectUserRequestConfirm7680" class="btn" type="button">Confirmar recusa</button>
+    </div>
+  </div>
+</div>
+
 <div id="userContactEditModal7674" class="modal">
   <div class="modal-box" style="max-width:620px">
     <h2 id="userContactEditTitle7674">👤 Editar contato do usuário</h2>
@@ -2407,7 +2555,7 @@ button.dashboard-kpi-card:hover{
   </div>
 </div>
 
-<div id="userModal" class="modal"><div class="modal-box"><h2>👤 Novo usuário</h2><label>Nome *<input id="userName"></label><label>Usuário/Login *<input id="userLogin"></label><label>E-mail *<input id="userEmail" type="email"></label><label>Perfil *<select id="userProfile"><option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option></select></label><label id="userSchoolLabel">Colégio / Unidade<select id="userSchool"><option value="">Todas / sem vínculo específico</option></select></label><div id="userSchoolHelp" class="system-login-note">GESTOR deve estar vinculado a um colégio. MASTER mantém acesso a todas as unidades.</div><label>Prestador<select id="userProvider"><option value="">Vínculo interno / sem prestador</option></select></label><div id="userMessage" class="message"></div><div class="modal-actions"><button id="cancelUser" class="btn btn-secondary">Cancelar</button><button id="saveUser" class="btn btn-blue">Criar e enviar convite</button></div></div></div>
+<div id="userModal" class="modal"><div class="modal-box"><h2 id="userModalTitle7680">👤 Novo usuário</h2><input id="userRequestId7680" type="hidden"><label>Nome *<input id="userName"></label><label>Usuário/Login *<input id="userLogin"></label><label id="userEmailLabel7680">E-mail (opcional)<input id="userEmail" type="email"></label><label>Perfil *<select id="userProfile"><option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option></select></label><label id="userSchoolLabel">Colégio / Unidade<select id="userSchool"><option value="">Todas / sem vínculo específico</option></select></label><div id="userSchoolHelp" class="system-login-note">GESTOR deve estar vinculado a um colégio. MASTER mantém acesso a todas as unidades.</div><label>Prestador<select id="userProvider"><option value="">Vínculo interno / sem prestador</option></select></label><div id="userMessage" class="message"></div><div class="modal-actions"><button id="cancelUser" class="btn btn-secondary">Cancelar</button><button id="saveUser" class="btn btn-blue">Criar e enviar convite</button></div></div></div>
 
 
 <div id="preventiveChecklistAdminModal" class="modal">
@@ -2572,7 +2720,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.7.4</div>
+<div class="footer">QRManut USA • Version 7.6.8.0</div>
 </div>
 <script>
 /* ============================================================
@@ -6782,8 +6930,165 @@ function openAssetManagement760(){
 
 
 let currentAuthToken="",currentAuthTokenType="";
-function openForgotPassword(){$("systemLoginModal").style.display="none";$("recoveryIdentifier").value=$("systemUsername").value.trim();$("recoveryMessage").className="message";$("forgotPasswordModal").style.display="flex"}
-async function sendRecovery(){const id=$("recoveryIdentifier").value.trim();if(!id){$("recoveryMessage").className="message error";$("recoveryMessage").textContent="Informe seu usuário ou e-mail.";return}$("sendRecovery").disabled=true;$("sendRecovery").textContent="Enviando...";try{const r=await apiPost({action:"forgotPassword",recoveryIdentifier:id});if(!r.ok)throw new Error(r.detail||"Não foi possível processar a solicitação.");$("recoveryMessage").className="message success";$("recoveryMessage").textContent=r.message}catch(e){$("recoveryMessage").className="message error";$("recoveryMessage").textContent=e.message}finally{$("sendRecovery").disabled=false;$("sendRecovery").textContent="Enviar instruções"}}
+function openForgotPassword(){
+  $("systemLoginModal").style.display="none";
+  $("recoveryIdentifier").value=$("systemUsername").value.trim();
+  $("recoveryMessage").className="message";
+  $("recoveryMessage").textContent="";
+  hide("recoveryRequestAccess7680");
+  $("forgotPasswordModal").style.display="flex";
+}
+
+function openAccessRequest7680(prefillLogin){
+  $("systemLoginModal").style.display="none";
+  $("forgotPasswordModal").style.display="none";
+
+  $("accessRequestName7680").value="";
+  $("accessRequestLogin7680").value=String(prefillLogin||$("systemUsername").value||"").trim();
+  $("accessRequestEmail7680").value="";
+  $("accessRequestPhone7680").value="";
+  $("accessRequestMessage7680").className="message";
+  $("accessRequestMessage7680").textContent="";
+
+  setAccessRequestLocked7680(false);
+  show("accessRequestCancel7680");
+  show("accessRequestSend7680");
+  hide("accessRequestReturn7680");
+
+  $("accessRequestModal7680").style.display="flex";
+}
+
+function setAccessRequestLocked7680(locked){
+  ["accessRequestName7680","accessRequestLogin7680","accessRequestEmail7680","accessRequestPhone7680"].forEach(id=>{
+    $(id).disabled=!!locked;
+  });
+}
+
+function returnAccessRequestToLogin7680(){
+  const requested=$("accessRequestLogin7680").value.trim();
+
+  $("accessRequestModal7680").style.display="none";
+  $("accessRequestName7680").value="";
+  $("accessRequestLogin7680").value="";
+  $("accessRequestEmail7680").value="";
+  $("accessRequestPhone7680").value="";
+  $("accessRequestMessage7680").className="message";
+  $("accessRequestMessage7680").textContent="";
+
+  setAccessRequestLocked7680(false);
+  $("systemUsername").value=requested;
+  $("systemLoginModal").style.display="flex";
+}
+
+async function sendAccessRequest7680(){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const btn=$("accessRequestSend7680");
+
+  if(btn.dataset.loading==="1")return;
+
+  const name=$("accessRequestName7680").value.trim();
+  const login=$("accessRequestLogin7680").value.trim();
+  const email=$("accessRequestEmail7680").value.trim();
+  const phone=$("accessRequestPhone7680").value.trim();
+
+  if(!name||!login){
+    $("accessRequestMessage7680").className="message error";
+    $("accessRequestMessage7680").textContent=
+      t("Informe nome completo e login desejado.","Enter your full name and desired login.");
+    return;
+  }
+
+  btn.dataset.loading="1";
+  btn.disabled=true;
+  btn.textContent=t("Enviando...","Sending...");
+  setAccessRequestLocked7680(true);
+  $("accessRequestCancel7680").disabled=true;
+
+  try{
+    const r=await apiPost({
+      action:"requestAccess",
+      accessRequestName:name,
+      accessRequestLogin:login,
+      accessRequestEmail:email,
+      accessRequestPhone:phone
+    });
+
+    if(!r.ok){
+      throw new Error(r.detail||t(
+        "Não foi possível enviar a solicitação.",
+        "Unable to submit the request."
+      ));
+    }
+
+    $("accessRequestMessage7680").className="message success";
+    $("accessRequestMessage7680").innerHTML=
+      `<b>${t("Solicitação enviada com sucesso.","Request submitted successfully.")}</b><br><br>`+
+      t(
+        "Sua solicitação de acesso foi encaminhada ao administrador do QRManut. Após a análise, você receberá as orientações para acessar o sistema.",
+        "Your access request was sent to the QRManut administrator. After review, you will receive instructions to access the system."
+      );
+
+    hide("accessRequestCancel7680");
+    hide("accessRequestSend7680");
+    show("accessRequestReturn7680");
+
+  }catch(e){
+    setAccessRequestLocked7680(false);
+    $("accessRequestCancel7680").disabled=false;
+    btn.disabled=false;
+    btn.textContent=t("Enviar solicitação","Submit Request");
+
+    $("accessRequestMessage7680").className="message error";
+    $("accessRequestMessage7680").textContent=e.message;
+  }finally{
+    delete btn.dataset.loading;
+  }
+}
+
+async function sendRecovery(){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const id=$("recoveryIdentifier").value.trim();
+
+  if(!id){
+    $("recoveryMessage").className="message error";
+    $("recoveryMessage").textContent=t("Informe seu usuário ou e-mail.","Enter your username or email.");
+    return;
+  }
+
+  $("sendRecovery").disabled=true;
+  $("sendRecovery").textContent=t("Enviando...","Sending...");
+  hide("recoveryRequestAccess7680");
+
+  try{
+    const r=await apiPost({
+      action:"forgotPassword",
+      recoveryIdentifier:id
+    });
+
+    if(!r.ok)throw new Error(r.detail||t(
+      "Não foi possível processar a solicitação.",
+      "Unable to process the request."
+    ));
+
+    const success=["RESET_SENT","INVITE_PENDING"].includes(String(r.scenario||""));
+
+    $("recoveryMessage").className=success?"message success":"message";
+    $("recoveryMessage").textContent=r.message||"";
+
+    if(r.scenario==="NOT_REGISTERED"){
+      $("recoveryRequestAccess7680").textContent=t("Solicitar cadastro","Request Access");
+      show("recoveryRequestAccess7680");
+    }
+
+  }catch(e){
+    $("recoveryMessage").className="message error";
+    $("recoveryMessage").textContent=e.message;
+  }finally{
+    $("sendRecovery").disabled=false;
+    $("sendRecovery").textContent=t("Enviar instruções","Send Instructions");
+  }
+}
+
 async function openSetPasswordFromUrl(){const p=new URLSearchParams(location.search),a=p.get("activate"),r=p.get("reset");if(!a&&!r)return false;currentAuthToken=a||r;currentAuthTokenType=a?"ATIVACAO":"RESET";try{const x=await api({action:"validatetoken",authToken:currentAuthToken,authTokenType:currentAuthTokenType});if(!x.ok)throw new Error(x.detail||"Link inválido ou expirado.");$("setPasswordTitle").textContent=a?"Ativar acesso":"Redefinir senha";$("setPasswordUser").innerHTML=`<b>${esc(x.usuario.nome||x.usuario.usuario)}</b><br>${esc(x.usuario.email||"")}`;$("newPassword").value="";$("confirmPassword").value="";$("setPasswordMessage").className="message";$("setPasswordModal").style.display="flex"}catch(e){alert(e.message)}return true}
 async function savePasswordFromToken(){const p=$("newPassword").value,c=$("confirmPassword").value;$("saveNewPassword").disabled=true;$("saveNewPassword").textContent="Salvando...";try{const r=await apiPost({action:"setPassword",authToken:currentAuthToken,authTokenType:currentAuthTokenType,newPassword:p,confirmPassword:c});if(!r.ok)throw new Error(r.detail||"Não foi possível salvar a senha.");$("setPasswordMessage").className="message success";$("setPasswordMessage").textContent=r.message;setTimeout(()=>{location.href=location.pathname+"?id=EQBUSCA"},1200)}catch(e){$("setPasswordMessage").className="message error";$("setPasswordMessage").textContent=e.message}finally{$("saveNewPassword").disabled=false;$("saveNewPassword").textContent="Salvar senha"}}
 async function loadUsers(){
@@ -6834,15 +7139,248 @@ async function loadUsers(){
           ✏️ ${t("Editar contato","Edit Contact")}
         </button>
 
+        ${x.email&&x.status!=="Inativo"
+          ?`<button class="btn btn-secondary" onclick="resendInviteUser('${esc(x.idUsuario)}')">${t("Reenviar convite","Resend invite")}</button>`
+          :""}
+
+        ${systemSession?.perfil==="MASTER"
+          ?`<button class="btn btn-secondary" onclick="openAdminUserPassword7680('${esc(x.idUsuario)}')">🔐 ${x.ultimoLogin||x.status==="Ativo"?t("Redefinir senha","Reset Password"):t("Definir senha","Set Password")}</button>`
+          :""}
+
         ${x.status!=="Inativo"
-          ?`<button class="btn btn-secondary" onclick="resendInviteUser('${esc(x.idUsuario)}')">${t("Reenviar convite","Resend invite")}</button><button class="btn" onclick="setUserStatus('${esc(x.idUsuario)}','Inativo')">${t("Inativar","Deactivate")}</button>`
+          ?`<button class="btn" onclick="setUserStatus('${esc(x.idUsuario)}','Inativo')">${t("Inativar","Deactivate")}</button>`
           :`<button class="btn btn-green" onclick="setUserStatus('${esc(x.idUsuario)}','Ativo')">${t("Reativar","Reactivate")}</button>`}
       </div>
     </div>`).join("");
 
     syncUserSchoolField7620();
+
+    if(systemSession?.perfil==="MASTER"){
+      show("userRequestsAdmin7680");
+      await loadUserRequests7680();
+    }else{
+      hide("userRequestsAdmin7680");
+    }
+
   }catch(e){
     $("usersStatus").textContent=e.message;
+  }
+}
+
+
+
+let userRequestsData7680=[];
+
+async function loadUserRequests7680(){
+  if(systemSession?.perfil!=="MASTER"){
+    hide("userRequestsAdmin7680");
+    return;
+  }
+
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+
+  try{
+    $("userRequestsStatus7680").textContent=t("Carregando...","Loading...");
+
+    const r=await menuApi({action:"userrequests"});
+    if(!r.ok)throw new Error(r.detail||t(
+      "Erro ao carregar solicitações.",
+      "Error loading requests."
+    ));
+
+    const data=r.data||{pending:0,items:[]};
+    userRequestsData7680=data.items||[];
+
+    $("userRequestsTitle7680").textContent=
+      `📨 ${t("Solicitações de Cadastro","Access Requests")}`+
+      (data.pending?` 🔴 ${data.pending}`:"");
+
+    $("userRequestsStatus7680").textContent=
+      data.pending
+        ?`${data.pending} ${t("solicitação(ões) pendente(s)","pending request(s)")}`
+        :t("Nenhuma solicitação pendente.","No pending requests.");
+
+    $("userRequestsList7680").innerHTML=userRequestsData7680.map(x=>`
+      <div class="user-card">
+        <b>${esc(x.nome||"-")}</b>
+        <div class="search-result-data">
+          <b>ID:</b> ${esc(x.idSolicitacao||"")}<br>
+          <b>${t("Login","Login")}:</b> ${esc(x.login||"")}<br>
+          <b>${t("E-mail","Email")}:</b> ${esc(x.email||"-")}<br>
+          <b>${t("Telefone","Phone")}:</b> ${esc(x.telefone||"-")}<br>
+          <b>${t("Data","Date")}:</b> ${esc(formatDate(x.dataHora)||"-")}<br>
+          <b>Status:</b> ${esc(x.status||"")}
+          ${x.analisadoPor?`<br><b>${t("Analisado por","Reviewed by")}:</b> ${esc(x.analisadoPor)}`:""}
+          ${x.motivo?`<br><b>${t("Observação","Note")}:</b> ${esc(x.motivo)}`:""}
+        </div>
+
+        ${x.status==="Pendente"?`
+          <div class="user-actions">
+            <button class="btn btn-green" type="button" onclick="approveUserRequest7680('${esc(x.idSolicitacao)}')">
+              ✅ ${t("Aprovar cadastro","Approve")}
+            </button>
+            <button class="btn" type="button" onclick="openRejectUserRequest7680('${esc(x.idSolicitacao)}')">
+              ${t("Recusar","Reject")}
+            </button>
+          </div>
+        `:""}
+      </div>
+    `).join("");
+
+  }catch(e){
+    $("userRequestsStatus7680").textContent=e.message;
+  }
+}
+
+function approveUserRequest7680(id){
+  if(systemSession?.perfil!=="MASTER")return;
+
+  const req=userRequestsData7680.find(x=>
+    String(x.idSolicitacao||"")===String(id||"")
+  );
+
+  if(!req)return;
+
+  openNewUser();
+
+  $("userRequestId7680").value=req.idSolicitacao||"";
+  $("userName").value=req.nome||"";
+  $("userLogin").value=req.login||"";
+  $("userEmail").value=req.email||"";
+  $("userLogin").disabled=true;
+  $("userModalTitle7680").textContent=
+    qrLanguage==="en-US"
+      ?"👤 Approve Access Request"
+      :"👤 Aprovar Solicitação de Cadastro";
+
+  $("userMessage").className="message";
+  $("userMessage").textContent=
+    req.email
+      ?(qrLanguage==="en-US"
+        ?"Complete the role/scope and create the user. An invitation will be emailed automatically."
+        :"Complete perfil/escopo e crie o usuário. O convite será enviado automaticamente por e-mail.")
+      :(qrLanguage==="en-US"
+        ?"This request has no email. After creating the user, use Set Password."
+        :"Esta solicitação não possui e-mail. Após criar o usuário, utilize Definir senha.");
+
+  $("saveUser").textContent=req.email
+    ?(qrLanguage==="en-US"?"Create and send invite":"Criar e enviar convite")
+    :(qrLanguage==="en-US"?"Create User":"Criar usuário");
+}
+
+function openRejectUserRequest7680(id){
+  if(systemSession?.perfil!=="MASTER")return;
+
+  const req=userRequestsData7680.find(x=>
+    String(x.idSolicitacao||"")===String(id||"")
+  );
+
+  if(!req)return;
+
+  $("rejectUserRequestId7680").value=req.idSolicitacao||"";
+  $("rejectUserRequestReason7680").value="";
+  $("rejectUserRequestMessage7680").className="message";
+  $("rejectUserRequestMessage7680").textContent="";
+  $("rejectUserRequestInfo7680").innerHTML=
+    `<b>${esc(req.nome||"")}</b><br>`+
+    `${esc(req.login||"")}`+
+    `${req.email?` • ${esc(req.email)}`:""}`;
+
+  $("rejectUserRequestModal7680").style.display="flex";
+}
+
+async function confirmRejectUserRequest7680(){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const btn=$("rejectUserRequestConfirm7680");
+
+  btn.disabled=true;
+  btn.textContent=t("Processando...","Processing...");
+
+  try{
+    const r=await menuApiPost({
+      action:"rejectUserRequest",
+      userRequestId:$("rejectUserRequestId7680").value.trim(),
+      userRequestReason:$("rejectUserRequestReason7680").value.trim()
+    });
+
+    if(!r.ok)throw new Error(r.detail||t(
+      "Não foi possível recusar a solicitação.",
+      "Unable to reject the request."
+    ));
+
+    $("rejectUserRequestModal7680").style.display="none";
+    await loadUserRequests7680();
+
+  }catch(e){
+    $("rejectUserRequestMessage7680").className="message error";
+    $("rejectUserRequestMessage7680").textContent=e.message;
+  }finally{
+    btn.disabled=false;
+    btn.textContent=t("Confirmar recusa","Confirm Rejection");
+  }
+}
+
+function openAdminUserPassword7680(userId){
+  if(systemSession?.perfil!=="MASTER")return;
+
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const u=usersAdminData7674.find(x=>
+    String(x.idUsuario||"")===String(userId||"")
+  );
+
+  if(!u)return;
+
+  $("adminUserPasswordId7680").value=u.idUsuario||"";
+  $("adminUserPassword7680").value="";
+  $("adminUserPasswordConfirm7680").value="";
+  $("adminUserPasswordMessage7680").className="message";
+  $("adminUserPasswordMessage7680").textContent="";
+
+  $("adminUserPasswordTitle7680").textContent=
+    `🔐 ${u.ultimoLogin||u.status==="Ativo"?t("Redefinir senha","Reset Password"):t("Definir senha","Set Password")}`;
+
+  $("adminUserPasswordInfo7680").innerHTML=
+    `<b>${esc(u.nome||u.usuario||u.idUsuario||"")}</b><br>`+
+    `<span class="muted">${esc(u.usuario||"")} • ${esc(u.email||t("Sem e-mail","No email"))}</span>`;
+
+  $("adminUserPasswordModal7680").style.display="flex";
+}
+
+async function saveAdminUserPassword7680(){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const btn=$("adminUserPasswordSave7680");
+
+  btn.disabled=true;
+  btn.textContent=t("Salvando...","Saving...");
+
+  try{
+    const r=await menuApiPost({
+      action:"setUserPasswordAdmin",
+      userId:$("adminUserPasswordId7680").value.trim(),
+      adminPassword:$("adminUserPassword7680").value,
+      adminPasswordConfirm:$("adminUserPasswordConfirm7680").value
+    });
+
+    if(!r.ok)throw new Error(r.detail||t(
+      "Não foi possível salvar a senha.",
+      "Unable to save the password."
+    ));
+
+    $("adminUserPasswordMessage7680").className="message success";
+    $("adminUserPasswordMessage7680").textContent=r.message;
+
+    await loadUsers();
+
+    setTimeout(()=>{
+      $("adminUserPasswordModal7680").style.display="none";
+    },600);
+
+  }catch(e){
+    $("adminUserPasswordMessage7680").className="message error";
+    $("adminUserPasswordMessage7680").textContent=e.message;
+  }finally{
+    btn.disabled=false;
+    btn.textContent=t("Salvar senha","Save Password");
   }
 }
 
@@ -6907,10 +7445,10 @@ async function saveEditUserContact7674(){
   const name=$("userContactEditName7674").value.trim();
   const email=$("userContactEditEmail7674").value.trim();
 
-  if(!name||!email){
+  if(!name){
     $("userContactEditMessage7674").className="message error";
     $("userContactEditMessage7674").textContent=
-      t("Informe nome e e-mail.","Enter name and email.");
+      t("Informe o nome.","Enter the name.");
     return;
   }
 
@@ -6958,6 +7496,9 @@ async function saveEditUserContact7674(){
 
 
 function openNewUser(){
+  $("userRequestId7680").value="";
+  $("userModalTitle7680").textContent=qrLanguage==="en-US"?"👤 New User":"👤 Novo usuário";
+  $("userLogin").disabled=false;
   $("userName").value="";
   $("userLogin").value="";
   $("userEmail").value="";
@@ -7027,6 +7568,7 @@ async function saveUser(){
       userName:$("userName").value.trim(),
       userLogin:$("userLogin").value.trim(),
       userEmail:$("userEmail").value.trim(),
+      userRequestId:$("userRequestId7680").value.trim(),
       userProviderId:$("userProvider").value,
       userProfile:profile,
       userSchoolId:schoolId
@@ -7034,11 +7576,14 @@ async function saveUser(){
     if(!r.ok)throw new Error(r.detail||t("Não foi possível criar o usuário.","Unable to create user."));
     $("userMessage").className="message success";
     $("userMessage").textContent=r.message;
-    setTimeout(async()=>{$("userModal").style.display="none";await loadUsers()},900);
+    setTimeout(async()=>{$("userModal").style.display="none";await loadUsers();if(systemSession?.perfil==="MASTER")await loadUserRequests7680()},900);
   }catch(e){
     $("userMessage").className="message error";$("userMessage").textContent=e.message;
   }finally{
-    b.disabled=false;b.textContent=t("Criar e enviar convite","Create and send invite");
+    b.disabled=false;
+    b.textContent=$("userEmail").value.trim()
+      ?t("Criar e enviar convite","Create and send invite")
+      :t("Criar usuário","Create User");
   }
 }
 async function setUserStatus(id,status){const lbl=qrStatus7612(status);if(!confirm(qrLanguage==="en-US"?`Change the user status to ${lbl}?`:`Alterar o status do usuário para ${lbl}?`))return;try{const r=await menuApiPost({action:"updateUserStatus",userId:id,userStatus:status});if(!r.ok)throw new Error(r.detail||(qrLanguage==="en-US"?"Error updating user.":"Erro ao alterar usuário."));await loadUsers()}catch(e){alert(e.message)}}
@@ -7835,7 +8380,7 @@ function qrTranslateRoutineScreens(){
     "searchArea","pendingArea","occurrenceReportArea","documentsArea",
     "documentUploadArea","companyArea","providersAdminArea","auditArea",
     "usersArea","preventiveControlArea","assetScreen","systemLoginModal",
-    "forgotPasswordModal","setPasswordModal","userModal","userContactEditModal7674","providerModal","providerContactModal7672",
+    "forgotPasswordModal","accessRequestModal7680","setPasswordModal","userModal","adminUserPasswordModal7680","rejectUserRequestModal7680","userContactEditModal7674","providerModal","providerContactModal7672",
     "preventiveModal","reportModal","manageModal",
     "assetManagementPanel","assetEditModal",
     "occurrenceCatalogArea","maintenancePendingArea"
@@ -8234,6 +8779,46 @@ function qrApplyLanguage(lang){
     applyEvidenceLanguage7670();
   }
 
+
+  // 7.6.8.0 - Login, recuperação, solicitações e gestão de senha.
+  if($("systemLoginTitle7680"))$("systemLoginTitle7680").textContent=qrLanguage==="en-US"?"🔐 QRManut Access":"🔐 Acesso ao QRManut";
+  if($("systemLoginNote7680"))$("systemLoginNote7680").textContent=qrLanguage==="en-US"?"Main Menu access is individual and controlled by role and scope.":"O acesso ao Menu Principal é individual e controlado por perfil e escopo.";
+  if($("systemUsernameLabel7680"))$("systemUsernameLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Username/Login or email":"Usuário/Login ou e-mail";
+  if($("systemPasswordLabel7680"))$("systemPasswordLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Password":"Senha";
+  if($("firstAccessTitle7680"))$("firstAccessTitle7680").textContent=qrLanguage==="en-US"?"First time using QRManut?":"Primeiro acesso ao QRManut?";
+  if($("firstAccessHelp7680"))$("firstAccessHelp7680").textContent=qrLanguage==="en-US"?"If you do not have an account yet, request access from the administrator.":"Se você ainda não possui usuário, solicite seu cadastro ao administrador.";
+  if($("requestAccessButton7680"))$("requestAccessButton7680").textContent=qrLanguage==="en-US"?"Request Access":"Solicitar cadastro";
+
+  if($("recoveryTitle7680"))$("recoveryTitle7680").textContent=qrLanguage==="en-US"?"🔑 Recover Password":"🔑 Recuperar senha";
+  if($("recoveryHelp7680"))$("recoveryHelp7680").textContent=qrLanguage==="en-US"?"Enter your username or email to check the account status.":"Informe seu usuário ou e-mail para verificar a situação do cadastro.";
+  if($("recoveryIdentifierLabel7680"))$("recoveryIdentifierLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Username or email":"Usuário ou e-mail";
+
+  if($("accessRequestTitle7680"))$("accessRequestTitle7680").textContent=qrLanguage==="en-US"?"👤 Request Access":"👤 Solicitar cadastro";
+  if($("accessRequestHelp7680"))$("accessRequestHelp7680").textContent=qrLanguage==="en-US"?"Enter your information below. The administrator will review the request inside QRManut.":"Preencha os dados abaixo. O administrador analisará sua solicitação dentro do QRManut.";
+  if($("accessRequestNameLabel7680"))$("accessRequestNameLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Full name *":"Nome completo *";
+  if($("accessRequestLoginLabel7680"))$("accessRequestLoginLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Desired login *":"Login desejado *";
+  if($("accessRequestEmailLabel7680"))$("accessRequestEmailLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Email":"E-mail";
+  if($("accessRequestPhoneLabel7680"))$("accessRequestPhoneLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Phone":"Telefone";
+  if($("accessRequestSend7680")&&!$("accessRequestSend7680").disabled)$("accessRequestSend7680").textContent=qrLanguage==="en-US"?"Submit Request":"Enviar solicitação";
+  if($("accessRequestCancel7680"))$("accessRequestCancel7680").textContent=qrLanguage==="en-US"?"Cancel":"Cancelar";
+  if($("accessRequestReturn7680"))$("accessRequestReturn7680").textContent=qrLanguage==="en-US"?"Back to Login":"Voltar ao login";
+
+  if($("userEmailLabel7680"))$("userEmailLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Email (optional)":"E-mail (opcional)";
+  if($("userRequestsHelp7680"))$("userRequestsHelp7680").textContent=qrLanguage==="en-US"?"Requests awaiting MASTER review.":"Solicitações aguardando análise do MASTER.";
+  if($("userRequestsRefresh7680"))$("userRequestsRefresh7680").textContent=qrLanguage==="en-US"?"Refresh":"Atualizar";
+
+  if($("adminUserPasswordLabel7680"))$("adminUserPasswordLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"New password":"Nova senha";
+  if($("adminUserPasswordConfirmLabel7680"))$("adminUserPasswordConfirmLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Confirm password":"Confirmar senha";
+  if($("adminUserPasswordRules7680"))$("adminUserPasswordRules7680").textContent=qrLanguage==="en-US"?"Minimum 8 characters with uppercase, lowercase, number, and special character.":"Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e caractere especial.";
+  if($("adminUserPasswordCancel7680"))$("adminUserPasswordCancel7680").textContent=qrLanguage==="en-US"?"Cancel":"Cancelar";
+  if($("adminUserPasswordSave7680")&&!$("adminUserPasswordSave7680").disabled)$("adminUserPasswordSave7680").textContent=qrLanguage==="en-US"?"Save Password":"Salvar senha";
+
+  if($("rejectUserRequestTitle7680"))$("rejectUserRequestTitle7680").textContent=qrLanguage==="en-US"?"Reject Request":"Recusar solicitação";
+  if($("rejectUserRequestReasonLabel7680"))$("rejectUserRequestReasonLabel7680").firstChild.nodeValue=qrLanguage==="en-US"?"Reason / note (optional)":"Motivo / observação (opcional)";
+  if($("rejectUserRequestCancel7680"))$("rejectUserRequestCancel7680").textContent=qrLanguage==="en-US"?"Cancel":"Cancelar";
+  if($("rejectUserRequestConfirm7680")&&!$("rejectUserRequestConfirm7680").disabled)$("rejectUserRequestConfirm7680").textContent=qrLanguage==="en-US"?"Confirm Rejection":"Confirmar recusa";
+
+
   // Headings/labels that have no functional event attached.
   const safeText=[
     ["#systemLoginModal h2","🔐 Acesso ao QRManut","🔐 QRManut Access"],
@@ -8400,7 +8985,15 @@ document.getElementById("qrLangEn").addEventListener("click",function(){
   qrTranslateRoutineScreens();
 });
 
-$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
+
+$("userEmail").addEventListener("input",()=>{
+  if($("userRequestId7680").value.trim())return;
+  $("saveUser").textContent=$("userEmail").value.trim()
+    ?(qrLanguage==="en-US"?"Create and send invite":"Criar e enviar convite")
+    :(qrLanguage==="en-US"?"Create User":"Criar usuário");
+});
+
+$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("requestAccessButton7680").onclick=()=>openAccessRequest7680($("systemUsername").value.trim());$("recoveryRequestAccess7680").onclick=()=>openAccessRequest7680($("recoveryIdentifier").value.trim());$("accessRequestCancel7680").onclick=()=>{$("accessRequestModal7680").style.display="none";$("systemLoginModal").style.display="flex"};$("accessRequestSend7680").onclick=sendAccessRequest7680;$("accessRequestReturn7680").onclick=returnAccessRequestToLogin7680;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("userRequestsRefresh7680").onclick=loadUserRequests7680;$("rejectUserRequestCancel7680").onclick=()=>{$("rejectUserRequestModal7680").style.display="none"};$("rejectUserRequestConfirm7680").onclick=confirmRejectUserRequest7680;$("adminUserPasswordCancel7680").onclick=()=>{$("adminUserPasswordModal7680").style.display="none"};$("adminUserPasswordSave7680").onclick=saveAdminUserPassword7680;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
   captureSchoolSelection7626(this);
 };
 
@@ -11438,6 +12031,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.7.3 - provider contact persistence backend fix.
 
 // QRManut USA 7.6.7.4 - user contact editing and provider consultation permissions.
+
+// QRManut USA 7.6.8.0 - Access Request & Recovery Management.
 </script>
 
 </body>
