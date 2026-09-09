@@ -2840,7 +2840,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.0</div>
+<div class="footer">QRManut USA • Version 7.6.9.1</div>
 </div>
 <script>
 /* ============================================================
@@ -5492,7 +5492,6 @@ async function loadAudit(){
 async function clearAuditFilters(){$("auditAction").value="";$("auditResult").value="";$("auditUser").value="";$("auditSearch").value="";$("auditStart").value="";$("auditEnd").value="";setDefaultAuditDates();await loadAudit()}
 
 async function loadPublicAppConfig(){try{const r=await api({action:"appconfig"});if(!r.ok||!r.app)return;const a=r.app;document.title=a.nomeSistema||"QRManut";const meta=document.querySelector('meta[name="theme-color"]');if(meta&&a.corPrincipal)meta.setAttribute("content",a.corPrincipal);const t=document.querySelector(".search-title");if(t&&a.nomeSistema)t.textContent=a.nomeSistema;const sub=document.getElementById("qrAppSubtitle");if(sub)sub.textContent=qrLanguage==="en-US"?"Quick Maintenance Management":"Gestão rápida de manutenção"}catch(e){}}
-async 
 async function showRolePermissions7690(){
   if(!systemSession){
     return requireSystemLogin(showRolePermissions7690);
@@ -12442,7 +12441,7 @@ if(document.readyState==="loading"){
 
 // QRManut USA 7.6.8.0 - Access Request & Recovery Management.
 
-// QRManut USA 7.6.9.0 - Configurable Role Permissions.
+// QRManut USA 7.6.9.1 - Startup hotfix for Role Permissions.
 </script>
 
 </body>
