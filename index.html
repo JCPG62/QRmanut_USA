@@ -1479,6 +1479,94 @@ button.dashboard-kpi-card:hover{
   }
 }
 
+
+/* ============================================================
+ * Role Permissions – 7.6.9.0
+ * ============================================================ */
+.role-permissions-note{
+  padding:12px 14px;
+  border:1px solid #d8e1ea;
+  border-radius:12px;
+  background:#f7f9fb;
+  margin:12px 0;
+}
+.role-permissions-table-wrap{overflow-x:auto}
+.role-permissions-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:820px;
+}
+.role-permissions-table th,
+.role-permissions-table td{
+  padding:10px 9px;
+  border-bottom:1px solid #e2e7ec;
+  text-align:center;
+  vertical-align:middle;
+}
+.role-permissions-table th:first-child,
+.role-permissions-table td:first-child{text-align:left}
+.role-permissions-table .perm-group td{
+  font-weight:800;
+  background:#f3f6f8;
+  text-align:left;
+}
+.role-permissions-table input[type="checkbox"]{
+  width:20px;
+  height:20px;
+  accent-color:currentColor;
+}
+.role-permissions-master{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.role-permissions-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+@media(max-width:760px){
+  .role-permissions-table-wrap{overflow:visible}
+  .role-permissions-table{display:block;min-width:0}
+  .role-permissions-table thead{display:none}
+  .role-permissions-table tbody{display:block}
+  .role-permissions-table tr{display:block}
+  .role-permissions-table .perm-group td{
+    display:block;
+    margin-top:12px;
+    border-radius:10px;
+  }
+  .role-permissions-table tr.permission-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 10px;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #dfe5ea;
+    border-radius:12px;
+  }
+  .role-permissions-table tr.permission-row td{
+    border:0;
+    padding:3px 0;
+    text-align:left;
+  }
+  .role-permissions-table tr.permission-row td:first-child{
+    grid-column:1/-1;
+    font-weight:800;
+    padding-bottom:7px;
+    border-bottom:1px solid #eef1f4;
+  }
+  .role-permissions-table tr.permission-row td[data-profile]::before{
+    content:attr(data-profile) " ";
+    display:inline-block;
+    min-width:92px;
+    font-weight:700;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1522,6 +1610,7 @@ button.dashboard-kpi-card:hover{
     <button id="tabAudit" class="menu-button audit hidden">🧾 Auditoria</button>
     <button id="tabProvidersAdmin" class="menu-button providers-admin hidden">🏢 Prestadores</button>
     <button id="tabCompany" class="menu-button company hidden">⚙️ Empresa</button>
+      <button id="tabRolePermissions7690" class="menu-button hidden">🔐 Permissões de Perfis</button>
   </div>
 
 
@@ -1882,8 +1971,39 @@ button.dashboard-kpi-card:hover{
     </div>
   </div>
 
+
+<div id="rolePermissionsArea7690" class="hidden">
+  <div class="card">
+    <div class="back-asset-wrap">
+      <button id="rolePermissionsBackMenu7690" class="back-asset-btn">← Voltar ao Menu Principal</button>
+    </div>
+    <div>
+      <h2 id="rolePermissionsTitle7690">🔐 Permissões de Perfis</h2>
+      <div id="rolePermissionsSubtitle7690" class="muted">
+        Configure quais rotinas GESTOR, PRESTADOR e CONSULTA podem executar.
+      </div>
+    </div>
+
+    <div class="role-permissions-note">
+      <b id="rolePermissionsMasterNote7690">MASTER — Acesso total protegido</b>
+      <div id="rolePermissionsMasterHelp7690" class="muted" style="margin-top:4px">
+        As permissões do MASTER permanecem sempre habilitadas e não podem ser removidas pela matriz.
+      </div>
+    </div>
+
+    <div id="rolePermissionsStatus7690" class="muted"></div>
+    <div id="rolePermissionsMatrix7690" class="role-permissions-table-wrap"></div>
+
+    <div class="role-permissions-actions">
+      <button id="saveRolePermissions7690" class="btn btn-blue" type="button">💾 Salvar permissões</button>
+      <button id="restoreRolePermissions7690" class="btn btn-secondary" type="button">↩️ Restaurar padrão</button>
+    </div>
+    <div id="rolePermissionsMessage7690" class="message"></div>
+  </div>
+</div>
+
 <div id="companyArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="companyBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><h2>⚙️ Configuração da Empresa</h2><div class="muted">Dados institucionais desta implantação dedicada.</div><div class="admin-grid"><label>ID Empresa<input id="companyId"></label><label>Nome da Empresa *<input id="companyName"></label><label>Nome Fantasia<input id="companyTradeName"></label><label>Tax ID / EIN<input id="companyCnpj"></label><label>E-mail de Manutenção<input id="companyMaintenanceEmail"></label><label>E-mail Administrativo<input id="companyAdminEmail"></label><label>Nome do Sistema *<input id="companySystemName"></label><label>Cor Principal<input id="companyPrimaryColor" type="color" value="#0b315e"></label><label>Fuso Horário<input id="companyTimezone"></label><label>URL Principal<input id="companyMainUrl"></label><label>E-mail de Relatórios<input id="companyReportsEmail"></label><label>Logo (URL)<input id="companyLogo"></label><label id="companyWoSlaLabel">SLA padrão OC (dias)<input id="companyWoSlaDays" type="number" min="1" max="365" step="1" value="7"></label><label class="full">Observações<textarea id="companyNotes" rows="4"></textarea></label></div><label class="switch-row"><input id="companyActive" type="checkbox"> Empresa ativa</label><div class="company-preview"><b>Pré-visualização</b><div id="companyPreviewName" style="margin-top:6px;font-size:1.1rem;font-weight:800"></div><img id="companyLogoPreview" class="company-logo-preview hidden"></div><div id="companyMessage" class="message"></div><div class="occ-report-actions"><button id="saveCompanyConfig" class="btn btn-blue">Salvar configuração</button></div></div></div>
-  <div id="providersAdminArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="providersBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2>🏢 Prestadores</h2><div id="providersAreaHelp7674" class="muted">Consulta de prestadores e contatos. Edição exclusiva do MASTER.</div></div><button id="newProviderButton" class="btn btn-blue">+ Novo prestador</button></div><div id="providersAdminStatus" class="muted" style="margin-top:12px"></div><div id="providersAdminList"></div></div></div>
+  <div id="providersAdminArea" class="hidden"><div class="card"><div class="back-asset-wrap"><button id="providersBackMenu" class="back-asset-btn">← Voltar ao Menu Principal</button></div><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2>🏢 Prestadores</h2><div id="providersAreaHelp7674" class="muted">Consulta de prestadores e contatos. As ações administrativas seguem as Permissões de Perfis.</div></div><button id="newProviderButton" class="btn btn-blue">+ Novo prestador</button></div><div id="providersAdminStatus" class="muted" style="margin-top:12px"></div><div id="providersAdminList"></div></div></div>
   <div id="auditArea" class="hidden">
     <div class="card">
       <h2 style="margin-bottom:5px">🧾 Auditoria</h2>
@@ -2720,7 +2840,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.8.0</div>
+<div class="footer">QRManut USA • Version 7.6.9.0</div>
 </div>
 <script>
 /* ============================================================
@@ -2731,6 +2851,23 @@ button.dashboard-kpi-card:hover{
  * ============================================================ */
 const API_URL="https://script.google.com/macros/s/AKfycbw3LRRcmSLHN71jZvV1odXk_ySncmjs6F_Sfofcdz86jludpL6_7rwbSkdjwB5DKTl7ig/exec";
 const TOKEN="";const SYSTEM_SESSION_KEY="qrmanut_system_session";const RESPONSIBLE_KEY="qrmanut_responsavel";const PREVENTIVE_SESSION_KEY="qrmanut_preventive_session";const ORIGIN_ASSET_KEY="qrmanut_origin_asset";const MAX_DIM=1280;const QUALITY=.72;
+let rolePermissionsAdminData7690=null;
+function hasUiPermission7690(key){
+  if(!systemSession)return false;
+  if(systemSession.perfil==="MASTER")return true;
+  return !!(systemSession.permissions&&systemSession.permissions[key]);
+}
+function showByPermission7690(id,key){
+  hasUiPermission7690(key)?show(id):hide(id);
+}
+function requireUiPermission7690(key){
+  if(hasUiPermission7690(key))return true;
+  alert(qrLanguage==="en-US"
+    ?"Your profile does not have permission for this action."
+    :"Seu perfil não possui permissão para esta ação.");
+  return false;
+}
+
 let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[],usersAdminData7674=[],providerContactIndex7674=null;
 let executiveDashboardData7661=null;
 let executiveDashboardLoading7661=false;
@@ -3251,8 +3388,75 @@ async function changeGlobalSchoolScope7622(requestedSchoolId){
   }
 }
 
-function updateRoleUi(){if(!systemSession)return;["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabUsers"):hide("tabUsers");if(systemSession.perfil==="GESTOR")$("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option>';else $("userProfile").innerHTML='<option value="PRESTADOR">PRESTADOR</option><option value="CONSULTA">CONSULTA</option><option value="GESTOR">GESTOR</option><option value="MASTER">MASTER</option>';systemSession.perfil==="MASTER"?show("tabAudit"):hide("tabAudit");systemSession?show("tabProvidersAdmin"):hide("tabProvidersAdmin");systemSession.perfil==="MASTER"?show("tabCompany"):hide("tabCompany");systemSession.perfil==="MASTER"?show("tabSchoolsAdmin"):hide("tabSchoolsAdmin");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabDocumentUpload"):hide("tabDocumentUpload");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabOccurrenceCatalog"):hide("tabOccurrenceCatalog");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabPreventiveChecklists"):hide("tabPreventiveChecklists");["MASTER","GESTOR","PRESTADOR"].includes(systemSession.perfil)?show("tabMaintenancePending"):hide("tabMaintenancePending");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabAssetManagement"):hide("tabAssetManagement");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabExecutiveDashboard"):hide("tabExecutiveDashboard");["MASTER","GESTOR"].includes(systemSession.perfil)?show("tabProblemAssets"):hide("tabProblemAssets")}
-function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
+
+function applyGranularActionUi7690(){
+  const pairs=[
+    ["assetNewButton","ASSET_CREATE"],
+    ["sendDocumentUpload","DOCUMENT_UPLOAD"],
+    ["saveCatalogCategory","CATALOG_ADMIN"],
+    ["saveCatalogComponent","CATALOG_ADMIN"],
+    ["newPreventiveChecklist","PREVENTIVE_CHECKLIST_ADMIN"],
+    ["sendMonthlyReport","PREVENTIVE_REPORT_SEND"]
+  ];
+  pairs.forEach(([id,key])=>{
+    if(!$(id))return;
+    hasUiPermission7690(key)?show(id):hide(id);
+  });
+}
+
+function updateRoleUi(){
+  if(!systemSession)return;
+
+  showByPermission7690("tabUsers","USER_VIEW");
+  showByPermission7690("tabAudit","AUDIT_VIEW");
+  showByPermission7690("tabProvidersAdmin","PROVIDER_VIEW_CONTACT");
+  showByPermission7690("tabCompany","COMPANY_CONFIG");
+  showByPermission7690("tabSchoolsAdmin","SCHOOL_ADMIN");
+  showByPermission7690("tabDocumentUpload","DOCUMENT_UPLOAD");
+  showByPermission7690("tabOccurrenceCatalog","CATALOG_ADMIN");
+  showByPermission7690("tabPreventiveChecklists","PREVENTIVE_CHECKLIST_ADMIN");
+  showByPermission7690("tabMaintenancePending","PENDING_VIEW");
+  showByPermission7690("tabAssetManagement","ASSET_ADMIN_VIEW");
+  showByPermission7690("tabExecutiveDashboard","DASHBOARD_VIEW");
+  showByPermission7690("tabProblemAssets","PROBLEM_ASSETS_VIEW");
+
+  showByPermission7690("tabPending","OC_PENDING_VIEW");
+  showByPermission7690("tabOccurrenceReport","OC_REPORT_VIEW");
+  showByPermission7690("tabPreventive","PREVENTIVE_VIEW");
+  showByPermission7690("tabDocuments","DOCUMENT_VIEW");
+
+  systemSession.perfil==="MASTER"?show("tabRolePermissions7690"):hide("tabRolePermissions7690");
+
+  if(systemSession.perfil==="MASTER"){
+    $("userProfile").innerHTML=
+      '<option value="PRESTADOR">PRESTADOR</option>'+
+      '<option value="CONSULTA">CONSULTA</option>'+
+      '<option value="GESTOR">GESTOR</option>'+
+      '<option value="MASTER">MASTER</option>';
+  }else{
+    $("userProfile").innerHTML=
+      '<option value="PRESTADOR">PRESTADOR</option>'+
+      '<option value="CONSULTA">CONSULTA</option>';
+  }
+
+  if($("newUserButton")){
+    hasUiPermission7690("USER_CREATE")?show("newUserButton"):hide("newUserButton");
+  }
+  if($("newProviderButton")){
+    hasUiPermission7690("PROVIDER_CREATE")?show("newProviderButton"):hide("newProviderButton");
+  }
+  if($("reportButton")){
+    hasUiPermission7690("OC_REGISTER")?show("reportButton"):hide("reportButton");
+  }
+  if($("preventiveButton")){
+    hasUiPermission7690("PREVENTIVE_REGISTER")?show("preventiveButton"):hide("preventiveButton");
+  }
+  if($("sendMonthlyReport")){
+    hasUiPermission7690("PREVENTIVE_REPORT_SEND")?show("sendMonthlyReport"):hide("sendMonthlyReport");
+  }
+  applyGranularActionUi7690();
+}
+function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea","rolePermissionsArea7690"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
 async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;fn()}else openMainMenu()}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
@@ -5288,7 +5492,188 @@ async function loadAudit(){
 async function clearAuditFilters(){$("auditAction").value="";$("auditResult").value="";$("auditUser").value="";$("auditSearch").value="";$("auditStart").value="";$("auditEnd").value="";setDefaultAuditDates();await loadAudit()}
 
 async function loadPublicAppConfig(){try{const r=await api({action:"appconfig"});if(!r.ok||!r.app)return;const a=r.app;document.title=a.nomeSistema||"QRManut";const meta=document.querySelector('meta[name="theme-color"]');if(meta&&a.corPrincipal)meta.setAttribute("content",a.corPrincipal);const t=document.querySelector(".search-title");if(t&&a.nomeSistema)t.textContent=a.nomeSistema;const sub=document.getElementById("qrAppSubtitle");if(sub)sub.textContent=qrLanguage==="en-US"?"Quick Maintenance Management":"Gestão rápida de manutenção"}catch(e){}}
-async function showCompanyTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode acessar esta área.");return}clearTabs();$("tabCompany").classList.add("active");showOnly("companyArea");await loadCompanyConfig()}
+async 
+async function showRolePermissions7690(){
+  if(!systemSession){
+    return requireSystemLogin(showRolePermissions7690);
+  }
+  if(systemSession.perfil!=="MASTER"){
+    return alert(qrLanguage==="en-US"
+      ?"Only MASTER can manage Role Permissions."
+      :"Somente MASTER pode administrar Permissões de Perfis.");
+  }
+
+  clearTabs();
+  $("tabRolePermissions7690").classList.add("active");
+  showOnly("rolePermissionsArea7690");
+  await loadRolePermissions7690();
+}
+
+async function loadRolePermissions7690(){
+  if(!requireUiPermission7690("USER_RESET_PASSWORD"))return;
+
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  $("rolePermissionsStatus7690").textContent=t("Carregando...","Loading...");
+  $("rolePermissionsMessage7690").className="message";
+  $("rolePermissionsMessage7690").textContent="";
+
+  try{
+    const r=await menuApi({action:"rolepermissions"});
+    if(!r.ok)throw new Error(r.detail||t(
+      "Erro ao carregar permissões.",
+      "Error loading permissions."
+    ));
+
+    rolePermissionsAdminData7690=r.data;
+    renderRolePermissions7690();
+    $("rolePermissionsStatus7690").textContent=
+      `${(r.data?.definitions||[]).length} ${t("permissão(ões) configuráveis","configurable permission(s)")}`;
+  }catch(e){
+    $("rolePermissionsStatus7690").textContent=e.message;
+  }
+}
+
+function renderRolePermissions7690(){
+  const data=rolePermissionsAdminData7690;
+  if(!data)return;
+
+  const defs=data.definitions||[];
+  const matrix=data.matrix||{};
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  let currentGroup="";
+
+  const rows=defs.map(d=>{
+    const group=qrLanguage==="en-US"?(d.groupEn||d.groupPt):(d.groupPt||d.groupEn);
+    const label=qrLanguage==="en-US"?(d.en||d.pt):(d.pt||d.en);
+    let out="";
+
+    if(group!==currentGroup){
+      currentGroup=group;
+      out+=`<tr class="perm-group"><td colspan="5">${esc(group)}</td></tr>`;
+    }
+
+    out+=`<tr class="permission-row">
+      <td>
+        ${esc(label)}
+        <div class="muted" style="font-size:11px">${esc(d.key)}</div>
+      </td>
+      <td data-profile="MASTER"><span class="role-permissions-master">🔒 ✅</span></td>
+      ${["GESTOR","PRESTADOR","CONSULTA"].map(profile=>`
+        <td data-profile="${profile}">
+          <input
+            type="checkbox"
+            class="role-permission-checkbox7690"
+            data-profile="${profile}"
+            data-permission="${esc(d.key)}"
+            ${matrix[profile]?.[d.key]?"checked":""}
+            aria-label="${esc(profile+" "+label)}">
+        </td>
+      `).join("")}
+    </tr>`;
+
+    return out;
+  }).join("");
+
+  $("rolePermissionsMatrix7690").innerHTML=`
+    <table class="role-permissions-table">
+      <thead>
+        <tr>
+          <th>${t("Rotina / Permissão","Routine / Permission")}</th>
+          <th>MASTER<br><span class="muted">🔒</span></th>
+          <th>GESTOR</th>
+          <th>PRESTADOR</th>
+          <th>CONSULTA</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function collectRolePermissions7690(){
+  const out={GESTOR:{},PRESTADOR:{},CONSULTA:{}};
+  document.querySelectorAll(".role-permission-checkbox7690").forEach(el=>{
+    const profile=el.dataset.profile;
+    const key=el.dataset.permission;
+    if(out[profile]&&key)out[profile][key]=!!el.checked;
+  });
+  return out;
+}
+
+async function saveRolePermissions7690(){
+  if(systemSession?.perfil!=="MASTER")return;
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const btn=$("saveRolePermissions7690");
+
+  btn.disabled=true;
+  btn.textContent=t("Salvando...","Saving...");
+
+  try{
+    const r=await menuApiPost({
+      action:"saveRolePermissions",
+      rolePermissionsJson:JSON.stringify(collectRolePermissions7690())
+    });
+    if(!r.ok)throw new Error(r.detail||t(
+      "Erro ao salvar permissões.",
+      "Error saving permissions."
+    ));
+
+    rolePermissionsAdminData7690=r.data;
+    renderRolePermissions7690();
+
+    $("rolePermissionsMessage7690").className="message success";
+    $("rolePermissionsMessage7690").textContent=r.message;
+
+    // MASTER permanece total. Atualiza seu objeto local sem trocar a sessão.
+    if(systemSession){
+      const masterMatrix=r.data?.matrix?.MASTER||{};
+      systemSession.permissions=masterMatrix;
+      saveSystemSession(systemSession);
+    }
+    updateRoleUi();
+  }catch(e){
+    $("rolePermissionsMessage7690").className="message error";
+    $("rolePermissionsMessage7690").textContent=e.message;
+  }finally{
+    btn.disabled=false;
+    btn.textContent=t("💾 Salvar permissões","💾 Save Permissions");
+  }
+}
+
+async function restoreRolePermissions7690(){
+  if(systemSession?.perfil!=="MASTER")return;
+
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  if(!confirm(t(
+    "Restaurar a configuração padrão de permissões para GESTOR, PRESTADOR e CONSULTA?",
+    "Restore the default permissions for GESTOR, PRESTADOR and CONSULTA?"
+  )))return;
+
+  const btn=$("restoreRolePermissions7690");
+  btn.disabled=true;
+  btn.textContent=t("Restaurando...","Restoring...");
+
+  try{
+    const r=await menuApiPost({action:"restoreRolePermissions"});
+    if(!r.ok)throw new Error(r.detail||t(
+      "Erro ao restaurar permissões.",
+      "Error restoring permissions."
+    ));
+
+    rolePermissionsAdminData7690=r.data;
+    renderRolePermissions7690();
+    $("rolePermissionsMessage7690").className="message success";
+    $("rolePermissionsMessage7690").textContent=r.message;
+  }catch(e){
+    $("rolePermissionsMessage7690").className="message error";
+    $("rolePermissionsMessage7690").textContent=e.message;
+  }finally{
+    btn.disabled=false;
+    btn.textContent=t("↩️ Restaurar padrão","↩️ Restore Defaults");
+  }
+}
+
+
+async function showCompanyTab(){if(!requireUiPermission7690("COMPANY_CONFIG"))return;clearTabs();$("tabCompany").classList.add("active");showOnly("companyArea");await loadCompanyConfig()}
 async function loadCompanyConfig(){try{const r=await menuApi({action:"companyconfig"});if(!r.ok)throw new Error(r.detail||"Erro ao carregar configuração.");const c=r.config||{};$("companyId").value=c.idEmpresa||"SCH-0001";$("companyName").value=c.nomeEmpresa||"";$("companyTradeName").value=c.nomeFantasia||"";$("companyCnpj").value=c.cnpj||"";$("companyMaintenanceEmail").value=c.emailManutencao||"";$("companyAdminEmail").value=c.emailAdministrativo||"";$("companyLogo").value=c.logo||"";$("companyPrimaryColor").value=/^#[0-9a-f]{6}$/i.test(c.corPrincipal||"")?c.corPrincipal:"#0b315e";$("companyTimezone").value=c.fusoHorario||"America/New_York";$("companySystemName").value=c.nomeSistema||"QRManut USA";$("companyActive").checked=!!c.empresaAtiva;$("companyMainUrl").value=c.urlPrincipal||"";$("companyReportsEmail").value=c.emailRelatorios||"";$("companyWoSlaDays").value=Number(c.slaOcDias||7)||7;$("companyNotes").value=c.observacoes||"";updateCompanyPreview()}catch(e){$("companyMessage").className="message error";$("companyMessage").textContent=e.message}}
 function updateCompanyPreview(){$("companyPreviewName").textContent=($("companySystemName").value||"QRManut")+" • "+($("companyTradeName").value||$("companyName").value||"");const l=$("companyLogo").value.trim();if(l){$("companyLogoPreview").src=l;show("companyLogoPreview")}else hide("companyLogoPreview")}
 async function saveCompanyConfig(){
@@ -5429,13 +5814,25 @@ function openProviderContact7672(index){
 
   const editButton7674=$("providerContactEdit7674");
 
-  if(systemSession?.perfil==="MASTER"){
+  if(hasUiPermission7690("PROVIDER_EDIT")){
     editButton7674.textContent=
       providerT7672("✏️ Editar prestador","✏️ Edit Service Provider");
     show("providerContactEdit7674");
   }else{
     hide("providerContactEdit7674");
   }
+
+  ["providerContactPhoneLink7672","providerContactWhatsappLink7672","providerContactEmailLink7672"].forEach(id=>{
+    const el=$(id);
+    if(!el)return;
+    if(hasUiPermission7690("PROVIDER_CONTACT_ACTION")){
+      el.style.display="";
+      el.removeAttribute("aria-disabled");
+    }else{
+      el.style.display="none";
+      el.setAttribute("aria-disabled","true");
+    }
+  });
 
   $("providerContactModal7672").style.display="flex";
 }
@@ -5445,13 +5842,7 @@ function closeProviderContact7672(){
 }
 
 function editProviderFromContact7674(){
-  if(systemSession?.perfil!=="MASTER"){
-    return alert(
-      qrLanguage==="en-US"
-        ?"Only MASTER can edit service providers."
-        :"Somente MASTER pode editar prestadores."
-    );
-  }
+  if(!requireUiPermission7690("PROVIDER_EDIT"))return;
 
   const index=providerContactIndex7674;
 
@@ -5473,16 +5864,14 @@ async function showProvidersAdminTab(){
   $("tabProvidersAdmin").classList.add("active");
   showOnly("providersAdminArea");
 
-  if(systemSession.perfil==="MASTER"){
-    show("newProviderButton");
-  }else{
-    hide("newProviderButton");
-  }
+  hasUiPermission7690("PROVIDER_CREATE")
+    ?show("newProviderButton")
+    :hide("newProviderButton");
 
   $("providersAreaHelp7674").textContent=
     qrLanguage==="en-US"
-      ?"Service provider and contact consultation. Editing is restricted to MASTER."
-      :"Consulta de prestadores e contatos. Edição exclusiva do MASTER.";
+      ?"Service provider and contact consultation. Administrative actions follow Role Permissions."
+      :"Consulta de prestadores e contatos. As ações administrativas seguem as Permissões de Perfis.";
 
   await loadProvidersAdmin();
 }
@@ -7132,24 +7521,26 @@ async function loadUsers(){
         ${x.ultimoLogin?`<br><b>${t("Último login","Last login")}:</b> ${esc(formatDate(x.ultimoLogin))}`:""}
       </div>
       <div class="user-actions">
-        <button
+        ${hasUiPermission7690("USER_EDIT")?`<button
           class="btn btn-blue"
           type="button"
           onclick="openEditUserContact7674('${esc(x.idUsuario)}')">
           ✏️ ${t("Editar contato","Edit Contact")}
-        </button>
+        </button>`:""}
 
-        ${x.email&&x.status!=="Inativo"
+        ${hasUiPermission7690("USER_RESEND_INVITE")&&x.email&&x.status!=="Inativo"
           ?`<button class="btn btn-secondary" onclick="resendInviteUser('${esc(x.idUsuario)}')">${t("Reenviar convite","Resend invite")}</button>`
           :""}
 
-        ${systemSession?.perfil==="MASTER"
+        ${hasUiPermission7690("USER_RESET_PASSWORD")
           ?`<button class="btn btn-secondary" onclick="openAdminUserPassword7680('${esc(x.idUsuario)}')">🔐 ${x.ultimoLogin||x.status==="Ativo"?t("Redefinir senha","Reset Password"):t("Definir senha","Set Password")}</button>`
           :""}
 
-        ${x.status!=="Inativo"
-          ?`<button class="btn" onclick="setUserStatus('${esc(x.idUsuario)}','Inativo')">${t("Inativar","Deactivate")}</button>`
-          :`<button class="btn btn-green" onclick="setUserStatus('${esc(x.idUsuario)}','Ativo')">${t("Reativar","Reactivate")}</button>`}
+        ${hasUiPermission7690("USER_STATUS")
+          ?(x.status!=="Inativo"
+            ?`<button class="btn" onclick="setUserStatus('${esc(x.idUsuario)}','Inativo')">${t("Inativar","Deactivate")}</button>`
+            :`<button class="btn btn-green" onclick="setUserStatus('${esc(x.idUsuario)}','Ativo')">${t("Reativar","Reactivate")}</button>`)
+          :""}
       </div>
     </div>`).join("");
 
@@ -8780,6 +9171,19 @@ function qrApplyLanguage(lang){
   }
 
 
+
+  // 7.6.9.0 - Permissões de Perfis
+  if($("rolePermissionsTitle7690"))$("rolePermissionsTitle7690").textContent=qrLanguage==="en-US"?"🔐 Role Permissions":"🔐 Permissões de Perfis";
+  if($("rolePermissionsSubtitle7690"))$("rolePermissionsSubtitle7690").textContent=qrLanguage==="en-US"?"Configure which routines GESTOR, PRESTADOR and CONSULTA may execute.":"Configure quais rotinas GESTOR, PRESTADOR e CONSULTA podem executar.";
+  if($("rolePermissionsMasterNote7690"))$("rolePermissionsMasterNote7690").textContent=qrLanguage==="en-US"?"MASTER — Protected full access":"MASTER — Acesso total protegido";
+  if($("rolePermissionsMasterHelp7690"))$("rolePermissionsMasterHelp7690").textContent=qrLanguage==="en-US"?"MASTER permissions are always enabled and cannot be removed by the matrix.":"As permissões do MASTER permanecem sempre habilitadas e não podem ser removidas pela matriz.";
+  if($("saveRolePermissions7690")&&!$("saveRolePermissions7690").disabled)$("saveRolePermissions7690").textContent=qrLanguage==="en-US"?"💾 Save Permissions":"💾 Salvar permissões";
+  if($("restoreRolePermissions7690")&&!$("restoreRolePermissions7690").disabled)$("restoreRolePermissions7690").textContent=qrLanguage==="en-US"?"↩️ Restore Defaults":"↩️ Restaurar padrão";
+  if($("rolePermissionsBackMenu7690"))$("rolePermissionsBackMenu7690").textContent=qrLanguage==="en-US"?"← Back to Main Menu":"← Voltar ao Menu Principal";
+  if($("tabRolePermissions7690"))$("tabRolePermissions7690").textContent=qrLanguage==="en-US"?"🔐 Role Permissions":"🔐 Permissões de Perfis";
+  if(rolePermissionsAdminData7690)renderRolePermissions7690();
+
+
   // 7.6.8.0 - Login, recuperação, solicitações e gestão de senha.
   if($("systemLoginTitle7680"))$("systemLoginTitle7680").textContent=qrLanguage==="en-US"?"🔐 QRManut Access":"🔐 Acesso ao QRManut";
   if($("systemLoginNote7680"))$("systemLoginNote7680").textContent=qrLanguage==="en-US"?"Main Menu access is individual and controlled by role and scope.":"O acesso ao Menu Principal é individual e controlado por perfil e escopo.";
@@ -8993,6 +9397,10 @@ $("userEmail").addEventListener("input",()=>{
     :(qrLanguage==="en-US"?"Create User":"Criar usuário");
 });
 
+$("tabRolePermissions7690").onclick=showRolePermissions7690;
+$("rolePermissionsBackMenu7690").onclick=showSearchTab;
+$("saveRolePermissions7690").onclick=saveRolePermissions7690;
+$("restoreRolePermissions7690").onclick=restoreRolePermissions7690;
 $("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("requestAccessButton7680").onclick=()=>openAccessRequest7680($("systemUsername").value.trim());$("recoveryRequestAccess7680").onclick=()=>openAccessRequest7680($("recoveryIdentifier").value.trim());$("accessRequestCancel7680").onclick=()=>{$("accessRequestModal7680").style.display="none";$("systemLoginModal").style.display="flex"};$("accessRequestSend7680").onclick=sendAccessRequest7680;$("accessRequestReturn7680").onclick=returnAccessRequestToLogin7680;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("userRequestsRefresh7680").onclick=loadUserRequests7680;$("rejectUserRequestCancel7680").onclick=()=>{$("rejectUserRequestModal7680").style.display="none"};$("rejectUserRequestConfirm7680").onclick=confirmRejectUserRequest7680;$("adminUserPasswordCancel7680").onclick=()=>{$("adminUserPasswordModal7680").style.display="none"};$("adminUserPasswordSave7680").onclick=saveAdminUserPassword7680;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
   captureSchoolSelection7626(this);
 };
@@ -12033,6 +12441,8 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.7.4 - user contact editing and provider consultation permissions.
 
 // QRManut USA 7.6.8.0 - Access Request & Recovery Management.
+
+// QRManut USA 7.6.9.0 - Configurable Role Permissions.
 </script>
 
 </body>
