@@ -2840,7 +2840,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.1</div>
+<div class="footer">QRManut USA • Version 7.6.9.2</div>
 </div>
 <script>
 /* ============================================================
@@ -5532,6 +5532,89 @@ async function loadRolePermissions7690(){
   }
 }
 
+function rolePermissionUiCatalog7692(){
+  return {
+    groups:{
+      "Ativos":"Assets",
+      "Análises":"Analytics",
+      "OCs":"Work Orders",
+      "Preventivas":"Preventive Maintenance",
+      "Documentos":"Documents",
+      "Pendências":"Pending Actions",
+      "Prestadores":"Service Providers",
+      "Gestão de Ativos":"Asset Management",
+      "Estrutura USA":"USA Structure",
+      "Usuários":"Users",
+      "Cadastros":"Catalogs",
+      "Administração":"Administration"
+    },
+    permissions:{
+      ASSET_SEARCH:"Search / View Assets",
+      DASHBOARD_VIEW:"Executive Dashboard",
+      PROBLEM_ASSETS_VIEW:"Problem Assets / Equipment Attention",
+      OC_PENDING_VIEW:"View Pending Work Orders",
+      OC_REPORT_VIEW:"Work Order Reports",
+      OC_REGISTER:"Register Work Order",
+      OC_EDIT:"Edit Work Order",
+      OC_COMPLETE:"Complete Work Order",
+      OC_DELETE:"Delete Work Order",
+      OC_CLASSIFICATION_REVIEW:"Review Work Order Classification",
+      PREVENTIVE_VIEW:"View Preventive Maintenance",
+      PREVENTIVE_REGISTER:"Register Preventive Maintenance",
+      PREVENTIVE_DELETE:"Delete Preventive Maintenance",
+      PREVENTIVE_PHOTO_REPLACE:"Replace Preventive Photo",
+      PREVENTIVE_REPORT_SEND:"Send Preventive Report",
+      PREVENTIVE_CHECKLIST_ADMIN:"Manage Preventive Checklists",
+      DOCUMENT_VIEW:"View Technical Documents",
+      DOCUMENT_UPLOAD:"Upload Documents",
+      PENDING_VIEW:"View Pending Actions",
+      PENDING_EDIT:"Edit Pending Actions",
+      PENDING_CREATE_OC:"Create Work Order from Pending Action",
+      PROVIDER_VIEW_CONTACT:"View Service Providers and Contacts",
+      PROVIDER_CONTACT_ACTION:"Call / WhatsApp / Send Email",
+      PROVIDER_CREATE:"Create Service Provider",
+      PROVIDER_EDIT:"Edit Service Provider",
+      ASSET_ADMIN_VIEW:"Open Asset Management",
+      ASSET_CREATE:"Create Asset",
+      ASSET_EDIT:"Edit Asset",
+      ASSET_STATUS:"Activate / Deactivate Asset",
+      SCHOOL_ADMIN:"School / Unit Management",
+      USER_VIEW:"View Users",
+      USER_CREATE:"Create User",
+      USER_EDIT:"Edit User / Contact",
+      USER_STATUS:"Activate / Deactivate User",
+      USER_RESEND_INVITE:"Resend Invitation",
+      USER_RESET_PASSWORD:"Set / Reset Password",
+      CATALOG_ADMIN:"Categories / Components",
+      AUDIT_VIEW:"Audit",
+      COMPANY_CONFIG:"Company Configuration"
+    },
+    profiles:{
+      MASTER:"MASTER",
+      GESTOR:"MANAGER",
+      PRESTADOR:"SERVICE PROVIDER",
+      CONSULTA:"VIEW ONLY"
+    }
+  };
+}
+
+function rolePermissionGroupLabel7692(def){
+  if(qrLanguage!=="en-US")return def.groupPt||def.groupEn||"";
+  const cat=rolePermissionUiCatalog7692();
+  return def.groupEn||cat.groups[def.groupPt]||def.groupPt||"";
+}
+
+function rolePermissionLabel7692(def){
+  if(qrLanguage!=="en-US")return def.pt||def.en||def.key||"";
+  const cat=rolePermissionUiCatalog7692();
+  return def.en||cat.permissions[def.key]||def.pt||def.key||"";
+}
+
+function roleProfileLabel7692(profile){
+  if(qrLanguage!=="en-US")return profile;
+  return rolePermissionUiCatalog7692().profiles[profile]||profile;
+}
+
 function renderRolePermissions7690(){
   const data=rolePermissionsAdminData7690;
   if(!data)return;
@@ -5542,8 +5625,8 @@ function renderRolePermissions7690(){
   let currentGroup="";
 
   const rows=defs.map(d=>{
-    const group=qrLanguage==="en-US"?(d.groupEn||d.groupPt):(d.groupPt||d.groupEn);
-    const label=qrLanguage==="en-US"?(d.en||d.pt):(d.pt||d.en);
+    const group=rolePermissionGroupLabel7692(d);
+    const label=rolePermissionLabel7692(d);
     let out="";
 
     if(group!==currentGroup){
@@ -5579,9 +5662,9 @@ function renderRolePermissions7690(){
         <tr>
           <th>${t("Rotina / Permissão","Routine / Permission")}</th>
           <th>MASTER<br><span class="muted">🔒</span></th>
-          <th>GESTOR</th>
-          <th>PRESTADOR</th>
-          <th>CONSULTA</th>
+          <th>${roleProfileLabel7692("GESTOR")}</th>
+          <th>${roleProfileLabel7692("PRESTADOR")}</th>
+          <th>${roleProfileLabel7692("CONSULTA")}</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -5620,7 +5703,7 @@ async function saveRolePermissions7690(){
     renderRolePermissions7690();
 
     $("rolePermissionsMessage7690").className="message success";
-    $("rolePermissionsMessage7690").textContent=r.message;
+    $("rolePermissionsMessage7690").textContent=t("Permissões atualizadas com sucesso.","Permissions updated successfully.");
 
     // MASTER permanece total. Atualiza seu objeto local sem trocar a sessão.
     if(systemSession){
@@ -5644,7 +5727,7 @@ async function restoreRolePermissions7690(){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
   if(!confirm(t(
     "Restaurar a configuração padrão de permissões para GESTOR, PRESTADOR e CONSULTA?",
-    "Restore the default permissions for GESTOR, PRESTADOR and CONSULTA?"
+    "Restore the default permissions for Manager, Service Provider and View Only?"
   )))return;
 
   const btn=$("restoreRolePermissions7690");
@@ -5661,7 +5744,7 @@ async function restoreRolePermissions7690(){
     rolePermissionsAdminData7690=r.data;
     renderRolePermissions7690();
     $("rolePermissionsMessage7690").className="message success";
-    $("rolePermissionsMessage7690").textContent=r.message;
+    $("rolePermissionsMessage7690").textContent=t("Permissões padrão restauradas.","Default permissions restored.");
   }catch(e){
     $("rolePermissionsMessage7690").className="message error";
     $("rolePermissionsMessage7690").textContent=e.message;
@@ -9173,7 +9256,7 @@ function qrApplyLanguage(lang){
 
   // 7.6.9.0 - Permissões de Perfis
   if($("rolePermissionsTitle7690"))$("rolePermissionsTitle7690").textContent=qrLanguage==="en-US"?"🔐 Role Permissions":"🔐 Permissões de Perfis";
-  if($("rolePermissionsSubtitle7690"))$("rolePermissionsSubtitle7690").textContent=qrLanguage==="en-US"?"Configure which routines GESTOR, PRESTADOR and CONSULTA may execute.":"Configure quais rotinas GESTOR, PRESTADOR e CONSULTA podem executar.";
+  if($("rolePermissionsSubtitle7690"))$("rolePermissionsSubtitle7690").textContent=qrLanguage==="en-US"?"Configure which routines Manager, Service Provider and View-Only users may execute.":"Configure quais rotinas GESTOR, PRESTADOR e CONSULTA podem executar.";
   if($("rolePermissionsMasterNote7690"))$("rolePermissionsMasterNote7690").textContent=qrLanguage==="en-US"?"MASTER — Protected full access":"MASTER — Acesso total protegido";
   if($("rolePermissionsMasterHelp7690"))$("rolePermissionsMasterHelp7690").textContent=qrLanguage==="en-US"?"MASTER permissions are always enabled and cannot be removed by the matrix.":"As permissões do MASTER permanecem sempre habilitadas e não podem ser removidas pela matriz.";
   if($("saveRolePermissions7690")&&!$("saveRolePermissions7690").disabled)$("saveRolePermissions7690").textContent=qrLanguage==="en-US"?"💾 Save Permissions":"💾 Salvar permissões";
@@ -12442,6 +12525,7 @@ if(document.readyState==="loading"){
 // QRManut USA 7.6.8.0 - Access Request & Recovery Management.
 
 // QRManut USA 7.6.9.1 - Startup hotfix for Role Permissions.
+// QRManut USA 7.6.9.2 - Complete English translation fallback for Role Permissions.
 </script>
 
 </body>
