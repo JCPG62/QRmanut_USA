@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#f5f7fa",
   "theme_color": "#0b315e",
-  "description": "QRmanutUSA - maintenance management with configurable role permissions, secure access, work orders and preventive maintenance",
+  "description": "QRmanutUSA - maintenance management with bilingual configurable role permissions, secure access, work orders and preventive maintenance",
   "icons": [
     {
       "src": "./qrmanut-192.png",
