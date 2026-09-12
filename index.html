@@ -2793,8 +2793,12 @@ button.dashboard-kpi-card:hover{
 </div>
 <label id="preventivePhotoLabel">Foto / evidência</label>
 <div class="preventive-photo-picker">
-  <input id="preventivePhotoInput" type="file" accept="image/*" capture="environment" class="photo-source-hidden">
-  <label id="preventivePhotoChooseButton" for="preventivePhotoInput" class="btn btn-secondary preventive-photo-choose">Escolher foto</label>
+  <div class="photo-source-actions">
+    <button id="preventivePhotoCameraButton" type="button" class="btn btn-blue">📷 Tirar foto</button>
+    <button id="preventivePhotoChooseButton" type="button" class="btn btn-secondary">🖼️ Escolher imagem do celular</button>
+  </div>
+  <input id="preventivePhotoCameraInput" type="file" accept="image/*" capture="environment" class="photo-source-hidden">
+  <input id="preventivePhotoInput" type="file" accept="image/*" class="photo-source-hidden">
   <span id="preventivePhotoFileName" class="muted">Nenhum arquivo selecionado</span>
 </div>
 <img id="preventivePhotoPreview" class="photo-preview">
@@ -2840,7 +2844,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.3.2</div>
+<div class="footer">QRManut USA • Version 7.6.9.3.4</div>
 </div>
 <script>
 /* ============================================================
@@ -2868,7 +2872,7 @@ function requireUiPermission7690(key){
   return false;
 }
 
-let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[],usersAdminData7674=[],providerContactIndex7674=null;
+let systemSession=null,systemLoginNextAction=null,currentAsset=null,currentAssetStatus=null,history=[],selectedOccurrence=null,preventiveControlData=null,preventiveControlMode="all",preventiveSession=null,preventiveRequirements=null,loginNextAction=null,photoData=null,preventivePhotoData=null,preventiveDocumentFiles=[],correctionPhotoData=null,conclusionPhotoData=null,reportPosting=false,preventivePosting=false,preventiveOpening=false,managePosting=false,signatureDirty=false,signatureDrawing=false,signatureCtx=null,occurrenceReportData=null,occurrenceReportFiltersLoaded=false,pendingFiltersLoaded=false,auditFiltersLoaded=false,companyConfigLoaded=false,providersAdminData=[],usersAdminData7674=[],providerContactIndex7674=null;
 let executiveDashboardData7661=null;
 let executiveDashboardLoading7661=false;
 let executiveDashboardDetailKind7661="";
@@ -4479,7 +4483,7 @@ function renderHistoryItem(i){
   </div>`;
 }
 async function loadPreventiveHistory(){
-  const r=await api({action:"preventivehistory",id:currentAsset.id,systemSession:systemSession.systemSessionToken});
+  const r=await api({action:"preventivehistory",id:currentAsset.id,systemSession:systemSession.systemSessionToken,_refresh:Date.now()});
   if(!r.ok)return;
 
   const items=r.preventives||[],t=(pt,en)=>qrLanguage==="en-US"?en:pt;
@@ -4711,13 +4715,73 @@ async function uploadPreventiveDocuments7606(registro){
 }
 
 
-function requestPreventive(){requirePreventiveLogin(async()=>{await openPreventive();loadPreventiveHistory()},currentAsset.prestador)}
+/* ============================================================
+ * QRManut USA 7.6.9.3.4
+ * - Feedback imediato ao abrir Registrar Preventiva
+ * - Foto preventiva separada em Tirar foto / Escolher imagem do celular
+ * - Atualização segura das evidências após substituição de foto
+ * ============================================================ */
+function setPreventiveOpeningFeedback76934_(loading){
+  const btn=$("preventiveButton");
+  preventiveOpening=!!loading;
+  if(!btn)return;
+
+  btn.disabled=!!loading;
+  if(loading){
+    btn.setAttribute("aria-busy","true");
+    btn.textContent=qrLanguage==="en-US"
+      ?"⏳ Opening Preventive Maintenance..."
+      :"⏳ Abrindo Preventiva...";
+  }else{
+    btn.removeAttribute("aria-busy");
+    btn.textContent=qrLanguage==="en-US"
+      ?"🛠️ Register Preventive Maintenance"
+      :"🛠️ Registrar Preventiva";
+  }
+}
+
+function requestPreventive(){
+  if(preventiveOpening)return;
+
+  setPreventiveOpeningFeedback76934_(true);
+
+  // Permite ao navegador desenhar o feedback antes da validação de sessão/API.
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      let actionStarted=false;
+
+      requirePreventiveLogin(async()=>{
+        actionStarted=true;
+        setPreventiveOpeningFeedback76934_(true);
+
+        try{
+          await openPreventive();
+          loadPreventiveHistory();
+        }catch(e){
+          alert(e.message||String(e));
+        }finally{
+          setPreventiveOpeningFeedback76934_(false);
+        }
+      },currentAsset.prestador)
+      .then(()=>{
+        // Se foi necessário abrir a tela de login ou a ação foi bloqueada
+        // antes de iniciar, devolve o botão ao estado normal.
+        if(!actionStarted)setPreventiveOpeningFeedback76934_(false);
+      })
+      .catch(e=>{
+        setPreventiveOpeningFeedback76934_(false);
+        alert(e.message||String(e));
+      });
+    });
+  });
+}
 async function openPreventive(){
   preventiveChecklistData7640=null;
   preventivePhotoData=null;
   resetPreventiveDocuments7606();
   signatureDirty=false;
   $("preventivePhotoInput").value="";
+  if($("preventivePhotoCameraInput"))$("preventivePhotoCameraInput").value="";
   if($("preventivePhotoFileName")){
     $("preventivePhotoFileName").textContent=
       qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";
@@ -5126,9 +5190,28 @@ async function savePreventivePhotoReplacement7670(){
       photoMime:preventivePhotoReplacement7670.mime||""
     });
     if(!r.ok)throw new Error(r.detail||r.error||evidenceT7670("Não foi possível substituir a foto.","Unable to replace the photo."));
+    $("preventivePhotoReplaceMessage7670").className="message loading";
+    $("preventivePhotoReplaceMessage7670").textContent=evidenceT7670(
+      "Foto substituída. Atualizando evidências...",
+      "Photo replaced. Refreshing evidence..."
+    );
+
+    // Mantém a janela aberta até que o histórico já contenha o novo link.
+    // Evita que o usuário clique imediatamente na evidência antiga.
+    await loadPreventiveHistory();
+
     $("preventivePhotoReplaceMessage7670").className="message success";
-    $("preventivePhotoReplaceMessage7670").textContent=evidenceT7670("Foto substituída com sucesso.","Photo replaced successfully.");
-    setTimeout(async()=>{preventivePhotoReplacePosting7670=false;btn.disabled=false;$("preventivePhotoReplaceModal7670").style.display="none";await loadPreventiveHistory();},400);
+    $("preventivePhotoReplaceMessage7670").textContent=evidenceT7670(
+      "Foto substituída com sucesso.",
+      "Photo replaced successfully."
+    );
+
+    setTimeout(()=>{
+      preventivePhotoReplacePosting7670=false;
+      btn.disabled=false;
+      btn.textContent=evidenceT7670("Substituir foto","Replace Photo");
+      $("preventivePhotoReplaceModal7670").style.display="none";
+    },300);
   }catch(e){
     preventivePhotoReplacePosting7670=false;btn.disabled=false;btn.textContent=evidenceT7670("Substituir foto","Replace Photo");
     $("preventivePhotoReplaceMessage7670").className="message error";$("preventivePhotoReplaceMessage7670").textContent=e.message||String(e);
@@ -5437,7 +5520,42 @@ $("preventivePhotoReplaceCameraInput7670").onchange=async function(){try{if(this
 $("preventivePhotoReplaceInput7670").onchange=async function(){try{if(this.files[0])await handlePreventiveReplacementFile7670(this.files[0])}catch(e){alert(e.message)}};
 $("preventivePhotoReplaceCancel7670").onclick=closePreventivePhotoReplace7670;
 $("preventivePhotoReplaceSave7670").onclick=savePreventivePhotoReplacement7670;
-$("photoInput").onchange=async function(){if(!this.files[0]){photoData=null;$("photoPreview").style.display="none";return}photoData=await processPhoto(this.files[0]);$("photoPreview").src=photoData.dataUrl;$("photoPreview").style.display="block"};$("preventivePhotoInput").onchange=async function(){if(!this.files[0]){preventivePhotoData=null;if($("preventivePhotoFileName"))$("preventivePhotoFileName").textContent=qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";$("preventivePhotoPreview").style.display="none";return}if($("preventivePhotoFileName"))$("preventivePhotoFileName").textContent=this.files[0].name;preventivePhotoData=await processPhoto(this.files[0]);$("preventivePhotoPreview").src=preventivePhotoData.dataUrl;$("preventivePhotoPreview").style.display="block"};$("preventiveDocumentAddButton").onclick=()=>$("preventiveDocumentInput").click();$("preventiveDocumentInput").onchange=function(){addPreventiveDocuments7606(this.files)};async function handleManageSelectedImage(file,kind){
+$("photoInput").onchange=async function(){if(!this.files[0]){photoData=null;$("photoPreview").style.display="none";return}photoData=await processPhoto(this.files[0]);$("photoPreview").src=photoData.dataUrl;$("photoPreview").style.display="block"};
+
+async function handlePreventivePhotoSelection76934_(file){
+  if(!file){
+    preventivePhotoData=null;
+    if($("preventivePhotoFileName")){
+      $("preventivePhotoFileName").textContent=
+        qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";
+    }
+    $("preventivePhotoPreview").style.display="none";
+    return;
+  }
+
+  if($("preventivePhotoFileName"))$("preventivePhotoFileName").textContent=file.name;
+  preventivePhotoData=await processPhoto(file);
+  $("preventivePhotoPreview").src=preventivePhotoData.dataUrl;
+  $("preventivePhotoPreview").style.display="block";
+}
+
+$("preventivePhotoCameraButton").onclick=()=>$("preventivePhotoCameraInput").click();
+$("preventivePhotoChooseButton").onclick=()=>$("preventivePhotoInput").click();
+$("preventivePhotoCameraInput").onchange=async function(){
+  try{
+    if(this.files[0])await handlePreventivePhotoSelection76934_(this.files[0]);
+  }catch(e){
+    alert(e.message||String(e));
+  }
+};
+$("preventivePhotoInput").onchange=async function(){
+  try{
+    if(this.files[0])await handlePreventivePhotoSelection76934_(this.files[0]);
+  }catch(e){
+    alert(e.message||String(e));
+  }
+};
+$("preventiveDocumentAddButton").onclick=()=>$("preventiveDocumentInput").click();$("preventiveDocumentInput").onchange=function(){addPreventiveDocuments7606(this.files)};async function handleManageSelectedImage(file,kind){
   if(!file)return;
 
   const isConclusion=kind==="conclusion";
@@ -9444,14 +9562,20 @@ function qrApplyLanguage(lang){
       qrLanguage==="en-US"?"Photo / evidence":"Foto / evidência";
   }
 
+  if($("preventivePhotoCameraButton")){
+    $("preventivePhotoCameraButton").textContent=
+      qrLanguage==="en-US"?"📷 Take Photo":"📷 Tirar foto";
+  }
+
   if($("preventivePhotoChooseButton")){
     $("preventivePhotoChooseButton").textContent=
-      qrLanguage==="en-US"?"Choose Photo":"Escolher foto";
+      qrLanguage==="en-US"?"🖼️ Choose image from device":"🖼️ Escolher imagem do celular";
   }
 
   if(
     $("preventivePhotoFileName") &&
-    !$("preventivePhotoInput")?.files?.length
+    !$("preventivePhotoInput")?.files?.length &&
+    !$("preventivePhotoCameraInput")?.files?.length
   ){
     $("preventivePhotoFileName").textContent=
       qrLanguage==="en-US"?"No file selected":"Nenhum arquivo selecionado";
