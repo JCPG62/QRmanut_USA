@@ -2905,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.5.3</div>
+<div class="footer">QRManut USA • Version 7.6.9.5.4</div>
 </div>
 <script>
 /* ============================================================
@@ -3192,6 +3192,7 @@ function qrForceSystemLogout76952_(message){
   });
 
   showMenuGate();
+  qrRefreshCurrentAssetSecurityUi76954_().catch(()=>{});
 
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
   $("systemUsername").value="";
@@ -3634,10 +3635,67 @@ function updateRoleUi(){
   applyGranularActionUi7690();
 }
 function showMenuGate(){show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea","rolePermissionsArea7690"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
+
+async function qrRefreshCurrentAssetSecurityUi76954_(){
+  if(!currentAsset)return;
+
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+
+  // Re-renderiza o histórico de OCs para remover/adicionar imediatamente
+  // os botões administrativos conforme o estado atual da sessão.
+  try{
+    renderHistory(history||[]);
+  }catch(_){}
+
+  if(!systemSession?.systemSessionToken){
+    if($("preventiveHistory")){
+      $("preventiveHistory").innerHTML="";
+    }
+    if($("preventiveHistoryStatus")){
+      $("preventiveHistoryStatus").textContent=
+        t("Login necessário para visualizar.","Sign in to view.");
+    }
+    return;
+  }
+
+  const allowed=
+    sessionAllowsAssetSchool7620(currentAsset) &&
+    (
+      ["MASTER","GESTOR"].includes(systemSession.perfil) ||
+      !systemSession.prestador ||
+      String(systemSession.prestador||"").toLowerCase()===
+        String(currentAsset.prestador||"").toLowerCase()
+    );
+
+  if(!allowed){
+    if($("preventiveHistory")){
+      $("preventiveHistory").innerHTML="";
+    }
+    if($("preventiveHistoryStatus")){
+      $("preventiveHistoryStatus").textContent=
+        t("Este ativo está fora do seu escopo de acesso.","This asset is outside your access scope.");
+    }
+    return;
+  }
+
+  if($("preventiveHistoryStatus")){
+    $("preventiveHistoryStatus").textContent=t("Carregando...","Loading...");
+  }
+
+  try{
+    await loadPreventiveHistory();
+  }catch(e){
+    if($("preventiveHistoryStatus")){
+      $("preventiveHistoryStatus").textContent=
+        t("Não foi possível atualizar o histórico de preventivas.","Unable to refresh preventive maintenance history.");
+    }
+  }
+}
+
 function openMainMenu(){hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
-async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;fn()}else openMainMenu()}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
-async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;showMenuGate()}
+async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;await qrRefreshCurrentAssetSecurityUi76954_();if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;fn()}else openMainMenu()}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
+async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;showMenuGate();await qrRefreshCurrentAssetSecurityUi76954_()}
 
 async function sessionIsValid(){return systemSessionIsValid()}
 
@@ -13190,6 +13248,7 @@ if(document.readyState==="loading"){
 
 // QRManut USA 7.6.7.0 - Record & Evidence Management.
 
+// QRManut USA 7.6.9.5.4 - refresh asset protected sections immediately after login/logout/session revocation.
 // QRManut USA 7.6.9.5.3 - branded user status confirmation modal; no browser-origin popup.
 // QRManut USA 7.6.9.5.2 - centralized invalid-session logout + pre-action session validation.
 // QRManut USA 7.6.9.5.1 - close saved occurrence without full page reload; refresh asset in place.
