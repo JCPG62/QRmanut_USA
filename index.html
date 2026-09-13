@@ -2905,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.5.6</div>
+<div class="footer">QRManut USA • Version 7.6.9.5.7</div>
 </div>
 <script>
 /* ============================================================
@@ -3232,6 +3232,7 @@ function qrForceSystemLogout76952_(message){
   });
 
   qrShowLoggedOutContext76956_(qrLoginResumeContext76956_);
+  qrSyncAssetAccessButton76957_();
   qrRefreshCurrentAssetSecurityUi76954_().catch(()=>{});
 
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
@@ -3732,10 +3733,52 @@ async function qrRefreshCurrentAssetSecurityUi76954_(){
   }
 }
 
+function qrSyncAssetAccessButton76957_(){
+  const btn=$("searchAssetsButton");
+  if(!btn)return;
+
+  const loggedIn=!!systemSession?.systemSessionToken;
+
+  btn.textContent=loggedIn
+    ?(qrLanguage==="en-US"?"☰ Main Menu":"☰ Menu Principal")
+    :(qrLanguage==="en-US"?"🔐 Sign In to QRManut":"🔐 Entrar no QRManut");
+
+  btn.title=loggedIn
+    ?(qrLanguage==="en-US"?"Open Main Menu":"Abrir Menu Principal")
+    :(qrLanguage==="en-US"?"Sign in without leaving this asset":"Entrar sem sair da ficha deste equipamento");
+}
+
+async function qrOpenAssetAccess76957_(){
+  if(currentAsset?.id)setOriginAsset(currentAsset.id);
+
+  if(await systemSessionIsValid()){
+    qrSyncAssetAccessButton76957_();
+    openMainMenu();
+    focusBackAssetButton();
+    return;
+  }
+
+  // Login solicitado diretamente da ficha: após autenticar, permanece
+  // nesta ficha e apenas libera os recursos protegidos.
+  qrLoginResumeContext76956_="ASSET";
+  systemLoginNextAction=null;
+
+  $("systemUsername").value="";
+  $("systemPassword").value="";
+  $("systemLoginMessage").className="message";
+  $("systemLoginMessage").textContent="";
+
+  $("systemLoginModal").style.display="flex";
+
+  setTimeout(()=>{
+    try{$("systemUsername").focus()}catch(_){}
+  },80);
+}
+
 function openMainMenu(){hide("assetScreen");show("searchScreen");hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
-async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;await qrRefreshCurrentAssetSecurityUi76954_();if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;qrLoginResumeContext76956_="";fn()}else if(qrLoginResumeContext76956_==="ASSET"&&qrAssetRoute76956_()){qrLoginResumeContext76956_="";hide("searchScreen");show("assetScreen")}else{qrLoginResumeContext76956_="";openMainMenu()}}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
-async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;qrLoginResumeContext76956_="";qrShowLoggedOutContext76956_();await qrRefreshCurrentAssetSecurityUi76954_()}
+async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;qrSyncAssetAccessButton76957_();await qrRefreshCurrentAssetSecurityUi76954_();if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;qrLoginResumeContext76956_="";fn()}else if(qrLoginResumeContext76956_==="ASSET"&&qrAssetRoute76956_()){qrLoginResumeContext76956_="";hide("searchScreen");show("assetScreen")}else{qrLoginResumeContext76956_="";openMainMenu()}}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
+async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;qrLoginResumeContext76956_="";qrShowLoggedOutContext76956_();qrSyncAssetAccessButton76957_();await qrRefreshCurrentAssetSecurityUi76954_()}
 
 async function sessionIsValid(){return systemSessionIsValid()}
 
@@ -4520,6 +4563,7 @@ async function loadAssetDocuments747(id){
 async function loadAsset(id){
   hide("searchScreen");
   show("assetScreen");
+  qrSyncAssetAccessButton76957_();
 
   currentAsset=null;
   currentAssetStatus=null;
@@ -10017,6 +10061,8 @@ function qrApplyLanguage(lang){
     loadGlobalSchoolScope7622().catch(()=>{});
   }
 
+  qrSyncAssetAccessButton76957_();
+
   // 7.6.2.3 - Atualiza mensagens dinâmicas já exibidas ao trocar o idioma.
   if($("searchStatus")){
     const currentSearchStatus=String($("searchStatus").textContent||"").trim();
@@ -11864,7 +11910,7 @@ function renderExecutiveDashboardDetails7661(kind,items){
 
 
 $("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
-$("searchAssetsButton").onclick=function(){if(currentAsset?.id)setOriginAsset(currentAsset.id);requireSystemLogin(()=>{hide("assetScreen");show("searchScreen");openMainMenu();focusBackAssetButton()})};
+$("searchAssetsButton").onclick=qrOpenAssetAccess76957_;
 $("backAssetButton").onclick=function(){const id=getOriginAsset();if(!id)return;clearOriginAsset();location.href="?id="+encodeURIComponent(id)};
 $("occReportRefresh").onclick=loadOccurrenceReport;$("occReportPdf").onclick=generateOccurrenceReportPdf;["occReportStart","occReportEnd","occReportProvider","occReportCategory","occReportComponent","occReportFloor","occReportLocation"].forEach(id=>$(id).onchange=markOccurrenceReportDirty);$("controlRefresh").onclick=refreshPreventiveControl;$("controlCompetence").onchange=loadPreventiveControl;$("controlProvider").onchange=()=>{if(["MASTER","GESTOR"].includes(systemSession?.perfil))loadPreventiveControl();else renderControlList()};$("controlAll").onclick=()=>setControlMode("all");$("controlPending").onclick=()=>setControlMode("pending");$("controlDone").onclick=()=>setControlMode("done");$("sendMonthlyReport").onclick=sendMonthlyPreventiveReport;
 $("preventiveChecklistBackMenu").onclick=showSearchTab;
@@ -13318,6 +13364,7 @@ if(document.readyState==="loading"){
 
 // QRManut USA 7.6.7.0 - Record & Evidence Management.
 
+// QRManut USA 7.6.9.5.7 - direct login from asset screen; authenticated users keep Main Menu action.
 // QRManut USA 7.6.9.5.6 - session/login navigation state: asset and main menu are mutually exclusive; login resumes the correct context.
 // QRManut USA 7.6.9.5.5 - controlled deletion refreshes only affected asset data; removes full page reload.
 // QRManut USA 7.6.9.5.4 - refresh asset protected sections immediately after login/logout/session revocation.
