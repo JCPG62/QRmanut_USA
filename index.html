@@ -2648,9 +2648,17 @@ button.dashboard-kpi-card:hover{
   </div>
 </div>
 
+<!-- ============================================================
+     QRManut USA 7.6.9.4.0
+     - Gestão de Usuários permite editar Colégio / Unidade do usuário
+     - MASTER pode ter unidade de referência sem perder escopo global
+     - GESTOR continua obrigado a possuir uma unidade específica
+     - Alteração de unidade invalida a sessão anterior no backend
+     ============================================================ -->
+
 <div id="userContactEditModal7674" class="modal">
-  <div class="modal-box" style="max-width:620px">
-    <h2 id="userContactEditTitle7674">👤 Editar contato do usuário</h2>
+  <div class="modal-box" style="max-width:660px">
+    <h2 id="userContactEditTitle7674">👤 Editar usuário</h2>
 
     <input id="userContactEditId7674" type="hidden">
 
@@ -2662,9 +2670,17 @@ button.dashboard-kpi-card:hover{
     </label>
 
     <label id="userContactEditEmailLabel7674">
-      E-mail *
+      E-mail (opcional)
       <input id="userContactEditEmail7674" type="email" autocomplete="email">
     </label>
+
+    <label id="userContactEditSchoolLabel7674">
+      Colégio / Unidade
+      <select id="userContactEditSchool7674">
+        <option value="">Todas / sem vínculo específico</option>
+      </select>
+    </label>
+    <div id="userContactEditSchoolHelp7674" class="system-login-note"></div>
 
     <div id="userContactEditMessage7674" class="message"></div>
 
@@ -2844,7 +2860,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.3.5</div>
+<div class="footer">QRManut USA • Version 7.6.9.4.0</div>
 </div>
 <script>
 /* ============================================================
@@ -7752,13 +7768,16 @@ async function savePasswordFromToken(){const p=$("newPassword").value,c=$("confi
 function userSchoolDisplay76935_(u,t){
   const schoolName=String(u?.escola||"").trim();
   const schoolId=String(u?.idEscola||"").trim();
+  const profile=String(u?.perfil||"").trim().toUpperCase();
 
   if(schoolName||schoolId){
-    if(schoolName&&schoolId)return `${schoolName} (${schoolId})`;
-    return schoolName||schoolId;
+    const schoolText=schoolName&&schoolId?`${schoolName} (${schoolId})`:(schoolName||schoolId);
+    return profile==="MASTER"
+      ?schoolText+" • "+t("referência; acesso global","reference; global access")
+      :schoolText;
   }
 
-  if(String(u?.perfil||"").trim().toUpperCase()==="MASTER"){
+  if(profile==="MASTER"){
     return t("Todos os colégios / Escopo global","All Schools / Global scope");
   }
 
@@ -7782,6 +7801,11 @@ async function loadUsers(){
     const schools=sr.schools||[];
     $("userSchool").innerHTML=`<option value="">${t("Todas / sem vínculo específico","All / no specific school")}</option>`+
       schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
+
+    if($("userContactEditSchool7674")){
+      $("userContactEditSchool7674").innerHTML=`<option value="">${t("Todas / sem vínculo específico","All / no specific school")}</option>`+
+        schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
+    }
 
     if(systemSession?.perfil==="GESTOR"){
       $("userSchool").value=systemSession.idEscola||"";
@@ -7810,7 +7834,7 @@ async function loadUsers(){
           class="btn btn-blue"
           type="button"
           onclick="openEditUserContact7674('${esc(x.idUsuario)}')">
-          ✏️ ${t("Editar contato","Edit Contact")}
+          ✏️ ${t("Editar usuário","Edit User")}
         </button>`:""}
 
         ${hasUiPermission7690("USER_RESEND_INVITE")&&x.email&&x.status!=="Inativo"
@@ -8072,18 +8096,24 @@ function openEditUserContact7674(userId){
     return alert(t("Usuário não encontrado.","User not found."));
   }
 
+  const schoolSelect=$("userContactEditSchool7674");
+
   $("userContactEditId7674").value=u.idUsuario||"";
   $("userContactEditName7674").value=u.nome||"";
   $("userContactEditEmail7674").value=u.email||"";
+  if(schoolSelect)schoolSelect.value=u.idEscola||"";
 
   $("userContactEditTitle7674").textContent=
-    t("👤 Editar contato do usuário","👤 Edit User Contact");
+    t("👤 Editar usuário","👤 Edit User");
 
   $("userContactEditNameLabel7674").childNodes[0].nodeValue=
     t("Nome *","Name *");
 
   $("userContactEditEmailLabel7674").childNodes[0].nodeValue=
-    t("E-mail *","Email *");
+    t("E-mail (opcional)","Email (optional)");
+
+  $("userContactEditSchoolLabel7674").childNodes[0].nodeValue=
+    t("Colégio / Unidade","School / Unit");
 
   $("cancelUserContactEdit7674").textContent=
     t("Cancelar","Cancel");
@@ -8094,8 +8124,34 @@ function openEditUserContact7674(userId){
   $("userContactEditInfo7674").innerHTML=
     `<b>${esc(u.nome||u.usuario||u.idUsuario||"")}</b>`+
     `<br><span class="muted">ID: ${esc(u.idUsuario||"")} • Login: ${esc(u.usuario||"")} • ${esc(u.perfil||"")}</span>`+
-    `<br><span class="muted">${t("Colégio / Unidade","School / Unit")}: ${esc(userSchoolDisplay76935_(u,t))}</span>`+
+    `<br><span class="muted">${t("Colégio / Unidade atual","Current School / Unit")}: ${esc(userSchoolDisplay76935_(u,t))}</span>`+
     `${u.prestador?`<br><span class="muted">${t("Prestador","Service Provider")}: ${esc(u.prestador)}</span>`:""}`;
+
+  if(schoolSelect){
+    if(systemSession?.perfil==="GESTOR"){
+      schoolSelect.value=systemSession.idEscola||u.idEscola||"";
+      schoolSelect.disabled=true;
+    }else{
+      schoolSelect.disabled=false;
+    }
+  }
+
+  const profile=String(u.perfil||"").toUpperCase();
+  $("userContactEditSchoolHelp7674").textContent=
+    profile==="MASTER"
+      ?t(
+        "O colégio selecionado será apenas a unidade de referência do MASTER. O acesso continuará global a todas as unidades.",
+        "The selected school is only the MASTER account's reference unit. Access remains global across all units."
+      )
+      :profile==="GESTOR"
+        ?t(
+          "GESTOR deve permanecer vinculado a um colégio/unidade específico. Alterar este campo altera o escopo de acesso.",
+          "A MANAGER must remain linked to one specific School / Unit. Changing this field changes the access scope."
+        )
+        :t(
+          "Defina a unidade vinculada a este usuário quando aplicável.",
+          "Set the School / Unit linked to this user when applicable."
+        );
 
   $("userContactEditMessage7674").className="message";
   $("userContactEditMessage7674").textContent="";
@@ -8120,11 +8176,20 @@ async function saveEditUserContact7674(){
   const userId=$("userContactEditId7674").value.trim();
   const name=$("userContactEditName7674").value.trim();
   const email=$("userContactEditEmail7674").value.trim();
+  const schoolId=$("userContactEditSchool7674")?.value||"";
+  const u=usersAdminData7674.find(x=>String(x.idUsuario||"")===String(userId||""));
 
   if(!name){
     $("userContactEditMessage7674").className="message error";
     $("userContactEditMessage7674").textContent=
       t("Informe o nome.","Enter the name.");
+    return;
+  }
+
+  if(String(u?.perfil||"").toUpperCase()==="GESTOR"&&!schoolId){
+    $("userContactEditMessage7674").className="message error";
+    $("userContactEditMessage7674").textContent=
+      t("Selecione o colégio/unidade do GESTOR.","Select the School / Unit for the MANAGER.");
     return;
   }
 
@@ -8137,28 +8202,34 @@ async function saveEditUserContact7674(){
       action:"updateUserContact",
       userId:userId,
       userName:name,
-      userEmail:email
+      userEmail:email,
+      userSchoolId:schoolId
     });
 
     if(!r.ok){
       throw new Error(
         r.detail||
         t(
-          "Não foi possível atualizar o contato.",
-          "Unable to update the contact."
+          "Não foi possível atualizar o usuário.",
+          "Unable to update the user."
         )
       );
     }
 
     $("userContactEditMessage7674").className="message success";
     $("userContactEditMessage7674").textContent=
-      t("✅ Contato atualizado.","✅ Contact updated.");
+      r.scopeChanged
+        ?t(
+          "✅ Usuário atualizado. O vínculo de colégio/unidade foi alterado; uma sessão anterior desse usuário será encerrada.",
+          "✅ User updated. The School / Unit assignment changed; any previous session for this user will be ended."
+        )
+        :t("✅ Usuário atualizado.","✅ User updated.");
 
     await loadUsers();
 
     setTimeout(()=>{
       closeEditUserContact7674();
-    },500);
+    },700);
 
   }catch(e){
     $("userContactEditMessage7674").className="message error";
@@ -8202,14 +8273,12 @@ function syncUserSchoolField7620(){
   if(systemSession?.perfil==="GESTOR"){
     select.value=systemSession.idEscola||"";
     select.disabled=true;
-  }else if(profile==="MASTER"){
-    select.value="";
-    select.disabled=true;
   }else{
     select.disabled=false;
 
     // For a MASTER administrator, default a new account to the currently
-    // selected School / Unit without restricting the user list itself.
+    // selected School / Unit. For a MASTER target this is only a reference
+    // unit; MASTER access remains global by role.
     if(
       systemSession?.perfil==="MASTER" &&
       !select.value &&
@@ -8221,8 +8290,16 @@ function syncUserSchoolField7620(){
 
   if(help){
     help.textContent=qrLanguage==="en-US"
-      ?(profile==="GESTOR"?"A MANAGER must be linked to one school. MASTER has access to all schools.":"Choose the school scope for this account when applicable.")
-      :(profile==="GESTOR"?"GESTOR deve estar vinculado a um colégio. MASTER mantém acesso a todas as unidades.":"Defina o colégio deste usuário quando aplicável.");
+      ?(profile==="GESTOR"
+        ?"A MANAGER must be linked to one school. Changing the school changes the access scope."
+        :profile==="MASTER"
+          ?"For MASTER, the selected school is a reference unit only. MASTER access remains global."
+          :"Choose the School / Unit linked to this account when applicable.")
+      :(profile==="GESTOR"
+        ?"GESTOR deve estar vinculado a um colégio. Alterar o colégio altera o escopo de acesso."
+        :profile==="MASTER"
+          ?"Para MASTER, o colégio selecionado é apenas a unidade de referência. O acesso permanece global."
+          :"Defina o Colégio / Unidade deste usuário quando aplicável.");
   }
 }
 
