@@ -11469,7 +11469,7 @@ $("addPreventiveChecklistItem").onclick=()=>addPreventiveChecklistItem7640();
 $("cancelPreventiveChecklist").onclick=()=>$("preventiveChecklistAdminModal").style.display="none";
 $("savePreventiveChecklist").onclick=savePreventiveChecklistAdmin7640;
 
-$("preventiveLogout").onclick=()=>showSearchTab();$("cancelPreventive").onclick=()=>{if(!preventivePosting)$("preventiveModal").style.display="none"};$("savePreventive").onclick=savePreventive;$("cancelReport").onclick=function(){if(reportPosting){if($("sendReport").textContent==="Ocorrência gravada"){reportPosting=false;$("reportModal").style.display="none";location.reload()}return}$("reportModal").style.display="none"};$("sendReport").onclick=sendReport;$("historySelect").onchange=function(){renderHistoryItem(Number(this.value))};$("manageStatus").onchange=toggleConclusion;$("cancelManage").onclick=()=>{if(!managePosting)$("manageModal").style.display="none"};$("saveManage").onclick=saveManage;$("signatureCanvas").addEventListener("pointerdown",signatureStart);$("signatureCanvas").addEventListener("pointermove",signatureMove);window.addEventListener("pointerup",signatureEnd);$("clearSignature").onclick=clearSignatureCanvas;
+$("preventiveLogout").onclick=()=>showSearchTab();$("cancelPreventive").onclick=()=>{if(!preventivePosting)$("preventiveModal").style.display="none"};$("savePreventive").onclick=savePreventive;$("cancelReport").onclick=async function(){if(reportPosting){const saved=["Ocorrência gravada","Work Order Saved"].includes($("sendReport").textContent);if(saved){reportPosting=false;$("reportModal").style.display="none";const assetId=currentAsset?.id||getId();if(assetId)await loadAsset(assetId)}return}$("reportModal").style.display="none"};$("sendReport").onclick=sendReport;$("historySelect").onchange=function(){renderHistoryItem(Number(this.value))};$("manageStatus").onchange=toggleConclusion;$("cancelManage").onclick=()=>{if(!managePosting)$("manageModal").style.display="none"};$("saveManage").onclick=saveManage;$("signatureCanvas").addEventListener("pointerdown",signatureStart);$("signatureCanvas").addEventListener("pointermove",signatureMove);window.addEventListener("pointerup",signatureEnd);$("clearSignature").onclick=clearSignatureCanvas;
 qrLoadLanguage();
 qrInstallRoutineObserver();
 qrTranslateRoutineScreens();
@@ -12913,6 +12913,7 @@ if(document.readyState==="loading"){
 
 // QRManut USA 7.6.7.0 - Record & Evidence Management.
 
+// QRManut USA 7.6.9.5.1 - close saved occurrence without full page reload; refresh asset in place.
 // QRManut USA 7.6.7.1 - occurrence attachments accept documents and photos.
 
 // QRManut USA 7.6.7.2 - Provider phone, contact person, contact email, call and mail actions.
