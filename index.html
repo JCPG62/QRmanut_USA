@@ -2905,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.5.7</div>
+<div class="footer">QRManut USA • Version 7.6.9.7.1</div>
 </div>
 <script>
 /* ============================================================
@@ -8203,7 +8203,7 @@ async function loadUsers(){
           ?`<button class="btn btn-secondary" onclick="resendInviteUser('${esc(x.idUsuario)}')">${t("Reenviar convite","Resend invite")}</button>`
           :""}
 
-        ${hasUiPermission7690("USER_RESET_PASSWORD")
+        ${hasUiPermission7690("USER_RESET_PASSWORD")&&x.status!=="Inativo"
           ?`<button class="btn btn-secondary" onclick="openAdminUserPassword7680('${esc(x.idUsuario)}')">🔐 ${x.ultimoLogin||x.status==="Ativo"?t("Redefinir senha","Reset Password"):t("Definir senha","Set Password")}</button>`
           :""}
 
@@ -8391,6 +8391,14 @@ function openAdminUserPassword7680(userId){
   );
 
   if(!u)return;
+
+  if(String(u.status||"")==="Inativo"){
+    $("usersStatus").textContent=t(
+      "Usuário inativo. Reative o usuário antes de definir ou redefinir a senha.",
+      "Inactive user. Reactivate the user before setting or resetting the password."
+    );
+    return;
+  }
 
   $("adminUserPasswordId7680").value=u.idUsuario||"";
   $("adminUserPassword7680").value="";
@@ -13387,3 +13395,5 @@ if(document.readyState==="loading"){
 
 </body>
 </html>
+
+// QRManut USA 7.6.9.7.1 - inactive users no longer expose Set/Reset Password in User Management.
