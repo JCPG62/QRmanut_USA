@@ -2844,7 +2844,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.3.4</div>
+<div class="footer">QRManut USA • Version 7.6.9.3.5</div>
 </div>
 <script>
 /* ============================================================
@@ -7683,6 +7683,11 @@ async function sendAccessRequest7680(){
   }
 }
 
+/* ============================================================
+ * QRManut USA 7.6.9.3.5
+ * - Fecha automaticamente a recuperação após envio bem-sucedido
+ * - Mantém o identificador preenchido ao retornar para o login
+ * ============================================================ */
 async function sendRecovery(){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
   const id=$("recoveryIdentifier").value.trim();
@@ -7718,6 +7723,21 @@ async function sendRecovery(){
       show("recoveryRequestAccess7680");
     }
 
+    if(success){
+      setTimeout(()=>{
+        $("forgotPasswordModal").style.display="none";
+        $("systemUsername").value=id;
+        $("systemPassword").value="";
+        $("systemLoginMessage").className="message";
+        $("systemLoginMessage").textContent=t(
+          "Instruções enviadas. Verifique seu e-mail antes de entrar.",
+          "Instructions sent. Check your email before signing in."
+        );
+        $("systemLoginModal").style.display="flex";
+        try{$("systemPassword").focus()}catch(_){}
+      },1200);
+    }
+
   }catch(e){
     $("recoveryMessage").className="message error";
     $("recoveryMessage").textContent=e.message;
@@ -7729,6 +7749,22 @@ async function sendRecovery(){
 
 async function openSetPasswordFromUrl(){const p=new URLSearchParams(location.search),a=p.get("activate"),r=p.get("reset");if(!a&&!r)return false;currentAuthToken=a||r;currentAuthTokenType=a?"ATIVACAO":"RESET";try{const x=await api({action:"validatetoken",authToken:currentAuthToken,authTokenType:currentAuthTokenType});if(!x.ok)throw new Error(x.detail||"Link inválido ou expirado.");$("setPasswordTitle").textContent=a?"Ativar acesso":"Redefinir senha";$("setPasswordUser").innerHTML=`<b>${esc(x.usuario.nome||x.usuario.usuario)}</b><br>${esc(x.usuario.email||"")}`;$("newPassword").value="";$("confirmPassword").value="";$("setPasswordMessage").className="message";$("setPasswordModal").style.display="flex"}catch(e){alert(e.message)}return true}
 async function savePasswordFromToken(){const p=$("newPassword").value,c=$("confirmPassword").value;$("saveNewPassword").disabled=true;$("saveNewPassword").textContent="Salvando...";try{const r=await apiPost({action:"setPassword",authToken:currentAuthToken,authTokenType:currentAuthTokenType,newPassword:p,confirmPassword:c});if(!r.ok)throw new Error(r.detail||"Não foi possível salvar a senha.");$("setPasswordMessage").className="message success";$("setPasswordMessage").textContent=r.message;setTimeout(()=>{location.href=location.pathname+"?id=EQBUSCA"},1200)}catch(e){$("setPasswordMessage").className="message error";$("setPasswordMessage").textContent=e.message}finally{$("saveNewPassword").disabled=false;$("saveNewPassword").textContent="Salvar senha"}}
+function userSchoolDisplay76935_(u,t){
+  const schoolName=String(u?.escola||"").trim();
+  const schoolId=String(u?.idEscola||"").trim();
+
+  if(schoolName||schoolId){
+    if(schoolName&&schoolId)return `${schoolName} (${schoolId})`;
+    return schoolName||schoolId;
+  }
+
+  if(String(u?.perfil||"").trim().toUpperCase()==="MASTER"){
+    return t("Todos os colégios / Escopo global","All Schools / Global scope");
+  }
+
+  return t("Sem vínculo específico de colégio/unidade","No specific School / Unit assignment");
+}
+
 async function loadUsers(){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
   try{
@@ -7764,7 +7800,7 @@ async function loadUsers(){
         <b>Login:</b> ${esc(x.usuario)}<br>
         <b>${t("E-mail","Email")}:</b> ${esc(x.email||"-")}<br>
         <b>${t("Perfil","Role")}:</b> ${esc(x.perfil)}
-        ${x.escola?`<br><b>${t("Colégio","School")}:</b> ${esc(x.escola)} (${esc(x.idEscola||"")})`:""}
+        <br><b>${t("Colégio / Unidade","School / Unit")}:</b> ${esc(userSchoolDisplay76935_(x,t))}
         ${x.prestador?`<br><b>${t("Prestador","Service Provider")}:</b> ${esc(x.prestador)}`:""}
         <br><b>Status:</b> ${esc(qrStatus7612(x.status))}
         ${x.ultimoLogin?`<br><b>${t("Último login","Last login")}:</b> ${esc(formatDate(x.ultimoLogin))}`:""}
@@ -8058,7 +8094,7 @@ function openEditUserContact7674(userId){
   $("userContactEditInfo7674").innerHTML=
     `<b>${esc(u.nome||u.usuario||u.idUsuario||"")}</b>`+
     `<br><span class="muted">ID: ${esc(u.idUsuario||"")} • Login: ${esc(u.usuario||"")} • ${esc(u.perfil||"")}</span>`+
-    `${u.escola?`<br><span class="muted">${t("Colégio","School")}: ${esc(u.escola)} (${esc(u.idEscola||"")})</span>`:""}`+
+    `<br><span class="muted">${t("Colégio / Unidade","School / Unit")}: ${esc(userSchoolDisplay76935_(u,t))}</span>`+
     `${u.prestador?`<br><span class="muted">${t("Prestador","Service Provider")}: ${esc(u.prestador)}</span>`:""}`;
 
   $("userContactEditMessage7674").className="message";
