@@ -2905,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.1</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.2</div>
 </div>
 <script>
 /* ============================================================
@@ -3143,6 +3143,68 @@ function sessionAllowsAssetSchool7620(asset){
   }
   const assetSchool=String(asset?.school_id||asset?.idEscola||"").trim().toLowerCase();
   return assetSchool===scope.toLowerCase();
+}
+
+function sessionAllowsAssetProvider76982_(asset){
+  if(!systemSession)return false;
+
+  if(["MASTER","GESTOR"].includes(systemSession.perfil)){
+    return true;
+  }
+
+  if(systemSession.perfil!=="PRESTADOR"){
+    return true;
+  }
+
+  const sessionProviderId=String(systemSession.idPrestador||"").trim().toUpperCase();
+  const assetProviderId=String(
+    asset?.id_prestador||
+    asset?.idPrestador||
+    ""
+  ).trim().toUpperCase();
+
+  if(sessionProviderId&&assetProviderId){
+    return sessionProviderId===assetProviderId;
+  }
+
+  // Compatibilidade visual com ativos legados que ainda não possuam ID Prestador.
+  const sessionProvider=String(systemSession.prestador||"").trim().toLowerCase();
+  const assetProvider=String(asset?.prestador||"").trim().toLowerCase();
+
+  return !!sessionProvider && sessionProvider===assetProvider;
+}
+
+function qrApplyAssetActionScope76982_(){
+  const btn=$("preventiveButton");
+  if(!btn||!currentAsset)return;
+
+  if(!currentAsset.periodicidade){
+    hide("preventiveButton");
+    return;
+  }
+
+  // Na ficha pública o botão permanece disponível para conduzir ao login.
+  if(!systemSession?.systemSessionToken){
+    show("preventiveButton");
+    btn.disabled=false;
+    btn.title="";
+    return;
+  }
+
+  const allowed=
+    hasUiPermission7690("PREVENTIVE_REGISTER") &&
+    systemSession.perfil!=="CONSULTA" &&
+    sessionAllowsAssetSchool7620(currentAsset) &&
+    sessionAllowsAssetProvider76982_(currentAsset);
+
+  if(allowed){
+    show("preventiveButton");
+    btn.disabled=false;
+    btn.title="";
+  }else{
+    // Usuário já autenticado fora do escopo: não exibe uma ação que será negada.
+    hide("preventiveButton");
+  }
 }
 function getId(){return normalizeId(new URLSearchParams(location.search).get("id"))}function formatDate(v){if(!v)return"";const d=new Date(v);const loc=(typeof qrLanguage!=="undefined"&&qrLanguage==="en-US")?"en-US":"pt-BR";return isNaN(d)?v:d.toLocaleString(loc)}function currentCompetence(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 function pairs(items){return items.filter(x=>x[1]!==""&&x[1]!==null&&x[1]!==undefined).map(x=>`<div class="pair"><b>${esc(x[0])}:</b> ${esc(x[1])}</div>`).join("")}
@@ -3674,6 +3736,7 @@ function updateRoleUi(){
     hasUiPermission7690("PREVENTIVE_REPORT_SEND")?show("sendMonthlyReport"):hide("sendMonthlyReport");
   }
   applyGranularActionUi7690();
+  qrApplyAssetActionScope76982_();
 }
 function showMenuGate(){hide("assetScreen");show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea","rolePermissionsArea7690"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 
@@ -3681,6 +3744,8 @@ async function qrRefreshCurrentAssetSecurityUi76954_(){
   if(!currentAsset)return;
 
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+
+  qrApplyAssetActionScope76982_();
 
   // Re-renderiza o histórico de OCs para remover/adicionar imediatamente
   // os botões administrativos conforme o estado atual da sessão.
@@ -3701,12 +3766,7 @@ async function qrRefreshCurrentAssetSecurityUi76954_(){
 
   const allowed=
     sessionAllowsAssetSchool7620(currentAsset) &&
-    (
-      ["MASTER","GESTOR"].includes(systemSession.perfil) ||
-      !systemSession.prestador ||
-      String(systemSession.prestador||"").toLowerCase()===
-        String(currentAsset.prestador||"").toLowerCase()
-    );
+    sessionAllowsAssetProvider76982_(currentAsset);
 
   if(!allowed){
     if($("preventiveHistory")){
@@ -3819,7 +3879,7 @@ async function requirePreventiveLogin(nextAction,provider){
       alert(qrLanguage==="en-US"?"This asset is outside your school scope.":"Este ativo está fora do escopo do seu colégio.");
       return;
     }
-    if(systemSession?.perfil==="PRESTADOR"&&provider&&String(systemSession.prestador||"").trim().toLowerCase()!==String(provider).trim().toLowerCase()){
+    if(systemSession?.perfil==="PRESTADOR"&&!sessionAllowsAssetProvider76982_(currentAsset)){
       alert(qrLanguage==="en-US"?"This asset is outside your service provider scope.":"Este equipamento não pertence ao escopo do seu prestador.");
       return;
     }
@@ -4767,8 +4827,13 @@ function renderAsset(a){
   const h2=document.querySelector("#locationSection h3");if(h2)h2.textContent=t("Localização","Location");
   const h3=document.querySelector("#technicalSection h3");if(h3)h3.textContent=t("Características Técnicas","Technical Specifications");
 
-  if(a.periodicidade){show("preventiveButton");show("preventiveHistorySection")}
-  else{hide("preventiveButton");hide("preventiveHistorySection")}
+  if(a.periodicidade){
+    show("preventiveHistorySection");
+    qrApplyAssetActionScope76982_();
+  }else{
+    hide("preventiveButton");
+    hide("preventiveHistorySection");
+  }
 }
 function renderStatus(s){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
@@ -4800,7 +4865,7 @@ function renderHistory(items){
 function renderHistoryItem(i){
   const x=history[i];if(!x)return;selectedOccurrence=x;
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
-  const canManage=systemSession&&sessionAllowsAssetSchool7620(currentAsset)&&systemSession.perfil!=="CONSULTA"&&(["MASTER","GESTOR"].includes(systemSession.perfil)||systemSession.podeAtenderOC);
+  const canManage=systemSession&&sessionAllowsAssetSchool7620(currentAsset)&&sessionAllowsAssetProvider76982_(currentAsset)&&systemSession.perfil!=="CONSULTA"&&(["MASTER","GESTOR"].includes(systemSession.perfil)||systemSession.podeAtenderOC);
   const canDelete=systemSession&&sessionAllowsAssetSchool7620(currentAsset)&&["MASTER","GESTOR"].includes(systemSession.perfil);
   const docs=(x.documentos||[]).length
     ?`<div style="margin-top:9px"><b>📎 ${t("Arquivos da ocorrência","Work Order Files")}:</b>${occurrenceDocumentsHtml7670(x.documentos||[])}</div>`
@@ -13394,6 +13459,7 @@ if(document.readyState==="loading"){
 </script>
 
   <!-- QRManut USA 7.6.9.8.1 - remove stray visible release-note text from page footer. -->
+  <!-- QRManut USA 7.6.9.8.2 - asset actions respect school/provider scope; out-of-scope PRESTADOR does not see protected action buttons. -->
 </body>
 </html>
 
