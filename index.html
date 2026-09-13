@@ -2880,7 +2880,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.5.0</div>
+<div class="footer">QRManut USA • Version 7.6.9.5.2</div>
 </div>
 <script>
 /* ============================================================
@@ -3121,6 +3121,86 @@ function sessionAllowsAssetSchool7620(asset){
 }
 function getId(){return normalizeId(new URLSearchParams(location.search).get("id"))}function formatDate(v){if(!v)return"";const d=new Date(v);const loc=(typeof qrLanguage!=="undefined"&&qrLanguage==="en-US")?"en-US":"pt-BR";return isNaN(d)?v:d.toLocaleString(loc)}function currentCompetence(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 function pairs(items){return items.filter(x=>x[1]!==""&&x[1]!==null&&x[1]!==undefined).map(x=>`<div class="pair"><b>${esc(x[0])}:</b> ${esc(x[1])}</div>`).join("")}
+function qrNormalizeSessionMessage76952_(v){
+  return String(v||"")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase();
+}
+
+function qrIsInvalidSystemSessionResponse76952_(data){
+  if(!data || data.ok!==false)return false;
+  const msg=qrNormalizeSessionMessage76952_(
+    [data.detail,data.error,data.message].filter(Boolean).join(" ")
+  );
+  return (
+    (msg.includes("sessao") && (
+      msg.includes("invalida") ||
+      msg.includes("expirada") ||
+      msg.includes("revogada")
+    )) ||
+    (msg.includes("session") && (
+      msg.includes("invalid") ||
+      msg.includes("expired") ||
+      msg.includes("revoked")
+    ))
+  );
+}
+
+function qrForceSystemLogout76952_(message){
+  clearSystemSession();
+  clearPreventiveSession();
+
+  preventiveControlData=null;
+  occurrenceReportData=null;
+  occurrenceReportFiltersLoaded=false;
+  documentFiltersLoaded=false;
+  pendingFiltersLoaded=false;
+
+  reportPosting=false;
+  preventivePosting=false;
+  managePosting=false;
+  recordDeletePosting7670=false;
+
+  document.querySelectorAll(".modal").forEach(m=>{
+    m.style.display="none";
+  });
+
+  showMenuGate();
+
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  $("systemUsername").value="";
+  $("systemPassword").value="";
+  $("systemLoginMessage").className="message error";
+  $("systemLoginMessage").textContent=message||t(
+    "Sua sessão expirou, foi revogada ou o usuário foi inativado. Faça login novamente.",
+    "Your session expired, was revoked, or the user was deactivated. Please sign in again."
+  );
+  $("systemLoginModal").style.display="flex";
+
+  setTimeout(()=>{
+    try{$("systemUsername").focus()}catch(_){}
+  },80);
+}
+
+async function qrEnsureActiveSystemSession76952_(){
+  if(!systemSession?.systemSessionToken){
+    qrForceSystemLogout76952_();
+    return false;
+  }
+
+  const ok=await systemSessionIsValid();
+
+  if(!ok){
+    if($("systemLoginModal").style.display!=="flex"){
+      qrForceSystemLogout76952_();
+    }
+    return false;
+  }
+
+  return true;
+}
+
 async function api(params){
   const req={...params};
 
@@ -3135,7 +3215,23 @@ async function api(params){
   const r=await fetch(
     API_URL+"?"+new URLSearchParams(req)
   );
-  return r.json();
+  const data=await r.json();
+
+  const authenticatedRequest=!!(
+    req.systemSession ||
+    req.systemSessionToken ||
+    req.preventiveSessionToken
+  );
+
+  if(
+    authenticatedRequest &&
+    String(req.action||"").toLowerCase()!=="systemlogout" &&
+    qrIsInvalidSystemSessionResponse76952_(data)
+  ){
+    qrForceSystemLogout76952_();
+  }
+
+  return data;
 }
 
 async function apiPost(params){
@@ -3155,7 +3251,23 @@ async function apiPost(params){
     headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
     body:body.toString()
   });
-  return r.json();
+  const data=await r.json();
+
+  const authenticatedRequest=!!(
+    req.systemSession ||
+    req.systemSessionToken ||
+    req.preventiveSessionToken
+  );
+
+  if(
+    authenticatedRequest &&
+    String(req.action||"").toLowerCase()!=="systemlogout" &&
+    qrIsInvalidSystemSessionResponse76952_(data)
+  ){
+    qrForceSystemLogout76952_();
+  }
+
+  return data;
 }
 function getSavedResponsible(){try{return localStorage.getItem(RESPONSIBLE_KEY)||""}catch(e){return""}}function saveResponsible(n){if(!n)return;try{localStorage.setItem(RESPONSIBLE_KEY,n)}catch(e){}}
 function savePreventiveSession(d){preventiveSession=d;sessionStorage.setItem(PREVENTIVE_SESSION_KEY,JSON.stringify(d))}function readPreventiveSession(){try{const raw=sessionStorage.getItem(PREVENTIVE_SESSION_KEY);preventiveSession=raw?JSON.parse(raw):null}catch(e){preventiveSession=null}}function clearPreventiveSession(){preventiveSession=null;sessionStorage.removeItem(PREVENTIVE_SESSION_KEY)}function saveSystemSession(d){
@@ -3503,6 +3615,31 @@ async function doSystemLogin(){const user=$("systemUsername").value.trim(),passw
 async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;showMenuGate()}
 
 async function sessionIsValid(){return systemSessionIsValid()}
+
+let qrSessionGuardLastCheck76952_=0;
+async function qrProactiveSessionGuard76952_(){
+  if(!systemSession?.systemSessionToken)return;
+
+  const now=Date.now();
+  if(now-qrSessionGuardLastCheck76952_<15000)return;
+  qrSessionGuardLastCheck76952_=now;
+
+  const ok=await systemSessionIsValid();
+  if(!ok && $("systemLoginModal").style.display!=="flex"){
+    qrForceSystemLogout76952_();
+  }
+}
+
+window.addEventListener("focus",()=>{
+  qrProactiveSessionGuard76952_().catch(()=>{});
+});
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    qrProactiveSessionGuard76952_().catch(()=>{});
+  }
+});
+
 function getOriginAsset(){try{return sessionStorage.getItem(ORIGIN_ASSET_KEY)||""}catch(e){return""}}function setOriginAsset(id){try{sessionStorage.setItem(ORIGIN_ASSET_KEY,normalizeId(id))}catch(e){}}function clearOriginAsset(){try{sessionStorage.removeItem(ORIGIN_ASSET_KEY)}catch(e){}}
 function updateBackAssetButton(){const id=getOriginAsset();if(id){show("backAssetWrap");$("backAssetButton").textContent=qrLanguage==="en-US"?"← Back to "+id:"← Voltar para "+id}else hide("backAssetWrap")}
 function focusSearchInput(){setTimeout(()=>{try{$("searchInput").focus()}catch(e){}},80)}function focusBackAssetButton(){setTimeout(()=>{try{if(!$("backAssetWrap").classList.contains("hidden"))$("backAssetButton").focus()}catch(e){}},100)}
@@ -5128,7 +5265,8 @@ function applyEvidenceLanguage7670(){
   }
 }
 
-function requestDeleteRecord7670(type,id){
+async function requestDeleteRecord7670(type,id){
+  if(!await qrEnsureActiveSystemSession76952_())return;
   if(!["MASTER","GESTOR"].includes(systemSession?.perfil||"")){
     return alert(evidenceT7670("Somente MASTER ou GESTOR pode excluir registros.","Only MASTER or MANAGER can delete records."));
   }
@@ -5259,6 +5397,7 @@ function closePreventivePhotoReplace7670(){
 
 
 async function openReport(){
+  if(!await qrEnsureActiveSystemSession76952_())return;
   await populateOccurrenceCategorySelect();
   resetReportOccurrenceFile7670();
   applyEvidenceLanguage7670();
@@ -5408,7 +5547,8 @@ function showManageClassification7660(occ){
   }
 }
 
-function openManage(i){
+async function openManage(i){
+  if(!await qrEnsureActiveSystemSession76952_())return;
   selectedOccurrence=history[i];
   correctionPhotoData=null;
   conclusionPhotoData=null;
@@ -12913,6 +13053,7 @@ if(document.readyState==="loading"){
 
 // QRManut USA 7.6.7.0 - Record & Evidence Management.
 
+// QRManut USA 7.6.9.5.2 - centralized invalid-session logout + pre-action session validation.
 // QRManut USA 7.6.9.5.1 - close saved occurrence without full page reload; refresh asset in place.
 // QRManut USA 7.6.7.1 - occurrence attachments accept documents and photos.
 
