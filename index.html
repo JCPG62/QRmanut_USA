@@ -2649,15 +2649,16 @@ button.dashboard-kpi-card:hover{
 </div>
 
 <!-- ============================================================
-     QRManut USA 7.6.9.4.0
-     - Gestão de Usuários permite editar Colégio / Unidade do usuário
+     QRManut USA 7.6.9.5.0
+     - Gestão de Usuários permite editar Perfil, Colégio / Unidade e Prestador
+     - CONSULTA pode ser promovido a GESTOR sem recriar o usuário
+     - GESTOR exige unidade específica; PRESTADOR exige prestador
      - MASTER pode ter unidade de referência sem perder escopo global
-     - GESTOR continua obrigado a possuir uma unidade específica
-     - Alteração de unidade invalida a sessão anterior no backend
+     - Mudanças de acesso invalidam sessões anteriores no backend
      ============================================================ -->
 
 <div id="userContactEditModal7674" class="modal">
-  <div class="modal-box" style="max-width:660px">
+  <div class="modal-box" style="max-width:700px">
     <h2 id="userContactEditTitle7674">👤 Editar usuário</h2>
 
     <input id="userContactEditId7674" type="hidden">
@@ -2674,6 +2675,17 @@ button.dashboard-kpi-card:hover{
       <input id="userContactEditEmail7674" type="email" autocomplete="email">
     </label>
 
+    <label id="userContactEditProfileLabel7674">
+      Perfil *
+      <select id="userContactEditProfile7674">
+        <option value="CONSULTA">CONSULTA</option>
+        <option value="PRESTADOR">PRESTADOR</option>
+        <option value="GESTOR">GESTOR</option>
+        <option value="MASTER">MASTER</option>
+      </select>
+    </label>
+    <div id="userContactEditProfileHelp7674" class="system-login-note"></div>
+
     <label id="userContactEditSchoolLabel7674">
       Colégio / Unidade
       <select id="userContactEditSchool7674">
@@ -2681,6 +2693,14 @@ button.dashboard-kpi-card:hover{
       </select>
     </label>
     <div id="userContactEditSchoolHelp7674" class="system-login-note"></div>
+
+    <label id="userContactEditProviderLabel7674">
+      Prestador
+      <select id="userContactEditProvider7674">
+        <option value="">Vínculo interno / sem prestador</option>
+      </select>
+    </label>
+    <div id="userContactEditProviderHelp7674" class="system-login-note"></div>
 
     <div id="userContactEditMessage7674" class="message"></div>
 
@@ -2860,7 +2880,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.4.0</div>
+<div class="footer">QRManut USA • Version 7.6.9.5.0</div>
 </div>
 <script>
 /* ============================================================
@@ -4186,7 +4206,7 @@ function qrPreventiveCompetence7642(value){
     : raw;
 }
 
-const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated",SCHOOL_CRIADO:"School Created",SCHOOL_ALTERADO:"School Updated",SCHOOL_ATIVADO:"School Activated",SCHOOL_INATIVADO:"School Deactivated",CLASSIFICACAO_OC_REVISADA:"Work Order Classification Reviewed",OC_EXCLUIDA:"Work Order Deleted",PREVENTIVA_EXCLUIDA:"Preventive Record Deleted",FOTO_OC_SUBSTITUIDA:"Work Order Photo Replaced",FOTO_CONCLUSAO_OC_SUBSTITUIDA:"Conclusion Photo Replaced",FOTO_PREVENTIVA_SUBSTITUIDA:"Preventive Photo Replaced",DOCUMENTO_OC_ENVIADO:"Work Order File Uploaded"};
+const QR_AUDIT_EN_7612={PREVENTIVA_REGISTRADA:"Preventive Maintenance Recorded",PREVENTIVA_DUPLICIDADE_BLOQUEADA:"Duplicate Preventive Maintenance Blocked",OC_CRIADA:"Work Order Created",OC_ALTERADA:"Work Order Updated",OC_CONCLUIDA:"Work Order Completed",LOGIN_SUCESSO:"Login Success",LOGIN_FALHOU:"Login Failed",USUARIO_CRIADO:"User Created",USUARIO_ATUALIZADO:"User Updated",USUARIO_ATIVADO:"User Activated",USUARIO_DESATIVADO:"User Deactivated",USUARIO_STATUS_ALTERADO:"User Status Updated",USUARIO_BLOQUEADO:"User Blocked",SENHA_REDEFINIDA:"Password Reset",CONVITE_REENVIADO:"Invite Resent",PRESTADOR_CRIADO:"Service Provider Created",PRESTADOR_ALTERADO:"Service Provider Updated",CONFIGURACAO_ALTERADA:"Configuration Updated",DOCUMENTO_ENVIADO:"Document Uploaded",DOCUMENTO_PREVENTIVA_ENVIADO:"Preventive Document Uploaded",RELATORIO_ENVIADO:"Report Sent",PENDENCIA_CRIADA:"Pending Action Created",PENDENCIA_ATUALIZADA:"Pending Action Updated",PENDENCIA_RESOLVIDA:"Pending Action Resolved",PENDENCIA_GEROU_OC:"Work Order Created from Pending Action",CATEGORIA_CRIADA:"Category Created",CATEGORIA_ALTERADA:"Category Updated",CATEGORIA_REORDENADA:"Category Reordered",COMPONENTE_CRIADO:"Component Created",COMPONENTE_ALTERADO:"Component Updated",COMPONENTE_REORDENADO:"Component Reordered",ATIVO_CRIADO:"Asset Created",ATIVO_ATUALIZADO:"Asset Updated",ATIVO_ATIVADO:"Asset Activated",ATIVO_INATIVADO:"Asset Deactivated",CHECKLIST_CRIADO:"Checklist Created",CHECKLIST_ALTERADO:"Checklist Updated",CHECKLIST_ATIVADO:"Checklist Activated",CHECKLIST_INATIVADO:"Checklist Deactivated",SCHOOL_CRIADO:"School Created",SCHOOL_ALTERADO:"School Updated",SCHOOL_ATIVADO:"School Activated",SCHOOL_INATIVADO:"School Deactivated",CLASSIFICACAO_OC_REVISADA:"Work Order Classification Reviewed",OC_EXCLUIDA:"Work Order Deleted",PREVENTIVA_EXCLUIDA:"Preventive Record Deleted",FOTO_OC_SUBSTITUIDA:"Work Order Photo Replaced",FOTO_CONCLUSAO_OC_SUBSTITUIDA:"Conclusion Photo Replaced",FOTO_PREVENTIVA_SUBSTITUIDA:"Preventive Photo Replaced",DOCUMENTO_OC_ENVIADO:"Work Order File Uploaded"};
 function qrAuditAction7612(v){const s=String(v||"");return qrLanguage==="en-US"?(QR_AUDIT_EN_7612[s]||s):s;}
 function qrAuditResult7612(v){const s=String(v||"");return qrLanguage==="en-US"?({SUCESSO:"Success",FALHA:"Failed",BLOQUEADO:"Blocked"}[s]||s):s;}
 function qrAuditType7612(v){const s=String(v||"");if(qrLanguage!=="en-US")return s;return {AUTENTICACAO:"Authentication",USUARIO:"User",PRESTADOR:"Service Provider",PREVENTIVA:"Preventive Maintenance",ATIVO:"Asset",DOCUMENTO_TECNICO:"Technical Document",DOCUMENTO_PREVENTIVA:"Preventive Document",CONFIGURACAO_EMPRESA:"Company Configuration",PENDENCIA_MANUTENCAO:"Maintenance Pending Action",CATEGORIA_OCORRENCIA:"Work Order Category",COMPONENTE_OCORRENCIA:"Work Order Component",CHECKLIST_PREVENTIVA:"Preventive Checklist",ESCOLA:"School / Unit",DOCUMENTO_OC:"Work Order File"}[s]||s;}
@@ -7807,6 +7827,11 @@ async function loadUsers(){
         schools.map(x=>`<option value="${esc(x.idEscola)}">${esc(x.idEscola+" – "+x.escola)}</option>`).join("");
     }
 
+    if($("userContactEditProvider7674")){
+      $("userContactEditProvider7674").innerHTML=`<option value="">${t("Vínculo interno / sem prestador","Internal account / no provider")}</option>`+
+        prov.map(x=>`<option value="${esc(x.idPrestador)}">${esc(x.nomeFantasia||x.nome)}</option>`).join("");
+    }
+
     if(systemSession?.perfil==="GESTOR"){
       $("userSchool").value=systemSession.idEscola||"";
       $("userSchool").disabled=true;
@@ -8085,6 +8110,81 @@ async function saveAdminUserPassword7680(){
 }
 
 
+function syncEditUserAccessFields76950_(u){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const profileSelect=$("userContactEditProfile7674");
+  const schoolSelect=$("userContactEditSchool7674");
+  const providerSelect=$("userContactEditProvider7674");
+  if(!profileSelect||!schoolSelect||!providerSelect)return;
+
+  const profile=String(profileSelect.value||"").toUpperCase();
+  const editingSelf=String(u?.idUsuario||"")===String(systemSession?.idUsuario||"");
+
+  profileSelect.disabled=systemSession?.perfil!=="MASTER"||editingSelf;
+
+  if(systemSession?.perfil==="GESTOR"){
+    schoolSelect.value=systemSession.idEscola||u?.idEscola||"";
+    schoolSelect.disabled=true;
+  }else{
+    schoolSelect.disabled=false;
+  }
+
+  if(profile==="MASTER"||profile==="GESTOR"){
+    providerSelect.value="";
+    providerSelect.disabled=true;
+  }else{
+    providerSelect.disabled=false;
+  }
+
+  $("userContactEditProfileHelp7674").textContent=
+    editingSelf&&systemSession?.perfil==="MASTER"
+      ?t(
+        "O próprio MASTER não pode alterar seu perfil nesta tela.",
+        "The current MASTER cannot change their own role on this screen."
+      )
+      :systemSession?.perfil==="MASTER"
+        ?t(
+          "Alterar o perfil muda as permissões do usuário e encerra sessões anteriores.",
+          "Changing the role changes the user's permissions and ends previous sessions."
+        )
+        :t(
+          "Somente MASTER pode alterar o perfil do usuário.",
+          "Only MASTER can change the user's role."
+        );
+
+  $("userContactEditSchoolHelp7674").textContent=
+    profile==="MASTER"
+      ?t(
+        "Para MASTER, o colégio selecionado é apenas unidade de referência. O acesso permanece global.",
+        "For MASTER, the selected school is only a reference unit. Access remains global."
+      )
+      :profile==="GESTOR"
+        ?t(
+          "GESTOR deve estar vinculado a um colégio/unidade específico.",
+          "A MANAGER must be linked to one specific School / Unit."
+        )
+        :t(
+          "Para CONSULTA ou PRESTADOR, o colégio é opcional e pode limitar o escopo quando informado.",
+          "For VIEWER or SERVICE PROVIDER, School / Unit is optional and can limit scope when set."
+        );
+
+  $("userContactEditProviderHelp7674").textContent=
+    profile==="PRESTADOR"
+      ?t(
+        "PRESTADOR deve estar vinculado a um prestador.",
+        "A SERVICE PROVIDER user must be linked to a service provider."
+      )
+      :profile==="MASTER"||profile==="GESTOR"
+        ?t(
+          "Não se aplica a perfis administrativos internos.",
+          "Not applicable to internal administrative roles."
+        )
+        :t(
+          "Opcional para CONSULTA.",
+          "Optional for VIEWER."
+        );
+}
+
 function openEditUserContact7674(userId){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
 
@@ -8097,11 +8197,15 @@ function openEditUserContact7674(userId){
   }
 
   const schoolSelect=$("userContactEditSchool7674");
+  const providerSelect=$("userContactEditProvider7674");
+  const profileSelect=$("userContactEditProfile7674");
 
   $("userContactEditId7674").value=u.idUsuario||"";
   $("userContactEditName7674").value=u.nome||"";
   $("userContactEditEmail7674").value=u.email||"";
+  if(profileSelect)profileSelect.value=String(u.perfil||"CONSULTA").toUpperCase();
   if(schoolSelect)schoolSelect.value=u.idEscola||"";
+  if(providerSelect)providerSelect.value=u.idPrestador||"";
 
   $("userContactEditTitle7674").textContent=
     t("👤 Editar usuário","👤 Edit User");
@@ -8112,8 +8216,14 @@ function openEditUserContact7674(userId){
   $("userContactEditEmailLabel7674").childNodes[0].nodeValue=
     t("E-mail (opcional)","Email (optional)");
 
+  $("userContactEditProfileLabel7674").childNodes[0].nodeValue=
+    t("Perfil *","Role *");
+
   $("userContactEditSchoolLabel7674").childNodes[0].nodeValue=
     t("Colégio / Unidade","School / Unit");
+
+  $("userContactEditProviderLabel7674").childNodes[0].nodeValue=
+    t("Prestador","Service Provider");
 
   $("cancelUserContactEdit7674").textContent=
     t("Cancelar","Cancel");
@@ -8125,33 +8235,9 @@ function openEditUserContact7674(userId){
     `<b>${esc(u.nome||u.usuario||u.idUsuario||"")}</b>`+
     `<br><span class="muted">ID: ${esc(u.idUsuario||"")} • Login: ${esc(u.usuario||"")} • ${esc(u.perfil||"")}</span>`+
     `<br><span class="muted">${t("Colégio / Unidade atual","Current School / Unit")}: ${esc(userSchoolDisplay76935_(u,t))}</span>`+
-    `${u.prestador?`<br><span class="muted">${t("Prestador","Service Provider")}: ${esc(u.prestador)}</span>`:""}`;
+    `${u.prestador?`<br><span class="muted">${t("Prestador atual","Current Service Provider")}: ${esc(u.prestador)}</span>`:""}`;
 
-  if(schoolSelect){
-    if(systemSession?.perfil==="GESTOR"){
-      schoolSelect.value=systemSession.idEscola||u.idEscola||"";
-      schoolSelect.disabled=true;
-    }else{
-      schoolSelect.disabled=false;
-    }
-  }
-
-  const profile=String(u.perfil||"").toUpperCase();
-  $("userContactEditSchoolHelp7674").textContent=
-    profile==="MASTER"
-      ?t(
-        "O colégio selecionado será apenas a unidade de referência do MASTER. O acesso continuará global a todas as unidades.",
-        "The selected school is only the MASTER account's reference unit. Access remains global across all units."
-      )
-      :profile==="GESTOR"
-        ?t(
-          "GESTOR deve permanecer vinculado a um colégio/unidade específico. Alterar este campo altera o escopo de acesso.",
-          "A MANAGER must remain linked to one specific School / Unit. Changing this field changes the access scope."
-        )
-        :t(
-          "Defina a unidade vinculada a este usuário quando aplicável.",
-          "Set the School / Unit linked to this user when applicable."
-        );
+  syncEditUserAccessFields76950_(u);
 
   $("userContactEditMessage7674").className="message";
   $("userContactEditMessage7674").textContent="";
@@ -8176,8 +8262,9 @@ async function saveEditUserContact7674(){
   const userId=$("userContactEditId7674").value.trim();
   const name=$("userContactEditName7674").value.trim();
   const email=$("userContactEditEmail7674").value.trim();
+  const profile=String($("userContactEditProfile7674")?.value||"").toUpperCase();
   const schoolId=$("userContactEditSchool7674")?.value||"";
-  const u=usersAdminData7674.find(x=>String(x.idUsuario||"")===String(userId||""));
+  const providerId=$("userContactEditProvider7674")?.value||"";
 
   if(!name){
     $("userContactEditMessage7674").className="message error";
@@ -8186,10 +8273,17 @@ async function saveEditUserContact7674(){
     return;
   }
 
-  if(String(u?.perfil||"").toUpperCase()==="GESTOR"&&!schoolId){
+  if(profile==="GESTOR"&&!schoolId){
     $("userContactEditMessage7674").className="message error";
     $("userContactEditMessage7674").textContent=
       t("Selecione o colégio/unidade do GESTOR.","Select the School / Unit for the MANAGER.");
+    return;
+  }
+
+  if(profile==="PRESTADOR"&&!providerId){
+    $("userContactEditMessage7674").className="message error";
+    $("userContactEditMessage7674").textContent=
+      t("Selecione o prestador do usuário PRESTADOR.","Select the service provider for the SERVICE PROVIDER user.");
     return;
   }
 
@@ -8203,7 +8297,9 @@ async function saveEditUserContact7674(){
       userId:userId,
       userName:name,
       userEmail:email,
-      userSchoolId:schoolId
+      userProfile:profile,
+      userSchoolId:schoolId,
+      userProviderId:providerId
     });
 
     if(!r.ok){
@@ -8218,10 +8314,10 @@ async function saveEditUserContact7674(){
 
     $("userContactEditMessage7674").className="message success";
     $("userContactEditMessage7674").textContent=
-      r.scopeChanged
+      r.accessChanged
         ?t(
-          "✅ Usuário atualizado. O vínculo de colégio/unidade foi alterado; uma sessão anterior desse usuário será encerrada.",
-          "✅ User updated. The School / Unit assignment changed; any previous session for this user will be ended."
+          "✅ Usuário atualizado. Perfil e/ou escopo foram alterados; sessões anteriores desse usuário foram encerradas.",
+          "✅ User updated. Role and/or access scope changed; previous sessions for this user were ended."
         )
         :t("✅ Usuário atualizado.","✅ User updated.");
 
@@ -8267,6 +8363,7 @@ function openNewUser(){
 function syncUserSchoolField7620(){
   const profile=$("userProfile")?.value||"";
   const select=$("userSchool");
+  const provider=$("userProvider");
   const help=$("userSchoolHelp");
   if(!select)return;
 
@@ -8276,9 +8373,6 @@ function syncUserSchoolField7620(){
   }else{
     select.disabled=false;
 
-    // For a MASTER administrator, default a new account to the currently
-    // selected School / Unit. For a MASTER target this is only a reference
-    // unit; MASTER access remains global by role.
     if(
       systemSession?.perfil==="MASTER" &&
       !select.value &&
@@ -8288,18 +8382,31 @@ function syncUserSchoolField7620(){
     }
   }
 
+  if(provider){
+    if(profile==="MASTER"||profile==="GESTOR"){
+      provider.value="";
+      provider.disabled=true;
+    }else{
+      provider.disabled=false;
+    }
+  }
+
   if(help){
     help.textContent=qrLanguage==="en-US"
       ?(profile==="GESTOR"
         ?"A MANAGER must be linked to one school. Changing the school changes the access scope."
         :profile==="MASTER"
           ?"For MASTER, the selected school is a reference unit only. MASTER access remains global."
-          :"Choose the School / Unit linked to this account when applicable.")
+          :profile==="PRESTADOR"
+            ?"SERVICE PROVIDER requires a provider. School / Unit is optional and can limit the scope."
+            :"VIEWER can optionally be linked to a School / Unit and/or Service Provider.")
       :(profile==="GESTOR"
         ?"GESTOR deve estar vinculado a um colégio. Alterar o colégio altera o escopo de acesso."
         :profile==="MASTER"
           ?"Para MASTER, o colégio selecionado é apenas a unidade de referência. O acesso permanece global."
-          :"Defina o Colégio / Unidade deste usuário quando aplicável.");
+          :profile==="PRESTADOR"
+            ?"PRESTADOR exige vínculo com um prestador. Colégio / Unidade é opcional e pode limitar o escopo."
+            :"CONSULTA pode ter Colégio / Unidade e/ou Prestador como vínculos opcionais.");
   }
 }
 
@@ -8311,6 +8418,12 @@ async function saveUser(){
   if(profile==="GESTOR"&&!schoolId){
     $("userMessage").className="message error";
     $("userMessage").textContent=t("Selecione o colégio/unidade do GESTOR.","Select the school/unit for the MANAGER.");
+    return;
+  }
+
+  if(profile==="PRESTADOR"&&!$("userProvider").value){
+    $("userMessage").className="message error";
+    $("userMessage").textContent=t("Selecione o prestador do usuário PRESTADOR.","Select the service provider for the SERVICE PROVIDER user.");
     return;
   }
 
@@ -9769,7 +9882,7 @@ $("tabRolePermissions7690").onclick=showRolePermissions7690;
 $("rolePermissionsBackMenu7690").onclick=showSearchTab;
 $("saveRolePermissions7690").onclick=saveRolePermissions7690;
 $("restoreRolePermissions7690").onclick=restoreRolePermissions7690;
-$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("requestAccessButton7680").onclick=()=>openAccessRequest7680($("systemUsername").value.trim());$("recoveryRequestAccess7680").onclick=()=>openAccessRequest7680($("recoveryIdentifier").value.trim());$("accessRequestCancel7680").onclick=()=>{$("accessRequestModal7680").style.display="none";$("systemLoginModal").style.display="flex"};$("accessRequestSend7680").onclick=sendAccessRequest7680;$("accessRequestReturn7680").onclick=returnAccessRequestToLogin7680;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("userRequestsRefresh7680").onclick=loadUserRequests7680;$("rejectUserRequestCancel7680").onclick=()=>{$("rejectUserRequestModal7680").style.display="none"};$("rejectUserRequestConfirm7680").onclick=confirmRejectUserRequest7680;$("adminUserPasswordCancel7680").onclick=()=>{$("adminUserPasswordModal7680").style.display="none"};$("adminUserPasswordSave7680").onclick=saveAdminUserPassword7680;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
+$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("requestAccessButton7680").onclick=()=>openAccessRequest7680($("systemUsername").value.trim());$("recoveryRequestAccess7680").onclick=()=>openAccessRequest7680($("recoveryIdentifier").value.trim());$("accessRequestCancel7680").onclick=()=>{$("accessRequestModal7680").style.display="none";$("systemLoginModal").style.display="flex"};$("accessRequestSend7680").onclick=sendAccessRequest7680;$("accessRequestReturn7680").onclick=returnAccessRequestToLogin7680;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("userRequestsRefresh7680").onclick=loadUserRequests7680;$("rejectUserRequestCancel7680").onclick=()=>{$("rejectUserRequestModal7680").style.display="none"};$("rejectUserRequestConfirm7680").onclick=confirmRejectUserRequest7680;$("adminUserPasswordCancel7680").onclick=()=>{$("adminUserPasswordModal7680").style.display="none"};$("adminUserPasswordSave7680").onclick=saveAdminUserPassword7680;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("userContactEditProfile7674").onchange=()=>{const id=$("userContactEditId7674").value;const u=usersAdminData7674.find(x=>String(x.idUsuario||"")===String(id||""));syncEditUserAccessFields76950_(u||null)};$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession)showMenuGate()};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
   captureSchoolSelection7626(this);
 };
 
