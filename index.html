@@ -2649,13 +2649,38 @@ button.dashboard-kpi-card:hover{
 </div>
 
 <!-- ============================================================
-     QRManut USA 7.6.9.5.0
-     - Gestão de Usuários permite editar Perfil, Colégio / Unidade e Prestador
-     - CONSULTA pode ser promovido a GESTOR sem recriar o usuário
-     - GESTOR exige unidade específica; PRESTADOR exige prestador
-     - MASTER pode ter unidade de referência sem perder escopo global
-     - Mudanças de acesso invalidam sessões anteriores no backend
+     QRManut USA 7.6.9.5.3
+     - Confirmação de ativação/inativação deixa de usar popup nativo do navegador
+     - Modal próprio do QRManut evita exibir jcpg62.github.io
      ============================================================ -->
+
+<div id="userStatusConfirmModal76953" class="modal">
+  <div class="modal-box" style="max-width:620px">
+    <h2 id="userStatusConfirmTitle76953">👤 Alterar status do usuário</h2>
+
+    <div id="userStatusConfirmInfo76953" class="preventive-info"></div>
+
+    <div id="userStatusConfirmText76953"
+         style="margin-top:14px;line-height:1.5"></div>
+
+    <div id="userStatusConfirmMessage76953" class="message"></div>
+
+    <div class="modal-actions">
+      <button id="userStatusConfirmCancel76953"
+              class="btn btn-secondary"
+              type="button"
+              onclick="closeUserStatusConfirm76953()">
+        Cancelar
+      </button>
+      <button id="userStatusConfirmApply76953"
+              class="btn"
+              type="button"
+              onclick="applyUserStatus76953()">
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
 
 <div id="userContactEditModal7674" class="modal">
   <div class="modal-box" style="max-width:700px">
@@ -2880,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.5.2</div>
+<div class="footer">QRManut USA • Version 7.6.9.5.3</div>
 </div>
 <script>
 /* ============================================================
@@ -8592,7 +8617,119 @@ async function saveUser(){
       :t("Criar usuário","Create User");
   }
 }
-async function setUserStatus(id,status){const lbl=qrStatus7612(status);if(!confirm(qrLanguage==="en-US"?`Change the user status to ${lbl}?`:`Alterar o status do usuário para ${lbl}?`))return;try{const r=await menuApiPost({action:"updateUserStatus",userId:id,userStatus:status});if(!r.ok)throw new Error(r.detail||(qrLanguage==="en-US"?"Error updating user.":"Erro ao alterar usuário."));await loadUsers()}catch(e){alert(e.message)}}
+let userStatusPending76953=null;
+
+function setUserStatus(id,status){
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const u=(usersAdminData7674||[]).find(x=>
+    String(x.idUsuario||"")===String(id||"")
+  );
+
+  if(!u){
+    return;
+  }
+
+  const activating=String(status||"")==="Ativo";
+
+  userStatusPending76953={
+    idUsuario:u.idUsuario,
+    status:status
+  };
+
+  $("userStatusConfirmTitle76953").textContent=activating
+    ?t("✅ Reativar usuário","✅ Reactivate User")
+    :t("⛔ Inativar usuário","⛔ Deactivate User");
+
+  $("userStatusConfirmInfo76953").innerHTML=
+    `<b>${esc(u.nome||u.usuario||u.idUsuario||"")}</b>`+
+    `<br><span class="muted">ID: ${esc(u.idUsuario||"")} • Login: ${esc(u.usuario||"")} • ${esc(u.perfil||"")}</span>`+
+    `${u.escola?`<br><span class="muted">${t("Colégio / Unidade","School / Unit")}: ${esc(u.escola)}${u.idEscola?` (${esc(u.idEscola)})`:""}</span>`:""}`;
+
+  $("userStatusConfirmText76953").innerHTML=activating
+    ?t(
+      "O usuário voltará a ter acesso ao QRManut conforme o perfil e o escopo cadastrados. Deseja continuar?",
+      "The user will regain access to QRManut according to the assigned role and scope. Do you want to continue?"
+    )
+    :t(
+      "O acesso deste usuário será interrompido e as sessões ativas serão revogadas. Deseja continuar?",
+      "This user's access will be interrupted and active sessions will be revoked. Do you want to continue?"
+    );
+
+  $("userStatusConfirmMessage76953").className="message";
+  $("userStatusConfirmMessage76953").textContent="";
+
+  const apply=$("userStatusConfirmApply76953");
+  apply.disabled=false;
+  apply.className=activating?"btn btn-green":"btn";
+  apply.textContent=activating
+    ?t("Reativar usuário","Reactivate User")
+    :t("Inativar usuário","Deactivate User");
+
+  $("userStatusConfirmCancel76953").textContent=t("Cancelar","Cancel");
+  $("userStatusConfirmModal76953").style.display="flex";
+}
+
+function closeUserStatusConfirm76953(){
+  if($("userStatusConfirmApply76953")?.dataset.loading==="1")return;
+  $("userStatusConfirmModal76953").style.display="none";
+  userStatusPending76953=null;
+}
+
+async function applyUserStatus76953(){
+  if(!userStatusPending76953)return;
+
+  const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const btn=$("userStatusConfirmApply76953");
+  if(btn.dataset.loading==="1")return;
+
+  const pending={...userStatusPending76953};
+
+  btn.dataset.loading="1";
+  btn.disabled=true;
+  btn.textContent=t("Salvando...","Saving...");
+
+  try{
+    const r=await menuApiPost({
+      action:"updateUserStatus",
+      userId:pending.idUsuario,
+      userStatus:pending.status
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        t("Erro ao alterar usuário.","Error updating user.")
+      );
+    }
+
+    $("userStatusConfirmMessage76953").className="message success";
+    $("userStatusConfirmMessage76953").textContent=
+      pending.status==="Ativo"
+        ?t("✅ Usuário reativado com sucesso.","✅ User reactivated successfully.")
+        :t("✅ Usuário inativado com sucesso.","✅ User deactivated successfully.");
+
+    await loadUsers();
+
+    setTimeout(()=>{
+      $("userStatusConfirmModal76953").style.display="none";
+      userStatusPending76953=null;
+    },450);
+
+  }catch(e){
+    $("userStatusConfirmMessage76953").className="message error";
+    $("userStatusConfirmMessage76953").textContent=e.message;
+  }finally{
+    btn.disabled=false;
+    delete btn.dataset.loading;
+
+    if(userStatusPending76953){
+      const activating=userStatusPending76953.status==="Ativo";
+      btn.textContent=activating
+        ?t("Reativar usuário","Reactivate User")
+        :t("Inativar usuário","Deactivate User");
+    }
+  }
+}
 async function resendInviteUser(id){try{const r=await menuApiPost({action:"resendInvite",userId:id});if(!r.ok)throw new Error(r.detail||(qrLanguage==="en-US"?"Error sending invite.":"Erro ao enviar convite."));alert(qrLanguage==="en-US"?"Invite sent.":"Convite enviado.")}catch(e){alert(e.message)}}
 
 const QR_LANG_KEY="qrmanut_language";
@@ -13053,6 +13190,7 @@ if(document.readyState==="loading"){
 
 // QRManut USA 7.6.7.0 - Record & Evidence Management.
 
+// QRManut USA 7.6.9.5.3 - branded user status confirmation modal; no browser-origin popup.
 // QRManut USA 7.6.9.5.2 - centralized invalid-session logout + pre-action session validation.
 // QRManut USA 7.6.9.5.1 - close saved occurrence without full page reload; refresh asset in place.
 // QRManut USA 7.6.7.1 - occurrence attachments accept documents and photos.
