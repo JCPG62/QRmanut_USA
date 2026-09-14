@@ -2905,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.3</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.4</div>
 </div>
 <script>
 /* ============================================================
@@ -5902,6 +5902,24 @@ async function openManage(i){
   $("manageModal").style.display="flex";
 }
 function toggleConclusion(){if($("manageStatus").value==="Concluída")show("conclusionPhotoArea");else hide("conclusionPhotoArea")}
+
+async function qrRefreshAssetAfterManage76984_(){
+  const assetId=currentAsset?.id||getId();
+
+  $("manageModal").style.display="none";
+  managePosting=false;
+
+  const btn=$("saveManage");
+  if(btn){
+    btn.disabled=false;
+    btn.textContent="Salvar alterações";
+  }
+
+  if(assetId){
+    await loadAsset(assetId);
+  }
+}
+
 async function saveManage(){
   if(managePosting)return;
 
@@ -5974,9 +5992,14 @@ async function saveManage(){
     btn.textContent="Alterações salvas";
 
     setTimeout(()=>{
-      $("manageModal").style.display="none";
-      location.reload();
-    },900);
+      qrRefreshAssetAfterManage76984_().catch(e=>{
+        managePosting=false;
+        btn.disabled=false;
+        btn.textContent="Salvar alterações";
+        $("manageMessage").className="message error";
+        $("manageMessage").textContent=e.message||"Não foi possível atualizar a ficha do ativo.";
+      });
+    },650);
 
   }catch(e){
     managePosting=false;
@@ -6070,7 +6093,7 @@ $("conclusionAttachButton").onclick=()=>$("conclusionPhotoInput").click();
 $("manageOccurrenceCameraInput").onchange=function(){handleManageSelectedImage(this.files?.[0],"correction")};
 $("manageOccurrencePhotoInput").onchange=function(){handleManageSelectedImage(this.files?.[0],"correction")};
 $("conclusionCameraInput").onchange=function(){handleManageSelectedImage(this.files?.[0],"conclusion")};
-$("conclusionPhotoInput").onchange=function(){handleManageSelectedImage(this.files?.[0],"conclusion")};$("manageFrame").onload=function(){if(!managePosting)return;managePosting=false;$("manageModal").style.display="none";location.reload()};
+$("conclusionPhotoInput").onchange=function(){handleManageSelectedImage(this.files?.[0],"conclusion")};$("manageFrame").onload=function(){if(!managePosting)return;qrRefreshAssetAfterManage76984_().catch(()=>{managePosting=false;$("manageModal").style.display="none"})};
 
 
 const PASSWORD_EYE_OPEN=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.8"></circle></svg>`;
@@ -13501,6 +13524,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.1 - remove stray visible release-note text from page footer. -->
   <!-- QRManut USA 7.6.9.8.2 - asset actions respect school/provider scope; out-of-scope PRESTADOR does not see protected action buttons. -->
   <!-- QRManut USA 7.6.9.8.3 - maintenance history is authenticated and scope-protected. -->
+  <!-- QRManut USA 7.6.9.8.4 - manage occurrence refreshes current asset in place; removes full-page reload/white flash. -->
 </body>
 </html>
 
