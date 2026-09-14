@@ -2905,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.2</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.3</div>
 </div>
 <script>
 /* ============================================================
@@ -3747,13 +3747,9 @@ async function qrRefreshCurrentAssetSecurityUi76954_(){
 
   qrApplyAssetActionScope76982_();
 
-  // Re-renderiza o histórico de OCs para remover/adicionar imediatamente
-  // os botões administrativos conforme o estado atual da sessão.
-  try{
-    renderHistory(history||[]);
-  }catch(_){}
-
   if(!systemSession?.systemSessionToken){
+    qrShowMaintenanceHistoryAccess76983_("login_required");
+
     if($("preventiveHistory")){
       $("preventiveHistory").innerHTML="";
     }
@@ -3769,6 +3765,8 @@ async function qrRefreshCurrentAssetSecurityUi76954_(){
     sessionAllowsAssetProvider76982_(currentAsset);
 
   if(!allowed){
+    qrShowMaintenanceHistoryAccess76983_("denied");
+
     if($("preventiveHistory")){
       $("preventiveHistory").innerHTML="";
     }
@@ -3777,6 +3775,21 @@ async function qrRefreshCurrentAssetSecurityUi76954_(){
         t("Este ativo está fora do seu escopo de acesso.","This asset is outside your access scope.");
     }
     return;
+  }
+
+  $("historyStatus").textContent=t("Carregando...","Loading...");
+
+  try{
+    const maintenanceHistory76983=
+      await loadAssetHistory747(
+        currentAsset.id
+      );
+
+    renderHistory(
+      maintenanceHistory76983
+    );
+  }catch(e){
+    qrShowMaintenanceHistoryAccess76983_("denied");
   }
 
   if($("preventiveHistoryStatus")){
@@ -4597,15 +4610,34 @@ function renderControlList(){
 async function sendMonthlyPreventiveReport(){if(!preventiveSession)return;const competencia=$("controlCompetence").value,provider=["MASTER","GESTOR"].includes(systemSession.perfil)?$("controlProvider").value:systemSession.prestador,s=preventiveControlData?.summary||{previstas:0,realizadas:0,pendentes:0},txt=$("controlTitle").textContent.replace("Preventivas – ",""),escopo=provider||"Todos os prestadores";if(!confirm(`Enviar relatório de ${txt}?\n\nEscopo: ${escopo}\n\nPrevistas: ${s.previstas}\nRealizadas: ${s.realizadas}\nPendentes: ${s.pendentes}`))return;const btn=$("sendMonthlyReport"),msg=$("monthlyReportMessage");btn.disabled=true;btn.textContent="Enviando relatório...";msg.className="message loading";msg.textContent="Gerando o PDF e enviando o relatório...";try{const r=await apiPost({action:"sendPreventiveReport",systemSessionToken:systemSession.systemSessionToken,competencia,reportProvider:provider||""});if(!r.ok)throw new Error(r.detail||"Não foi possível enviar o relatório.");msg.className="message success";msg.innerHTML=`✅ Relatório de <b>${esc(r.competenciaDescricao)}</b> enviado com sucesso.<br><br><b>Escopo:</b> ${esc(r.escopo)}<br><b>Destino:</b> ${esc(r.email)}<br><br><b>Previstas:</b> ${r.summary.previstas} • <b>Realizadas:</b> ${r.summary.realizadas} • <b>Pendentes:</b> ${r.summary.pendentes} • <b>Conclusão:</b> ${r.summary.percentual}%`}catch(e){msg.className="message error";msg.textContent=e.message}finally{btn.disabled=false;btn.textContent="📧 Enviar relatório da competência"}}
 
 async function loadAssetHistory747(id){
+  if(!systemSession?.systemSessionToken)return [];
+
   try{
-    const r=await api({action:"history",id});
+    const r=await api({
+      action:"history",
+      id,
+      systemSession:systemSession.systemSessionToken
+    });
     if(r&&r.ok)return r.history||r.data||[];
   }catch(e){}
-  try{
-    const b=await api({action:"assetbundle",id});
-    if(b&&b.ok)return b.history||[];
-  }catch(e){}
+
   return [];
+}
+
+function qrShowMaintenanceHistoryAccess76983_(mode){
+  history=[];
+  hide("historySelect");
+  $("historyDetail").innerHTML="";
+
+  if(mode==="denied"){
+    $("historyStatus").textContent=qrLanguage==="en-US"
+      ?"Maintenance history is outside your access scope."
+      :"Histórico de manutenção fora do seu escopo de acesso.";
+  }else{
+    $("historyStatus").textContent=qrLanguage==="en-US"
+      ?"Sign in to view maintenance history."
+      :"Login necessário para visualizar o histórico de manutenção.";
+  }
 }
 
 async function loadAssetDocuments747(id){
@@ -4646,7 +4678,11 @@ async function loadAsset(id){
   let basicOk=false;
   let bundleOk=false;
 
-  const bundlePromise=api({action:"assetbundle",id})
+  const bundlePromise=api({
+    action:"assetbundle",
+    id,
+    systemSession:systemSession?.systemSessionToken||""
+  })
     .then(bundle=>{
       if(bundle?.ok&&bundle.data){
         bundleOk=true;
@@ -4658,7 +4694,14 @@ async function loadAsset(id){
           renderStatus(bundle.status);
         }
 
-        renderHistory(bundle.history||[]);
+        if(bundle.historyAccess==="allowed"){
+          renderHistory(bundle.history||[]);
+        }else{
+          qrShowMaintenanceHistoryAccess76983_(
+            bundle.historyAccess==="denied"?"denied":"login_required"
+          );
+        }
+
         renderAssetDocuments(bundle.documents||[]);
 
         $("assetProgressNote").textContent=qrLanguage==="en-US"
@@ -4716,16 +4759,17 @@ async function loadAsset(id){
       try{
         const sessionOk=await sessionIsValid();
 
-        if(sessionOk&&sessionAllowsAssetSchool7620(currentAsset)&&(
-          ["MASTER","GESTOR"].includes(systemSession.perfil)||
-          !systemSession.prestador||
-          String(systemSession.prestador).toLowerCase()===String(currentAsset.prestador).toLowerCase()
-        )){
+        if(sessionOk&&sessionAllowsAssetSchool7620(currentAsset)&&sessionAllowsAssetProvider76982_(currentAsset)){
           loadPreventiveHistory().catch(()=>{});
         }else{
-          $("preventiveHistoryStatus").textContent=qrLanguage==="en-US"
-            ?"Sign in to view."
-            :"Login necessário para visualizar.";
+          const logged=!!systemSession?.systemSessionToken;
+          $("preventiveHistoryStatus").textContent=logged
+            ?(qrLanguage==="en-US"
+              ?"This asset is outside your access scope."
+              :"Este ativo está fora do seu escopo de acesso.")
+            :(qrLanguage==="en-US"
+              ?"Sign in to view."
+              :"Login necessário para visualizar.");
         }
       }catch(e){}
 
@@ -4746,11 +4790,7 @@ async function loadAsset(id){
 
     sessionIsValid()
       .then(ok=>{
-        if(ok&&sessionAllowsAssetSchool7620(currentAsset)&&(
-          ["MASTER","GESTOR"].includes(systemSession.perfil)||
-          !systemSession.prestador||
-          String(systemSession.prestador).toLowerCase()===String(currentAsset.prestador).toLowerCase()
-        )){
+        if(ok&&sessionAllowsAssetSchool7620(currentAsset)&&sessionAllowsAssetProvider76982_(currentAsset)){
           loadPreventiveHistory().catch(()=>{});
         }
       })
@@ -13460,6 +13500,7 @@ if(document.readyState==="loading"){
 
   <!-- QRManut USA 7.6.9.8.1 - remove stray visible release-note text from page footer. -->
   <!-- QRManut USA 7.6.9.8.2 - asset actions respect school/provider scope; out-of-scope PRESTADOR does not see protected action buttons. -->
+  <!-- QRManut USA 7.6.9.8.3 - maintenance history is authenticated and scope-protected. -->
 </body>
 </html>
 
