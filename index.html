@@ -2905,7 +2905,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.5</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.6</div>
 </div>
 <script>
 /* ============================================================
@@ -6757,6 +6757,7 @@ async function saveProviderAdmin(){
 
 let documentUploadMetaLoaded=false;
 let documentUploadFileData=null;
+let documentUploadCompleted76986_=false;
 
 async function showDocumentUploadTab(){
   if(!["MASTER","GESTOR"].includes(systemSession?.perfil)){alert("Seu perfil não permite enviar documentos.");return}
@@ -6799,7 +6800,21 @@ async function prepareDocumentUploadFile(){
 function clearDocumentUploadForm(){
   ["uploadDocumentTitle","uploadDocumentEnvironment","uploadDocumentSubject","uploadDocumentRevision","uploadDocumentAsset","uploadDocumentNotes"].forEach(id=>$(id).value="");
   ["uploadDocumentType","uploadDocumentDiscipline","uploadDocumentFloor","uploadDocumentProvider"].forEach(id=>$(id).value="");
-  $("uploadDocumentFile").value="";$("uploadDocumentFileName").textContent=qrLanguage==="en-US"?"No file selected.":"Nenhum arquivo selecionado.";$("documentUploadMessage").className="message";$("documentUploadMessage").textContent="";$("documentUploadResult").innerHTML="";documentUploadFileData=null;
+  $("uploadDocumentFile").value="";
+  $("uploadDocumentFileName").textContent=qrLanguage==="en-US"?"No file selected.":"Nenhum arquivo selecionado.";
+  $("documentUploadMessage").className="message";
+  $("documentUploadMessage").textContent="";
+  $("documentUploadResult").innerHTML="";
+  documentUploadFileData=null;
+  documentUploadCompleted76986_=false;
+
+  const btn=$("sendDocumentUpload");
+  if(btn){
+    btn.disabled=false;
+    btn.dataset.loading="";
+    btn.removeAttribute("aria-busy");
+    btn.textContent=qrLanguage==="en-US"?"Upload document":"Enviar documento";
+  }
 }
 
 
@@ -6809,19 +6824,106 @@ function cancelDocumentUpload(){
 }
 
 async function sendDocumentUpload(){
-  const btn=$("sendDocumentUpload");if(btn.dataset.loading==="1")return;
-  if(!documentUploadFileData){$("documentUploadMessage").className="message error";$("documentUploadMessage").textContent="Selecione um arquivo PDF.";return}
-  if(!$("uploadDocumentTitle").value.trim()){$("documentUploadMessage").className="message error";$("documentUploadMessage").textContent="Informe o título do documento.";$("uploadDocumentTitle").focus();return}
-  if(!$("uploadDocumentType").value){$("documentUploadMessage").className="message error";$("documentUploadMessage").textContent="Informe o tipo do documento.";return}
-  btn.dataset.loading="1";btn.disabled=true;btn.textContent="Enviando...";$("documentUploadMessage").className="message loading";$("documentUploadMessage").textContent="Enviando PDF e cadastrando o documento. Aguarde...";$("documentUploadResult").innerHTML="";
+  const btn=$("sendDocumentUpload");
+
+  if(btn.dataset.loading==="1"||documentUploadCompleted76986_)return;
+
+  if(!documentUploadFileData){
+    $("documentUploadMessage").className="message error";
+    $("documentUploadMessage").textContent=qrLanguage==="en-US"
+      ?"Select a PDF file."
+      :"Selecione um arquivo PDF.";
+    return;
+  }
+
+  if(!$("uploadDocumentTitle").value.trim()){
+    $("documentUploadMessage").className="message error";
+    $("documentUploadMessage").textContent=qrLanguage==="en-US"
+      ?"Enter the document title."
+      :"Informe o título do documento.";
+    $("uploadDocumentTitle").focus();
+    return;
+  }
+
+  if(!$("uploadDocumentType").value){
+    $("documentUploadMessage").className="message error";
+    $("documentUploadMessage").textContent=qrLanguage==="en-US"
+      ?"Select the document type."
+      :"Informe o tipo do documento.";
+    return;
+  }
+
+  btn.dataset.loading="1";
+  btn.disabled=true;
+  btn.setAttribute("aria-busy","true");
+  btn.textContent=qrLanguage==="en-US"?"Uploading...":"Enviando...";
+
+  $("documentUploadMessage").className="message loading";
+  $("documentUploadMessage").textContent=qrLanguage==="en-US"
+    ?"Uploading PDF and registering the document. Please wait..."
+    :"Enviando PDF e cadastrando o documento. Aguarde...";
+  $("documentUploadResult").innerHTML="";
+
+  let uploadOk76986_=false;
+
   try{
-    const r=await menuApiPost({action:"uploadDocument",documentTitle:$("uploadDocumentTitle").value.trim(),documentType:$("uploadDocumentType").value,documentDiscipline:$("uploadDocumentDiscipline").value,documentFloor:$("uploadDocumentFloor").value,documentEnvironment:$("uploadDocumentEnvironment").value.trim(),documentProvider:$("uploadDocumentProvider").value,documentSubject:$("uploadDocumentSubject").value.trim(),documentRevision:$("uploadDocumentRevision").value.trim(),documentAssetId:$("uploadDocumentAsset").value.trim(),documentNotes:$("uploadDocumentNotes").value.trim(),documentFileName:documentUploadFileData.name,documentMime:documentUploadFileData.mime,documentBase64:documentUploadFileData.base64});
-    if(!r.ok)throw new Error(r.detail||"Não foi possível enviar o documento.");
-    $("documentUploadMessage").className="message success";$("documentUploadMessage").textContent="✅ Documento enviado com sucesso.";
-    $("documentUploadResult").innerHTML=`<div class="upload-success-card"><b>${esc(r.idDocumento)} — ${esc(r.titulo)}</b>${r.idAtivo?`<div style="margin-top:5px">Vinculado ao ativo: <b>${esc(r.idAtivo)}</b></div>`:""}<a class="open-button" style="margin-top:10px" href="${esc(r.linkPdf)}" target="_blank" rel="noopener">Abrir PDF</a></div>`;
+    const r=await menuApiPost({
+      action:"uploadDocument",
+      documentTitle:$("uploadDocumentTitle").value.trim(),
+      documentType:$("uploadDocumentType").value,
+      documentDiscipline:$("uploadDocumentDiscipline").value,
+      documentFloor:$("uploadDocumentFloor").value,
+      documentEnvironment:$("uploadDocumentEnvironment").value.trim(),
+      documentProvider:$("uploadDocumentProvider").value,
+      documentSubject:$("uploadDocumentSubject").value.trim(),
+      documentRevision:$("uploadDocumentRevision").value.trim(),
+      documentAssetId:$("uploadDocumentAsset").value.trim(),
+      documentNotes:$("uploadDocumentNotes").value.trim(),
+      documentFileName:documentUploadFileData.name,
+      documentMime:documentUploadFileData.mime,
+      documentBase64:documentUploadFileData.base64
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        (qrLanguage==="en-US"
+          ?"Could not upload the document."
+          :"Não foi possível enviar o documento.")
+      );
+    }
+
+    uploadOk76986_=true;
+    documentUploadCompleted76986_=true;
+
+    $("documentUploadMessage").className="message success";
+    $("documentUploadMessage").textContent=qrLanguage==="en-US"
+      ?"✅ Document uploaded successfully. Use Clear fields to upload another document."
+      :"✅ Documento enviado com sucesso. Use Limpar campos para enviar outro documento.";
+
+    $("documentUploadResult").innerHTML=
+      `<div class="upload-success-card"><b>${esc(r.idDocumento)} — ${esc(r.titulo)}</b>${r.idAtivo?`<div style="margin-top:5px">Vinculado ao ativo: <b>${esc(r.idAtivo)}</b></div>`:""}<a class="open-button" style="margin-top:10px" href="${esc(r.linkPdf)}" target="_blank" rel="noopener">Abrir PDF</a></div>`;
+
     documentFiltersLoaded=false;
-  }catch(e){$("documentUploadMessage").className="message error";$("documentUploadMessage").textContent=e.message}
-  finally{btn.disabled=false;btn.textContent="Enviar documento";delete btn.dataset.loading}
+  }catch(e){
+    $("documentUploadMessage").className="message error";
+    $("documentUploadMessage").textContent=e.message;
+  }finally{
+    delete btn.dataset.loading;
+    btn.removeAttribute("aria-busy");
+
+    if(uploadOk76986_){
+      btn.disabled=true;
+      btn.textContent=qrLanguage==="en-US"
+        ?"✓ Document uploaded"
+        :"✓ Documento enviado";
+    }else{
+      btn.disabled=false;
+      btn.textContent=qrLanguage==="en-US"
+        ?"Upload document"
+        :"Enviar documento";
+    }
+  }
 }
 
 
@@ -13557,6 +13659,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.3 - maintenance history is authenticated and scope-protected. -->
   <!-- QRManut USA 7.6.9.8.4 - manage occurrence refreshes current asset in place; removes full-page reload/white flash. -->
   <!-- QRManut USA 7.6.9.8.5 - Back to asset now loads in place without full-page navigation. -->
+  <!-- QRManut USA 7.6.9.8.6 - document upload button disables during submit and remains locked after success to prevent duplicate uploads. -->
 </body>
 </html>
 
