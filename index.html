@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.16</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.17</div>
 </div>
 <script>
 /* ============================================================
@@ -3624,6 +3624,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetSchoolsCache769813_==="function"){
     qrResetSchoolsCache769813_();
+  }
+  if(typeof qrResetExecutiveDashboardBrowserCache769817_==="function"){
+    qrResetExecutiveDashboardBrowserCache769817_();
   }
 
   try{
@@ -11877,6 +11880,60 @@ function applyExecutiveDashboardLanguage7661(){
   }
 }
 
+const QR_EXEC_DASH_BROWSER_CACHE_TTL_769817=45000;
+
+let qrExecutiveDashboardBrowserCache769817_={
+  key:"",
+  expires:0,
+  data:null,
+  performanceMs:null
+};
+
+function qrResetExecutiveDashboardBrowserCache769817_(){
+  qrExecutiveDashboardBrowserCache769817_={
+    key:"",
+    expires:0,
+    data:null,
+    performanceMs:null
+  };
+}
+
+function qrExecutiveDashboardCacheKey769817_(params){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    schoolId:String(selectedSchoolId7626()||""),
+    period:String(params?.period||""),
+    startDate:String(params?.startDate||""),
+    endDate:String(params?.endDate||"")
+  });
+}
+
+function qrGetExecutiveDashboardBrowserCache769817_(params){
+  const key=qrExecutiveDashboardCacheKey769817_(params);
+
+  if(
+    qrExecutiveDashboardBrowserCache769817_.key===key &&
+    qrExecutiveDashboardBrowserCache769817_.data &&
+    Date.now()<qrExecutiveDashboardBrowserCache769817_.expires
+  ){
+    return qrExecutiveDashboardBrowserCache769817_;
+  }
+
+  return null;
+}
+
+function qrSetExecutiveDashboardBrowserCache769817_(params,data,performanceMs){
+  qrExecutiveDashboardBrowserCache769817_={
+    key:qrExecutiveDashboardCacheKey769817_(params),
+    expires:Date.now()+QR_EXEC_DASH_BROWSER_CACHE_TTL_769817,
+    data:data||null,
+    performanceMs:
+      Number.isFinite(Number(performanceMs))
+        ?Number(performanceMs)
+        :null
+  };
+}
+
 async function showExecutiveDashboardTab7661(){
   if(!["MASTER","GESTOR"].includes(systemSession?.perfil||"")){
     return alert(
@@ -11902,6 +11959,10 @@ async function loadExecutiveDashboard7661(forceRefresh){
 
   const params=dashboardPeriodParams7661();
 
+  if(forceRefresh){
+    qrResetExecutiveDashboardBrowserCache769817_();
+  }
+
   if(params.period==="custom"&&(!params.startDate||!params.endDate)){
     $("executiveDashboardStatus").textContent=
       dashT7661(
@@ -11909,6 +11970,29 @@ async function loadExecutiveDashboard7661(forceRefresh){
         "Enter the start and end dates."
       );
     return;
+  }
+
+  if(!forceRefresh){
+    const localCache769817_=
+      qrGetExecutiveDashboardBrowserCache769817_(params);
+
+    if(localCache769817_){
+      executiveDashboardData7661=
+        localCache769817_.data;
+
+      renderExecutiveDashboard7661();
+
+      const generated=
+        executiveDashboardData7661?.generatedAt;
+
+      $("executiveDashboardStatus").textContent=
+        dashT7661(
+          `Atualizado em ${dashboardDateTime7661(generated)} • cache local`,
+          `Updated ${dashboardDateTime7661(generated)} • local cache`
+        );
+
+      return;
+    }
   }
 
   executiveDashboardLoading7661=true;
@@ -11942,6 +12026,12 @@ async function loadExecutiveDashboard7661(forceRefresh){
     }
 
     executiveDashboardData7661=r.data||null;
+
+    qrSetExecutiveDashboardBrowserCache769817_(
+      params,
+      executiveDashboardData7661,
+      r.performanceMs
+    );
 
     renderExecutiveDashboard7661();
 
@@ -14066,6 +14156,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.12 - deduplicates simultaneous preventivehistory requests per asset/session and avoids stale render after asset change. -->
   <!-- QRManut USA 7.6.9.8.13 - caches and deduplicates School / Unit list for 5 minutes; invalidates after school changes/logout. -->
   <!-- QRManut USA 7.6.9.8.16 - waits for assetbundle before invoking assetstatus/preventivehistory fallback; removes redundant calls when bundle succeeds. -->
+  <!-- QRManut USA 7.6.9.8.17 - Executive Dashboard browser cache for 45s avoids repeat Apps Script call when returning to same scope/period. -->
 </body>
 </html>
 
