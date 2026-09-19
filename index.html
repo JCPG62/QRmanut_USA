@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.18</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.19</div>
 </div>
 <script>
 /* ============================================================
@@ -3324,6 +3324,9 @@ function qrForceSystemLogout76952_(message){
   occurrenceReportData=null;
   occurrenceReportFiltersLoaded=false;
   documentFiltersLoaded=false;
+  if(typeof qrResetDocumentCaches769819_==="function"){
+    qrResetDocumentCaches769819_();
+  }
   pendingFiltersLoaded=false;
 
   reportPosting=false;
@@ -3881,6 +3884,9 @@ function resetSchoolScopedData7622(){
   }
   occurrenceReportFiltersLoaded=false;
   documentFiltersLoaded=false;
+  if(typeof qrResetDocumentCaches769819_==="function"){
+    qrResetDocumentCaches769819_();
+  }
   pendingFiltersLoaded=false;
   if(typeof documentUploadMetaLoaded!=="undefined")documentUploadMetaLoaded=false;
   $("occReportSummary").innerHTML="";
@@ -4196,8 +4202,8 @@ async function qrOpenAssetAccess76957_(){
 
 function openMainMenu(){hide("assetScreen");show("searchScreen");hide("menuLockedCard");show("mainMenuButtons");renderSystemAccess();updateRoleUi();loadGlobalSchoolScope7622().catch(()=>{});showSearchTab();if(systemSession?.perfil==="PRESTADOR"){$("occReportProvider").disabled=true}else{$("occReportProvider").disabled=false}}
 async function requireSystemLogin(nextAction){if(await systemSessionIsValid()){nextAction();return}systemLoginNextAction=nextAction;$("systemUsername").value="";$("systemPassword").value="";$("systemLoginMessage").className="message";$("systemLoginModal").style.display="flex";setTimeout(()=>$("systemUsername").focus(),80)}
-async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);qrMarkSessionValidated769811_();$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;qrSyncAssetAccessButton76957_();await qrRefreshCurrentAssetSecurityUi76954_();if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;qrLoginResumeContext76956_="";fn()}else if(qrLoginResumeContext76956_==="ASSET"&&qrAssetRoute76956_()){qrLoginResumeContext76956_="";hide("searchScreen");show("assetScreen")}else{qrLoginResumeContext76956_="";openMainMenu()}}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
-async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;pendingFiltersLoaded=false;qrLoginResumeContext76956_="";qrShowLoggedOutContext76956_();qrSyncAssetAccessButton76957_();await qrRefreshCurrentAssetSecurityUi76954_()}
+async function doSystemLogin(){const user=$("systemUsername").value.trim(),password=$("systemPassword").value;if(!user||!password){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent="Informe usuário e senha.";return}$("sendSystemLogin").disabled=true;$("sendSystemLogin").textContent="Entrando...";try{const r=await apiPost({action:"systemLogin",systemUsername:user,systemPassword:password});if(!r.ok)throw new Error(r.detail||"Usuário ou senha inválidos.");saveSystemSession(r);qrMarkSessionValidated769811_();$("systemLoginModal").style.display="none";occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;if(typeof qrResetDocumentCaches769819_==="function"){qrResetDocumentCaches769819_();}pendingFiltersLoaded=false;qrSyncAssetAccessButton76957_();await qrRefreshCurrentAssetSecurityUi76954_();if(systemLoginNextAction){const fn=systemLoginNextAction;systemLoginNextAction=null;qrLoginResumeContext76956_="";fn()}else if(qrLoginResumeContext76956_==="ASSET"&&qrAssetRoute76956_()){qrLoginResumeContext76956_="";hide("searchScreen");show("assetScreen")}else{qrLoginResumeContext76956_="";openMainMenu()}}catch(e){$("systemLoginMessage").className="message error";$("systemLoginMessage").textContent=e.message}finally{$("sendSystemLogin").disabled=false;$("sendSystemLogin").textContent="Entrar"}}
+async function logoutSystemMenu(){try{if(systemSession?.systemSessionToken)await apiPost({action:"systemLogout",systemSessionToken:systemSession.systemSessionToken})}catch(e){}clearSystemSession();clearPreventiveSession();preventiveControlData=null;occurrenceReportData=null;occurrenceReportFiltersLoaded=false;documentFiltersLoaded=false;if(typeof qrResetDocumentCaches769819_==="function"){qrResetDocumentCaches769819_();}pendingFiltersLoaded=false;qrLoginResumeContext76956_="";qrShowLoggedOutContext76956_();qrSyncAssetAccessButton76957_();await qrRefreshCurrentAssetSecurityUi76954_()}
 
 async function sessionIsValid(){return systemSessionIsValid()}
 
@@ -4608,11 +4614,73 @@ async function loadOccurrenceReport(){setDefaultOccurrenceReportDates();const p=
 async function generateOccurrenceReportPdf(){if(!occurrenceReportData)return;const p=occurrenceReportParams(),btn=$("occReportPdf");btn.disabled=true;btn.textContent="Gerando PDF...";show("occPdfBox");$("occPdfMessage").textContent="Gerando o arquivo PDF...";$("occPdfLinkWrap").innerHTML="";try{const r=await menuApiPost({action:"generateOccurrenceReportPdf",dataInicial:p.dataInicial,dataFinal:p.dataFinal,occProvider:p.prestador,occCategory:p.categoria,occComponent:p.componente,occFloor:p.pavimento,occLocation:p.localizacao});if(!r.ok)throw new Error(r.detail||"Não foi possível gerar o PDF.");$("occPdfMessage").textContent=`PDF gerado com ${r.summary.total} OC(s) concluída(s).`;$("occPdfLinkWrap").innerHTML=`<a class="occ-pdf-link" href="${esc(r.url)}" target="_blank" rel="noopener">📄 Abrir PDF</a>`}catch(e){$("occPdfMessage").textContent=e.message}finally{btn.disabled=false;btn.textContent="📄 Gerar PDF"}}
 
 let documentFiltersLoaded=false;
+
+const QR_DOCUMENTS_CACHE_TTL_769819=45000;
+const QR_DOCUMENT_FILTERS_CACHE_TTL_769819=300000;
+
+let qrDocumentFiltersScopeKey769819_="";
+const qrDocumentFiltersCache769819_=new Map();
+const qrDocumentSearchCache769819_=new Map();
+const qrDocumentSearchInFlight769819_=new Map();
+
+function qrDocumentScopeKey769819_(){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    schoolId:String(selectedSchoolId7626()||"")
+  });
+}
+
+function qrDocumentSearchKey769819_(){
+  return JSON.stringify({
+    scope:qrDocumentScopeKey769819_(),
+    q:String($("documentSearchInput")?.value||"").trim(),
+    tipo:String($("documentTypeFilter")?.value||""),
+    disciplina:String($("documentDisciplineFilter")?.value||""),
+    pavimento:String($("documentFloorFilter")?.value||"")
+  });
+}
+
+function qrResetDocumentCaches769819_(){
+  documentFiltersLoaded=false;
+  qrDocumentFiltersScopeKey769819_="";
+  qrDocumentFiltersCache769819_.clear();
+  qrDocumentSearchCache769819_.clear();
+  qrDocumentSearchInFlight769819_.clear();
+}
+
 async function loadDocumentFilters(){
-  if(documentFiltersLoaded)return;
+  const scopeKey=qrDocumentScopeKey769819_();
+
+  if(
+    documentFiltersLoaded &&
+    qrDocumentFiltersScopeKey769819_===scopeKey
+  ){
+    return;
+  }
+
   try{
-    const r=await menuApi({action:"documentfilters"});
-    if(!r.ok)return;
+    let r=null;
+    const cached=qrDocumentFiltersCache769819_.get(scopeKey);
+
+    if(
+      cached &&
+      cached.data &&
+      Date.now()<cached.expires
+    ){
+      r=cached.data;
+    }else{
+      r=await menuApi({action:"documentfilters"});
+
+      if(!r.ok)return;
+
+      qrDocumentFiltersCache769819_.set(
+        scopeKey,
+        {
+          expires:Date.now()+QR_DOCUMENT_FILTERS_CACHE_TTL_769819,
+          data:r
+        }
+      );
+    }
 
     const f=r.filters||{};
 
@@ -4633,23 +4701,73 @@ async function loadDocumentFilters(){
     );
 
     documentFiltersLoaded=true;
+    qrDocumentFiltersScopeKey769819_=scopeKey;
   }catch(e){}
 }
-async function searchDocuments(){
+async function searchDocuments(options={}){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
   const q=$("documentSearchInput").value.trim();
+  const force=!!options.force;
+  const cacheKey=qrDocumentSearchKey769819_();
 
   $("documentStatus").textContent=t("Buscando documentos...","Searching documents...");
   $("documentResults").innerHTML="";
 
   try{
-    const r=await menuApi({
-      action:"documents",
-      q:q,
-      tipo:$("documentTypeFilter").value,
-      disciplina:$("documentDisciplineFilter").value,
-      pavimento:$("documentFloorFilter").value
-    });
+    let r=null;
+    let usedLocalCache769819_=false;
+
+    if(!force){
+      const cached=qrDocumentSearchCache769819_.get(cacheKey);
+
+      if(
+        cached &&
+        cached.data &&
+        Date.now()<cached.expires
+      ){
+        r=cached.data;
+        usedLocalCache769819_=true;
+      }
+    }
+
+    if(!r){
+      if(
+        !force &&
+        qrDocumentSearchInFlight769819_.has(cacheKey)
+      ){
+        r=await qrDocumentSearchInFlight769819_.get(cacheKey);
+      }else{
+        const request=menuApi({
+          action:"documents",
+          q:q,
+          tipo:$("documentTypeFilter").value,
+          disciplina:$("documentDisciplineFilter").value,
+          pavimento:$("documentFloorFilter").value
+        });
+
+        qrDocumentSearchInFlight769819_.set(cacheKey,request);
+
+        try{
+          r=await request;
+        }finally{
+          if(
+            qrDocumentSearchInFlight769819_.get(cacheKey)===request
+          ){
+            qrDocumentSearchInFlight769819_.delete(cacheKey);
+          }
+        }
+
+        if(r?.ok){
+          qrDocumentSearchCache769819_.set(
+            cacheKey,
+            {
+              expires:Date.now()+QR_DOCUMENTS_CACHE_TTL_769819,
+              data:r
+            }
+          );
+        }
+      }
+    }
 
     if(!r.ok){
       throw new Error(
@@ -4660,9 +4778,12 @@ async function searchDocuments(){
     const items=r.documents||[];
 
     $("documentStatus").textContent=
-      qrLanguage==="en-US"
+      (qrLanguage==="en-US"
         ?`${items.length} document(s) found`
-        :`${items.length} documento(s) encontrado(s)`;
+        :`${items.length} documento(s) encontrado(s)`) +
+      (usedLocalCache769819_
+        ?` • ${t("cache local","local cache")}`
+        :"");
 
     if(!items.length){
       $("documentResults").innerHTML=
@@ -7303,7 +7424,7 @@ async function sendDocumentUpload(){
     $("documentUploadResult").innerHTML=
       `<div class="upload-success-card"><b>${esc(r.idDocumento)} — ${esc(r.titulo)}</b>${r.idAtivo?`<div style="margin-top:5px">Vinculado ao ativo: <b>${esc(r.idAtivo)}</b></div>`:""}<a class="open-button" style="margin-top:10px" href="${esc(r.linkPdf)}" target="_blank" rel="noopener">Abrir PDF</a></div>`;
 
-    documentFiltersLoaded=false;
+    qrResetDocumentCaches769819_();
   }catch(e){
     $("documentUploadMessage").className="message error";
     $("documentUploadMessage").textContent=e.message;
@@ -12710,7 +12831,7 @@ function renderExecutiveDashboardDetails7661(kind,items){
 }
 
 
-$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=searchDocuments;$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments()}};$("documentTypeFilter").onchange=searchDocuments;$("documentDisciplineFilter").onchange=searchDocuments;$("documentFloorFilter").onchange=searchDocuments;$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=()=>searchDocuments({force:true});$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchDocuments({force:true})}};$("documentTypeFilter").onchange=()=>searchDocuments({force:true});$("documentDisciplineFilter").onchange=()=>searchDocuments({force:true});$("documentFloorFilter").onchange=()=>searchDocuments({force:true});$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=qrOpenAssetAccess76957_;
 $("backAssetButton").onclick=async function(){
   const id=getOriginAsset();
@@ -14230,6 +14351,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.16 - waits for assetbundle before invoking assetstatus/preventivehistory fallback; removes redundant calls when bundle succeeds. -->
   <!-- QRManut USA 7.6.9.8.17 - Executive Dashboard browser cache for 45s avoids repeat Apps Script call when returning to same scope/period. -->
   <!-- QRManut USA 7.6.9.8.18 - Executive Dashboard detail responses cached locally for 45s by scope/period/card; repeated card opens avoid Apps Script call. -->
+  <!-- QRManut USA 7.6.9.8.19 - scoped browser cache for document filters (5 min) and document searches (45s), plus in-flight dedupe and invalidation after uploads/scope/session changes. -->
 </body>
 </html>
 
