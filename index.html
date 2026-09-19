@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.12</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.13</div>
 </div>
 <script>
 /* ============================================================
@@ -3622,6 +3622,9 @@ function clearSystemSession(){
   if(typeof qrResetSessionValidationCache769811_==="function"){
     qrResetSessionValidationCache769811_();
   }
+  if(typeof qrResetSchoolsCache769813_==="function"){
+    qrResetSchoolsCache769813_();
+  }
 
   try{
     localStorage.removeItem(SYSTEM_SESSION_KEY);
@@ -3739,6 +3742,79 @@ function renderSystemAccess(){
     `${systemSession.perfil==="MASTER"&&systemSession.scopeSchoolName?` • ${t("Escopo","Scope")}: <b>${esc(systemSession.scopeSchoolName)}</b>`:""}`+
     `${systemSession.prestador?` • ${t("Prestador","Service Provider")}: <b>${esc(systemSession.prestador)}</b>`:""}`;
 }
+const QR_SCHOOLS_CACHE_TTL_769813=300000;
+let qrSchoolsCache769813_={
+  token:"",
+  expires:0,
+  data:null,
+  inFlight:null
+};
+
+function qrResetSchoolsCache769813_(){
+  qrSchoolsCache769813_={
+    token:"",
+    expires:0,
+    data:null,
+    inFlight:null
+  };
+}
+
+async function qrGetSchoolsCached769813_(options={}){
+  if(!systemSession?.systemSessionToken){
+    throw new Error("Faça login no Menu Principal.");
+  }
+
+  const token=String(systemSession.systemSessionToken);
+  const force=!!options.force;
+  const now=Date.now();
+
+  if(
+    !force &&
+    qrSchoolsCache769813_.token===token &&
+    qrSchoolsCache769813_.data &&
+    now<qrSchoolsCache769813_.expires
+  ){
+    return qrSchoolsCache769813_.data;
+  }
+
+  if(qrSchoolsCache769813_.inFlight){
+    return qrSchoolsCache769813_.inFlight;
+  }
+
+  const request=(async()=>{
+    const r=await api({
+      action:"schools",
+      systemSession:token
+    });
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        (qrLanguage==="en-US"
+          ?"Unable to load schools."
+          :"Erro ao carregar colégios.")
+      );
+    }
+
+    qrSchoolsCache769813_.token=token;
+    qrSchoolsCache769813_.data=r;
+    qrSchoolsCache769813_.expires=
+      Date.now()+QR_SCHOOLS_CACHE_TTL_769813;
+
+    return r;
+  })();
+
+  qrSchoolsCache769813_.inFlight=request;
+
+  try{
+    return await request;
+  }finally{
+    if(qrSchoolsCache769813_.inFlight===request){
+      qrSchoolsCache769813_.inFlight=null;
+    }
+  }
+}
+
 async function loadGlobalSchoolScope7622(){
   const loadSeq=++globalSchoolScopeLoadSeq7624;
   const box=$("globalSchoolScope"),select=$("globalSchoolSelect"),hint=$("globalSchoolHint"),mode=$("globalSchoolMode");
@@ -3753,7 +3829,7 @@ async function loadGlobalSchoolScope7622(){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
 
   try{
-    const r=await api({action:"schools",systemSession:systemSession.systemSessionToken});
+    const r=await qrGetSchoolsCached769813_();
     if(loadSeq!==globalSchoolScopeLoadSeq7624)return;
     if(!r.ok)throw new Error(r.detail||t("Erro ao carregar colégios.","Unable to load schools."));
     const schools=r.schools||[];
@@ -7863,6 +7939,8 @@ async function saveSchoolAdmin7650(){
         "School / unit saved successfully."
       );
 
+    qrResetSchoolsCache769813_();
+
     // If the currently selected school was edited, refresh the stored scope
     // so its name/status is immediately consistent.
     if(
@@ -7921,6 +7999,8 @@ async function toggleSchoolAdmin7650(id,active){
     });
 
     if(!r.ok)throw new Error(r.detail||r.error||"");
+
+    qrResetSchoolsCache769813_();
 
     // If MASTER just deactivated the school currently selected in the
     // global filter, return immediately to All Schools.
@@ -8678,7 +8758,7 @@ async function loadUsers(){
     const [u,p,sr]=await Promise.all([
       menuApi({action:"users"}),
       menuApi({action:"providers"}),
-      menuApi({action:"schools"})
+      qrGetSchoolsCached769813_()
     ]);
     if(!u.ok)throw new Error(u.detail||t("Erro ao carregar usuários.","Error loading users."));
 
@@ -13968,6 +14048,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.9 - MASTER performance diagnostics: API elapsed time, average, P95, maximum and slow-call log. -->
   <!-- QRManut USA 7.6.9.8.11 - reuses recent positive system-session validation for 30s; proactive focus/visibility checks remain remote. -->
   <!-- QRManut USA 7.6.9.8.12 - deduplicates simultaneous preventivehistory requests per asset/session and avoids stale render after asset change. -->
+  <!-- QRManut USA 7.6.9.8.13 - caches and deduplicates School / Unit list for 5 minutes; invalidates after school changes/logout. -->
 </body>
 </html>
 
