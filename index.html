@@ -1608,6 +1608,7 @@ button.dashboard-kpi-card:hover{
     <button id="tabDocumentUpload" class="menu-button upload-doc hidden">📤 Upload de Documentos</button>
     <button id="tabUsers" class="menu-button users hidden">👥 Gestão de Usuários</button>
     <button id="tabAudit" class="menu-button audit hidden">🧾 Auditoria</button>
+    <button id="tabPerformance76989" class="menu-button hidden">⏱ Performance</button>
     <button id="tabProvidersAdmin" class="menu-button providers-admin hidden">🏢 Prestadores</button>
     <button id="tabCompany" class="menu-button company hidden">⚙️ Empresa</button>
       <button id="tabRolePermissions7690" class="menu-button hidden">🔐 Permissões de Perfis</button>
@@ -2024,6 +2025,47 @@ button.dashboard-kpi-card:hover{
       <div id="auditResults"></div>
     </div>
   </div>
+  <div id="performanceArea76989" class="hidden">
+    <div class="card">
+      <div class="back-asset-wrap">
+        <button id="performanceBackMenu76989" class="back-asset-btn" type="button">← Voltar ao Menu Principal</button>
+      </div>
+      <h2 style="margin-bottom:5px">⏱ Diagnóstico de Performance</h2>
+      <div class="muted">
+        Mede o tempo total das chamadas entre o navegador e a API. Use esta tela para identificar quais rotinas estão demorando mais antes de otimizar o sistema.
+      </div>
+
+      <div id="performanceSummary76989" class="status-summary" style="margin-top:14px"></div>
+
+      <div class="occ-report-actions" style="margin-top:14px">
+        <button id="performanceRefresh76989" class="btn btn-blue" type="button">Atualizar leitura</button>
+        <button id="performanceClear76989" class="btn btn-secondary" type="button">Limpar medições</button>
+      </div>
+
+      <div id="performanceStatus76989" class="muted" style="margin-top:12px"></div>
+
+      <div style="overflow:auto;margin-top:10px">
+        <table style="width:100%;border-collapse:collapse;min-width:720px">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Horário</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Método</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Ação</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #ddd">Tempo total</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #ddd">Backend*</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="performanceRows76989"></tbody>
+        </table>
+      </div>
+
+      <div class="muted" style="margin-top:10px">
+        * Backend aparece quando a própria rotina informa <code>performanceMs</code>. O tempo total inclui rede, Apps Script e processamento da resposta no navegador.
+      </div>
+    </div>
+  </div>
+
   <div id="usersArea" class="hidden">
     <div class="card">
       <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
@@ -2905,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.6</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.9</div>
 </div>
 <script>
 /* ============================================================
@@ -3254,7 +3296,7 @@ function qrShowLoggedOutContext76956_(context){
     "searchArea","pendingArea","occurrenceReportArea","preventiveControlArea",
     "preventiveChecklistAdminArea","documentsArea","usersArea","auditArea",
     "companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea",
-    "rolePermissionsArea7690","occurrenceCatalogArea","maintenancePendingArea",
+    "performanceArea76989","rolePermissionsArea7690","occurrenceCatalogArea","maintenancePendingArea",
     "assetManagementPanel","executiveDashboardArea","problemAssetsArea"
   ].forEach(hide);
 
@@ -3330,73 +3372,231 @@ async function qrEnsureActiveSystemSession76952_(){
   return true;
 }
 
+const qrPerformanceLog76989_=[];
+
+function qrPerformancePercentile76989_(values,p){
+  if(!values.length)return 0;
+  const sorted=[...values].sort((a,b)=>a-b);
+  const index=Math.min(
+    sorted.length-1,
+    Math.max(0,Math.ceil((p/100)*sorted.length)-1)
+  );
+  return sorted[index];
+}
+
+function qrRecordPerformance76989_(method,req,elapsed,data,error){
+  const item={
+    time:new Date(),
+    method:String(method||"GET"),
+    action:String(req?.action||"(sem action)"),
+    elapsed:Math.round(Number(elapsed)||0),
+    backendMs:
+      data&&Number.isFinite(Number(data.performanceMs))
+        ?Math.round(Number(data.performanceMs))
+        :null,
+    ok:!error&&data?.ok!==false,
+    detail:error
+      ?String(error.message||error)
+      :String(data?.detail||data?.error||"")
+  };
+
+  qrPerformanceLog76989_.push(item);
+  if(qrPerformanceLog76989_.length>100){
+    qrPerformanceLog76989_.splice(
+      0,
+      qrPerformanceLog76989_.length-100
+    );
+  }
+
+  try{
+    console.info(
+      `[QRPerf] ${item.method} ${item.action}: ${item.elapsed} ms`,
+      item
+    );
+  }catch(_){}
+
+  if(
+    $("performanceArea76989") &&
+    !$("performanceArea76989").classList.contains("hidden")
+  ){
+    renderPerformance76989_();
+  }
+}
+
+function renderPerformance76989_(){
+  const rows=$("performanceRows76989");
+  const summary=$("performanceSummary76989");
+  const status=$("performanceStatus76989");
+  if(!rows||!summary||!status)return;
+
+  const items=[...qrPerformanceLog76989_];
+  const values=items.map(x=>x.elapsed);
+  const avg=values.length
+    ?Math.round(values.reduce((a,b)=>a+b,0)/values.length)
+    :0;
+  const p95=Math.round(qrPerformancePercentile76989_(values,95));
+  const max=values.length?Math.max(...values):0;
+  const slow=items.filter(x=>x.elapsed>=2000).length;
+
+  summary.innerHTML=
+    `<div><b>Medições:</b> ${items.length}</div>`+
+    `<div><b>Média:</b> ${avg} ms</div>`+
+    `<div><b>P95:</b> ${p95} ms</div>`+
+    `<div><b>Máximo:</b> ${max} ms</div>`+
+    `<div><b>≥ 2 s:</b> ${slow}</div>`;
+
+  if(!items.length){
+    status.textContent=
+      "Ainda não há medições. Navegue pelas telas do sistema e volte aqui para comparar os tempos.";
+    rows.innerHTML="";
+    return;
+  }
+
+  const worst=[...items]
+    .sort((a,b)=>b.elapsed-a.elapsed)
+    .slice(0,3)
+    .map(x=>`${x.action} (${x.elapsed} ms)`)
+    .join(" • ");
+
+  status.textContent=
+    `Chamadas mais lentas desta sessão: ${worst}`;
+
+  rows.innerHTML=items
+    .slice()
+    .reverse()
+    .slice(0,40)
+    .map(x=>{
+      const hh=String(x.time.getHours()).padStart(2,"0");
+      const mm=String(x.time.getMinutes()).padStart(2,"0");
+      const ss=String(x.time.getSeconds()).padStart(2,"0");
+      return `<tr>
+        <td style="padding:8px;border-bottom:1px solid #eee">${hh}:${mm}:${ss}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee">${esc(x.method)}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee"><b>${esc(x.action)}</b></td>
+        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${x.elapsed} ms</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${x.backendMs===null?"—":x.backendMs+" ms"}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee">${x.ok?"OK":"ERRO"}${x.detail?` — ${esc(x.detail)}`:""}</td>
+      </tr>`;
+    }).join("");
+}
+
+function clearPerformance76989_(){
+  qrPerformanceLog76989_.length=0;
+  renderPerformance76989_();
+}
+
+function showPerformanceTab76989_(){
+  if(systemSession?.perfil!=="MASTER"){
+    alert("Somente MASTER pode acessar o diagnóstico de performance.");
+    return;
+  }
+  clearTabs();
+  $("tabPerformance76989").classList.add("active");
+  showOnly("performanceArea76989");
+  renderPerformance76989_();
+}
+
 async function api(params){
   const req={...params};
+  const perfStart76989_=performance.now();
+  let perfData76989_=null;
+  let perfError76989_=null;
 
-  // 7.6.2.8 - todo GET autenticado carrega o School / Unit ativo.
-  if(
-    systemSession?.systemSessionToken &&
-    !Object.prototype.hasOwnProperty.call(req,"schoolId")
-  ){
-    req.schoolId=selectedSchoolId7626();
+  try{
+    // 7.6.2.8 - todo GET autenticado carrega o School / Unit ativo.
+    if(
+      systemSession?.systemSessionToken &&
+      !Object.prototype.hasOwnProperty.call(req,"schoolId")
+    ){
+      req.schoolId=selectedSchoolId7626();
+    }
+
+    const r=await fetch(
+      API_URL+"?"+new URLSearchParams(req)
+    );
+    const data=await r.json();
+    perfData76989_=data;
+
+    const authenticatedRequest=!!(
+      req.systemSession ||
+      req.systemSessionToken ||
+      req.preventiveSessionToken
+    );
+
+    if(
+      authenticatedRequest &&
+      String(req.action||"").toLowerCase()!=="systemlogout" &&
+      qrIsInvalidSystemSessionResponse76952_(data)
+    ){
+      qrForceSystemLogout76952_();
+    }
+
+    return data;
+  }catch(e){
+    perfError76989_=e;
+    throw e;
+  }finally{
+    qrRecordPerformance76989_(
+      "GET",
+      req,
+      performance.now()-perfStart76989_,
+      perfData76989_,
+      perfError76989_
+    );
   }
-
-  const r=await fetch(
-    API_URL+"?"+new URLSearchParams(req)
-  );
-  const data=await r.json();
-
-  const authenticatedRequest=!!(
-    req.systemSession ||
-    req.systemSessionToken ||
-    req.preventiveSessionToken
-  );
-
-  if(
-    authenticatedRequest &&
-    String(req.action||"").toLowerCase()!=="systemlogout" &&
-    qrIsInvalidSystemSessionResponse76952_(data)
-  ){
-    qrForceSystemLogout76952_();
-  }
-
-  return data;
 }
 
 async function apiPost(params){
   const req={...params};
+  const perfStart76989_=performance.now();
+  let perfData76989_=null;
+  let perfError76989_=null;
 
-  // 7.6.2.8 - todo POST autenticado carrega o School / Unit ativo.
-  if(
-    systemSession?.systemSessionToken &&
-    !Object.prototype.hasOwnProperty.call(req,"schoolId")
-  ){
-    req.schoolId=selectedSchoolId7626();
+  try{
+    // 7.6.2.8 - todo POST autenticado carrega o School / Unit ativo.
+    if(
+      systemSession?.systemSessionToken &&
+      !Object.prototype.hasOwnProperty.call(req,"schoolId")
+    ){
+      req.schoolId=selectedSchoolId7626();
+    }
+
+    const body=new URLSearchParams(req);
+    const r=await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+      body:body.toString()
+    });
+    const data=await r.json();
+    perfData76989_=data;
+
+    const authenticatedRequest=!!(
+      req.systemSession ||
+      req.systemSessionToken ||
+      req.preventiveSessionToken
+    );
+
+    if(
+      authenticatedRequest &&
+      String(req.action||"").toLowerCase()!=="systemlogout" &&
+      qrIsInvalidSystemSessionResponse76952_(data)
+    ){
+      qrForceSystemLogout76952_();
+    }
+
+    return data;
+  }catch(e){
+    perfError76989_=e;
+    throw e;
+  }finally{
+    qrRecordPerformance76989_(
+      "POST",
+      req,
+      performance.now()-perfStart76989_,
+      perfData76989_,
+      perfError76989_
+    );
   }
-
-  const body=new URLSearchParams(req);
-  const r=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
-    body:body.toString()
-  });
-  const data=await r.json();
-
-  const authenticatedRequest=!!(
-    req.systemSession ||
-    req.systemSessionToken ||
-    req.preventiveSessionToken
-  );
-
-  if(
-    authenticatedRequest &&
-    String(req.action||"").toLowerCase()!=="systemlogout" &&
-    qrIsInvalidSystemSessionResponse76952_(data)
-  ){
-    qrForceSystemLogout76952_();
-  }
-
-  return data;
 }
 function getSavedResponsible(){try{return localStorage.getItem(RESPONSIBLE_KEY)||""}catch(e){return""}}function saveResponsible(n){if(!n)return;try{localStorage.setItem(RESPONSIBLE_KEY,n)}catch(e){}}
 function savePreventiveSession(d){preventiveSession=d;sessionStorage.setItem(PREVENTIVE_SESSION_KEY,JSON.stringify(d))}function readPreventiveSession(){try{const raw=sessionStorage.getItem(PREVENTIVE_SESSION_KEY);preventiveSession=raw?JSON.parse(raw):null}catch(e){preventiveSession=null}}function clearPreventiveSession(){preventiveSession=null;sessionStorage.removeItem(PREVENTIVE_SESSION_KEY)}function saveSystemSession(d){
@@ -3707,6 +3907,7 @@ function updateRoleUi(){
   showByPermission7690("tabDocuments","DOCUMENT_VIEW");
 
   systemSession.perfil==="MASTER"?show("tabRolePermissions7690"):hide("tabRolePermissions7690");
+  systemSession.perfil==="MASTER"?show("tabPerformance76989"):hide("tabPerformance76989");
 
   if(systemSession.perfil==="MASTER"){
     $("userProfile").innerHTML=
@@ -3738,7 +3939,7 @@ function updateRoleUi(){
   applyGranularActionUi7690();
   qrApplyAssetActionScope76982_();
 }
-function showMenuGate(){hide("assetScreen");show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea","rolePermissionsArea7690"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
+function showMenuGate(){hide("assetScreen");show("searchScreen");hide("mainMenuButtons");["searchArea","pendingArea","occurrenceReportArea","preventiveControlArea","preventiveChecklistAdminArea","documentsArea","usersArea","auditArea","performanceArea76989","companyArea","providersAdminArea","documentUploadArea","schoolsAdminArea","rolePermissionsArea7690"].forEach(hide);hide("systemAccessInfo");hide("globalSchoolScope");show("menuLockedCard")}
 
 async function qrRefreshCurrentAssetSecurityUi76954_(){
   if(!currentAsset)return;
@@ -3964,12 +4165,13 @@ function showOnly(a){
     "assetManagementPanel",
     "schoolsAdminArea",
     "executiveDashboardArea",
-    "problemAssetsArea"
+    "problemAssetsArea",
+    "performanceArea76989"
   ].forEach(hide);
 
   show(a);
   focusRoutineStart7665(a);
-}function clearTabs(){["tabSearch","tabExecutiveDashboard","tabProblemAssets","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement","tabSchoolsAdmin"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
+}function clearTabs(){["tabSearch","tabExecutiveDashboard","tabProblemAssets","tabPending","tabOccurrenceReport","tabPreventive","tabPreventiveChecklists","tabDocuments","tabUsers","tabAudit","tabPerformance76989","tabProvidersAdmin","tabCompany","tabDocumentUpload","tabOccurrenceCatalog","tabMaintenancePending","tabAssetManagement","tabSchoolsAdmin"].forEach(id=>$(id).classList.remove("active"))}function showSearchTab(){clearTabs();$("tabSearch").classList.add("active");showOnly("searchArea");updateBackAssetButton();focusSearchInput()}async function showPendingTab(){clearTabs();$("tabPending").classList.add("active");showOnly("pendingArea");await loadPendingFilters();await loadPending()}async function showOccurrenceReportTab(){clearTabs();$("tabOccurrenceReport").classList.add("active");showOnly("occurrenceReportArea");setDefaultOccurrenceReportDates();await loadOccurrenceReportFilters();if(!occurrenceReportData)await loadOccurrenceReport()}function showPreventiveTab(){requireSystemLogin(()=>{clearTabs();$("tabPreventive").classList.add("active");showOnly("preventiveControlArea");loadPreventiveControl()})}async function showDocumentsTab(){clearTabs();$("tabDocuments").classList.add("active");showOnly("documentsArea");await loadDocumentFilters();await searchDocuments()}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
 async function showAuditTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode consultar a auditoria.");return}clearTabs();$("tabAudit").classList.add("active");showOnly("auditArea");setDefaultAuditDates();await loadAuditFilters();await loadAudit()}
 
 function isoDateLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -10571,6 +10773,10 @@ $("tabRolePermissions7690").onclick=showRolePermissions7690;
 $("rolePermissionsBackMenu7690").onclick=showSearchTab;
 $("saveRolePermissions7690").onclick=saveRolePermissions7690;
 $("restoreRolePermissions7690").onclick=restoreRolePermissions7690;
+$("tabPerformance76989").onclick=showPerformanceTab76989_;
+$("performanceBackMenu76989").onclick=showSearchTab;
+$("performanceRefresh76989").onclick=renderPerformance76989_;
+$("performanceClear76989").onclick=clearPerformance76989_;
 $("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("requestAccessButton7680").onclick=()=>openAccessRequest7680($("systemUsername").value.trim());$("recoveryRequestAccess7680").onclick=()=>openAccessRequest7680($("recoveryIdentifier").value.trim());$("accessRequestCancel7680").onclick=()=>{$("accessRequestModal7680").style.display="none";$("systemLoginModal").style.display="flex"};$("accessRequestSend7680").onclick=sendAccessRequest7680;$("accessRequestReturn7680").onclick=returnAccessRequestToLogin7680;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("userRequestsRefresh7680").onclick=loadUserRequests7680;$("rejectUserRequestCancel7680").onclick=()=>{$("rejectUserRequestModal7680").style.display="none"};$("rejectUserRequestConfirm7680").onclick=confirmRejectUserRequest7680;$("adminUserPasswordCancel7680").onclick=()=>{$("adminUserPasswordModal7680").style.display="none"};$("adminUserPasswordSave7680").onclick=saveAdminUserPassword7680;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("userContactEditProfile7674").onchange=()=>{const id=$("userContactEditId7674").value;const u=usersAdminData7674.find(x=>String(x.idUsuario||"")===String(id||""));syncEditUserAccessFields76950_(u||null)};$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession){const ctx=qrLoginResumeContext76956_;qrLoginResumeContext76956_="";qrShowLoggedOutContext76956_(ctx)}};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
   captureSchoolSelection7626(this);
 };
@@ -13660,6 +13866,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.4 - manage occurrence refreshes current asset in place; removes full-page reload/white flash. -->
   <!-- QRManut USA 7.6.9.8.5 - Back to asset now loads in place without full-page navigation. -->
   <!-- QRManut USA 7.6.9.8.6 - document upload button disables during submit and remains locked after success to prevent duplicate uploads. -->
+  <!-- QRManut USA 7.6.9.8.9 - MASTER performance diagnostics: API elapsed time, average, P95, maximum and slow-call log. -->
 </body>
 </html>
 
