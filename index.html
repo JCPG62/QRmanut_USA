@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.17</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.18</div>
 </div>
 <script>
 /* ============================================================
@@ -3627,6 +3627,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetExecutiveDashboardBrowserCache769817_==="function"){
     qrResetExecutiveDashboardBrowserCache769817_();
+  }
+  if(typeof qrResetExecutiveDashboardDetailsCache769818_==="function"){
+    qrResetExecutiveDashboardDetailsCache769818_();
   }
 
   try{
@@ -11961,6 +11964,7 @@ async function loadExecutiveDashboard7661(forceRefresh){
 
   if(forceRefresh){
     qrResetExecutiveDashboardBrowserCache769817_();
+    qrResetExecutiveDashboardDetailsCache769818_();
   }
 
   if(params.period==="custom"&&(!params.startDate||!params.endDate)){
@@ -12360,6 +12364,58 @@ function dashboardDetailTitle7661(kind){
   return dashT7661(x[0],x[1]);
 }
 
+const QR_EXEC_DASH_DETAILS_CACHE_TTL_769818=45000;
+
+const qrExecutiveDashboardDetailsCache769818_=new Map();
+
+function qrResetExecutiveDashboardDetailsCache769818_(){
+  qrExecutiveDashboardDetailsCache769818_.clear();
+}
+
+function qrExecutiveDashboardDetailsKey769818_(kind){
+  const params=dashboardPeriodParams7661();
+
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    schoolId:String(selectedSchoolId7626()||""),
+    period:String(params?.period||""),
+    startDate:String(params?.startDate||""),
+    endDate:String(params?.endDate||""),
+    kind:String(kind||"")
+  });
+}
+
+function qrGetExecutiveDashboardDetailsCache769818_(kind){
+  const key=qrExecutiveDashboardDetailsKey769818_(kind);
+  const item=qrExecutiveDashboardDetailsCache769818_.get(key);
+
+  if(
+    item &&
+    item.data &&
+    Date.now()<item.expires
+  ){
+    return item.data;
+  }
+
+  if(item){
+    qrExecutiveDashboardDetailsCache769818_.delete(key);
+  }
+
+  return null;
+}
+
+function qrSetExecutiveDashboardDetailsCache769818_(kind,data){
+  const key=qrExecutiveDashboardDetailsKey769818_(kind);
+
+  qrExecutiveDashboardDetailsCache769818_.set(
+    key,
+    {
+      expires:Date.now()+QR_EXEC_DASH_DETAILS_CACHE_TTL_769818,
+      data:data||null
+    }
+  );
+}
+
 async function openExecutiveDashboardDetail7661(kind,priority){
   executiveDashboardDetailKind7661=kind;
 
@@ -12374,24 +12430,37 @@ async function openExecutiveDashboardDetail7661(kind,priority){
   $("executiveDashboardDetailModal").style.display="flex";
 
   try{
-    const r=await menuApi({
-      action:"executivedashboarddetails",
-      ...dashboardPeriodParams7661(),
-      kind
-    });
+    let d=
+      qrGetExecutiveDashboardDetailsCache769818_(kind);
 
-    if(!r.ok){
-      throw new Error(
-        r.detail||
-        r.error||
-        dashT7661(
-          "Não foi possível carregar os registros.",
-          "Unable to load records."
-        )
+    let usedLocalCache769818_=!!d;
+
+    if(!d){
+      const r=await menuApi({
+        action:"executivedashboarddetails",
+        ...dashboardPeriodParams7661(),
+        kind
+      });
+
+      if(!r.ok){
+        throw new Error(
+          r.detail||
+          r.error||
+          dashT7661(
+            "Não foi possível carregar os registros.",
+            "Unable to load records."
+          )
+        );
+      }
+
+      d=r.data||{};
+
+      qrSetExecutiveDashboardDetailsCache769818_(
+        kind,
+        d
       );
     }
 
-    const d=r.data||{};
     let items=Array.isArray(d.items)?d.items:[];
 
     if(kind==="pendingActions"&&priority){
@@ -12435,6 +12504,9 @@ async function openExecutiveDashboardDetail7661(kind,priority){
       `${items.length} ${dashT7661("registro(s) exibido(s)","record(s) displayed")}`+
       (d.truncated
         ?` • ${dashT7661("lista limitada aos primeiros 500 registros","list limited to the first 500 records")}`
+        :"")+
+      (usedLocalCache769818_
+        ?` • ${dashT7661("cache local","local cache")}`
         :"");
 
     renderExecutiveDashboardDetails7661(kind,items);
@@ -14157,6 +14229,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.13 - caches and deduplicates School / Unit list for 5 minutes; invalidates after school changes/logout. -->
   <!-- QRManut USA 7.6.9.8.16 - waits for assetbundle before invoking assetstatus/preventivehistory fallback; removes redundant calls when bundle succeeds. -->
   <!-- QRManut USA 7.6.9.8.17 - Executive Dashboard browser cache for 45s avoids repeat Apps Script call when returning to same scope/period. -->
+  <!-- QRManut USA 7.6.9.8.18 - Executive Dashboard detail responses cached locally for 45s by scope/period/card; repeated card opens avoid Apps Script call. -->
 </body>
 </html>
 
