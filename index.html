@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.21</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.22</div>
 </div>
 <script>
 /* ============================================================
@@ -3391,7 +3391,11 @@ function qrRecordPerformance76989_(method,req,elapsed,data,error){
   const item={
     time:new Date(),
     method:String(method||"GET"),
-    action:String(req?.action||"(sem action)"),
+    action:
+      String(req?.action||"(sem action)")+
+      (req?.__perfSource
+        ?` [${String(req.__perfSource)}]`
+        :""),
     elapsed:Math.round(Number(elapsed)||0),
     backendMs:
       data&&Number.isFinite(Number(data.performanceMs))
@@ -3501,6 +3505,9 @@ function showPerformanceTab76989_(){
 
 async function api(params){
   const req={...params};
+  const wireReq={...req};
+  delete wireReq.__perfSource;
+
   const perfStart76989_=performance.now();
   let perfData76989_=null;
   let perfError76989_=null;
@@ -3515,7 +3522,7 @@ async function api(params){
     }
 
     const r=await fetch(
-      API_URL+"?"+new URLSearchParams(req)
+      API_URL+"?"+new URLSearchParams(wireReq)
     );
     const data=await r.json();
     perfData76989_=data;
@@ -3551,6 +3558,9 @@ async function api(params){
 
 async function apiPost(params){
   const req={...params};
+  const wireReq={...req};
+  delete wireReq.__perfSource;
+
   const perfStart76989_=performance.now();
   let perfData76989_=null;
   let perfError76989_=null;
@@ -3564,7 +3574,7 @@ async function apiPost(params){
       req.schoolId=selectedSchoolId7626();
     }
 
-    const body=new URLSearchParams(req);
+    const body=new URLSearchParams(wireReq);
     const r=await fetch(API_URL,{
       method:"POST",
       headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
@@ -3926,7 +3936,7 @@ async function refreshCurrentSchoolScopedView7622(){
   }
   if(!$("documentsArea").classList.contains("hidden")){
     await loadDocumentFilters();
-    await searchDocuments();
+    await searchDocuments({reason:"mudanca-escopo"});
     return;
   }
   if(!$("maintenancePendingArea").classList.contains("hidden")){
@@ -4341,7 +4351,7 @@ function showOnly(a){
     return;
   }
 
-  await searchDocuments();
+  await searchDocuments({reason:"abrir-tela"});
 }async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
 async function showAuditTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode consultar a auditoria.");return}clearTabs();$("tabAudit").classList.add("active");showOnly("auditArea");setDefaultAuditDates();await loadAuditFilters();await loadAudit()}
 
@@ -4774,6 +4784,7 @@ async function searchDocuments(options={}){
       }else{
         const request=menuApi({
           action:"documents",
+          __perfSource:String(options.reason||"nao-informado"),
           q:q,
           tipo:$("documentTypeFilter").value,
           disciplina:$("documentDisciplineFilter").value,
@@ -11015,7 +11026,9 @@ function qrApplyLanguage(lang){
   if(occurrenceReportData)renderOccurrenceReport();
   if($("documentsArea")&&!$("documentsArea").classList.contains("hidden")){
     documentFiltersLoaded=false;
-    loadDocumentFilters().then(()=>searchDocuments()).catch(()=>{});
+    loadDocumentFilters()
+      .then(()=>searchDocuments({reason:"idioma"}))
+      .catch(()=>{});
   }
   if($("uploadDocumentFileLabel"))$("uploadDocumentFileLabel").textContent=qrLanguage==="en-US"?"PDF File *":"Arquivo PDF *";
   if($("uploadDocumentChooseFileButton"))$("uploadDocumentChooseFileButton").textContent=qrLanguage==="en-US"?"📎 Choose PDF File":"📎 Escolher arquivo ou foto PDF";
@@ -12872,7 +12885,7 @@ function renderExecutiveDashboardDetails7661(kind,items){
 }
 
 
-$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true})};$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();qrResetDocumentsViewState769820_();searchDocuments({force:true})}};$("documentTypeFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true})};$("documentDisciplineFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true})};$("documentFloorFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true})};$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=loadPending;$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"buscar-manual"})};$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"enter-busca"})}};$("documentTypeFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-tipo"})};$("documentDisciplineFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-disciplina"})};$("documentFloorFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-pavimento"})};$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=qrOpenAssetAccess76957_;
 $("backAssetButton").onclick=async function(){
   const id=getOriginAsset();
@@ -14395,6 +14408,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.19 - scoped browser cache for document filters (5 min) and document searches (45s), plus in-flight dedupe and invalidation after uploads/scope/session changes. -->
   <!-- QRManut USA 7.6.9.8.20 - Documents view-state guard prevents repeated identical searches when reopening the same Documents screen within 45s. -->
   <!-- QRManut USA 7.6.9.8.21 - Documents screen reuses fresh rendered state directly; explicit invalidation on filters/scope/upload/session prevents redundant second documents call. -->
+  <!-- QRManut USA 7.6.9.8.22 - diagnostic tagging for Documents API call sources; client-only metadata is not sent to Apps Script. -->
 </body>
 </html>
 
