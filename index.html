@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.13</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.16</div>
 </div>
 <script>
 /* ============================================================
@@ -5118,26 +5118,42 @@ async function loadAsset(id){
     }
   });
 
-  // Se só a rota otimizada respondeu, mantém a ficha aberta e busca o restante.
+  // Se a rota rápida respondeu primeiro, a ficha permanece visível.
+  // Não dispara assetstatus/preventivehistory em paralelo porque assetbundle
+  // já está em andamento e contém o status. Só usa as rotas de fallback
+  // se o bundle realmente falhar.
   if(currentAsset&&!bundleOk){
-    api({action:"assetstatus",id})
-      .then(r=>{
+    hide("assetProgressNote");
+
+    bundlePromise.then(async bundle=>{
+      if(bundle?.ok&&bundle.data){
+        return;
+      }
+
+      try{
+        const r=await api({
+          action:"assetstatus",
+          id
+        });
+
         if(r?.ok&&r.data){
           currentAssetStatus=r.data;
           renderStatus(r.data);
         }
-      })
-      .catch(()=>{});
+      }catch(e){}
 
-    sessionIsValid()
-      .then(ok=>{
-        if(ok&&sessionAllowsAssetSchool7620(currentAsset)&&sessionAllowsAssetProvider76982_(currentAsset)){
-          loadPreventiveHistory().catch(()=>{});
+      try{
+        const ok=await sessionIsValid();
+
+        if(
+          ok &&
+          sessionAllowsAssetSchool7620(currentAsset) &&
+          sessionAllowsAssetProvider76982_(currentAsset)
+        ){
+          await loadPreventiveHistory();
         }
-      })
-      .catch(()=>{});
-
-    hide("assetProgressNote");
+      }catch(e){}
+    });
   }
 }
 function renderAssetDocuments(items){if(!items||!items.length){hide("assetDocumentsSection");$("assetDocuments").innerHTML="";$("assetDocumentsStatus").textContent="";return}show("assetDocumentsSection");$("assetDocumentsStatus").textContent=items.length+" documento(s) relacionado(s) a este ativo";$("assetDocuments").innerHTML=items.map(d=>{const icon=String(d.tipoDocumento||"").toLowerCase()==="manual"?"📘":"📄";return `<div class="asset-document-card"><div class="document-title">${icon} ${esc(d.titulo)}</div><div class="document-meta">${d.tipoDocumento?`<b>Tipo:</b> ${esc(d.tipoDocumento)}<br>`:""}${d.disciplina?`<b>Disciplina:</b> ${esc(d.disciplina)}<br>`:""}${d.assunto?`<b>Assunto:</b> ${esc(d.assunto)}<br>`:""}${d.revisao?`<b>Revisão:</b> ${esc(d.revisao)}<br>`:""}${d.observacoes?`<b>Observações:</b> ${esc(d.observacoes)}`:""}</div>${d.linkPdf?`<a class="document-open" href="${esc(d.linkPdf)}" target="_blank" rel="noopener">👁️ Abrir PDF</a>`:""}</div>`}).join("")}
@@ -14049,6 +14065,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.11 - reuses recent positive system-session validation for 30s; proactive focus/visibility checks remain remote. -->
   <!-- QRManut USA 7.6.9.8.12 - deduplicates simultaneous preventivehistory requests per asset/session and avoids stale render after asset change. -->
   <!-- QRManut USA 7.6.9.8.13 - caches and deduplicates School / Unit list for 5 minutes; invalidates after school changes/logout. -->
+  <!-- QRManut USA 7.6.9.8.16 - waits for assetbundle before invoking assetstatus/preventivehistory fallback; removes redundant calls when bundle succeeds. -->
 </body>
 </html>
 
