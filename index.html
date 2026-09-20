@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.29</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.30</div>
 </div>
 <script>
 /* ============================================================
@@ -3692,6 +3692,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetAssetAdminCache769829_==="function"){
     qrResetAssetAdminCache769829_();
+  }
+  if(typeof qrResetSchoolsAdminCache769830_==="function"){
+    qrResetSchoolsAdminCache769830_();
   }
 
   try{
@@ -8172,6 +8175,21 @@ function schoolT7650(pt,en){
   return qrLanguage==="en-US"?en:pt;
 }
 
+const QR_SCHOOLS_ADMIN_CACHE_TTL_769830=45000;
+const qrSchoolsAdminCache769830_=new Map();
+const qrSchoolsAdminInFlight769830_=new Map();
+
+function qrSchoolsAdminCacheKey769830_(){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||"")
+  });
+}
+
+function qrResetSchoolsAdminCache769830_(){
+  qrSchoolsAdminCache769830_.clear();
+  qrSchoolsAdminInFlight769830_.clear();
+}
+
 async function showSchoolsAdminTab7650(){
   if(systemSession?.perfil!=="MASTER"){
     return alert(
@@ -8186,15 +8204,79 @@ async function showSchoolsAdminTab7650(){
   $("tabSchoolsAdmin").classList.add("active");
   showOnly("schoolsAdminArea");
 
-  await loadSchoolsAdmin7650();
+  await loadSchoolsAdmin7650({
+    reason:"abrir-tela"
+  });
 }
 
-async function loadSchoolsAdmin7650(){
+async function loadSchoolsAdmin7650(options={}){
   $("schoolsAdminStatus").textContent=
     schoolT7650("Carregando colégios...","Loading schools...");
 
+  const force=!!options.force;
+  const key=qrSchoolsAdminCacheKey769830_();
+
   try{
-    const r=await menuApi({action:"schoolsadmin"});
+    let r=null;
+
+    if(!force){
+      const cached=qrSchoolsAdminCache769830_.get(key);
+
+      if(
+        cached &&
+        cached.data &&
+        Date.now()<cached.expires
+      ){
+        const localPerfStart769830_=performance.now();
+
+        r=cached.data;
+
+        qrRecordLocalCachePerformance769827_(
+          "schoolsadmin",
+          localPerfStart769830_,
+          "cache-local"
+        );
+      }
+    }
+
+    if(!r){
+      if(
+        !force &&
+        qrSchoolsAdminInFlight769830_.has(key)
+      ){
+        r=await qrSchoolsAdminInFlight769830_.get(key);
+      }else{
+        const request=menuApi({
+          action:"schoolsadmin",
+          __perfSource:String(options.reason||"abrir-tela")
+        });
+
+        if(!force){
+          qrSchoolsAdminInFlight769830_.set(key,request);
+        }
+
+        try{
+          r=await request;
+        }finally{
+          if(
+            !force &&
+            qrSchoolsAdminInFlight769830_.get(key)===request
+          ){
+            qrSchoolsAdminInFlight769830_.delete(key);
+          }
+        }
+
+        if(r?.ok){
+          qrSchoolsAdminCache769830_.set(
+            key,
+            {
+              expires:Date.now()+QR_SCHOOLS_ADMIN_CACHE_TTL_769830,
+              data:r
+            }
+          );
+        }
+      }
+    }
 
     if(!r.ok){
       throw new Error(
@@ -8209,6 +8291,7 @@ async function loadSchoolsAdmin7650(){
     qrSchoolsAdmin7650=r.data||{schools:[],nextId:"SCH-001"};
 
     renderSchoolsAdmin7650();
+
   }catch(e){
     $("schoolsAdminStatus").textContent=e.message||String(e);
     $("schoolsAdminList").innerHTML="";
@@ -8457,7 +8540,12 @@ async function saveSchoolAdmin7650(){
       await loadGlobalSchoolScope7622();
     }
 
-    await loadSchoolsAdmin7650();
+    qrResetSchoolsAdminCache769830_();
+
+    await loadSchoolsAdmin7650({
+      force:true,
+      reason:"apos-salvar"
+    });
 
     setTimeout(()=>{
       $("schoolAdminModal").style.display="none";
@@ -8520,7 +8608,12 @@ async function toggleSchoolAdmin7650(id,active){
       await loadGlobalSchoolScope7622();
     }
 
-    await loadSchoolsAdmin7650();
+    qrResetSchoolsAdminCache769830_();
+
+    await loadSchoolsAdmin7650({
+      force:true,
+      reason:"apos-status"
+    });
 
   }catch(e){
     alert(e.message||String(e));
@@ -15015,6 +15108,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.27 - Performance logs LOCAL cache hits; fixes automatic School/Unit scope propagation after diagnostic tagging introduced in 8.22. -->
   <!-- QRManut USA 7.6.9.8.28 - Preventive Checklist admin uses 45s scoped browser cache and in-flight dedupe; save/status changes force fresh reload. -->
   <!-- QRManut USA 7.6.9.8.29 - Asset Management uses 45s scoped browser cache and in-flight dedupe; save/status/scope/session changes invalidate cache. -->
+  <!-- QRManut USA 7.6.9.8.30 - School/Unit Management uses 45s browser cache and in-flight dedupe; save/status/session changes invalidate cache. -->
 </body>
 </html>
 
