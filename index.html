@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.28</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.29</div>
 </div>
 <script>
 /* ============================================================
@@ -3690,6 +3690,9 @@ function clearSystemSession(){
   if(typeof qrResetPreventiveChecklistAdminCache769828_==="function"){
     qrResetPreventiveChecklistAdminCache769828_();
   }
+  if(typeof qrResetAssetAdminCache769829_==="function"){
+    qrResetAssetAdminCache769829_();
+  }
 
   try{
     localStorage.removeItem(SYSTEM_SESSION_KEY);
@@ -3990,7 +3993,11 @@ async function refreshCurrentSchoolScopedView7622(){
     return;
   }
   if(!$("assetManagementPanel").classList.contains("hidden")){
-    await loadAssets760();
+    qrResetAssetAdminCache769829_();
+    await loadAssets760({
+      force:true,
+      reason:"mudanca-escopo"
+    });
     return;
   }
   if(!$("schoolsAdminArea").classList.contains("hidden")){
@@ -8526,6 +8533,22 @@ let qrAssetScope7650={schoolId:"",schoolName:"",allSchools:false};
 let qrAssetLoadSeq7650=0;
 let qrSchoolsAdmin7650={schools:[],nextId:"SCH-001"};
 
+const QR_ASSET_ADMIN_CACHE_TTL_769829=45000;
+const qrAssetAdminCache769829_=new Map();
+const qrAssetAdminInFlight769829_=new Map();
+
+function qrAssetAdminCacheKey769829_(){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    schoolId:String(selectedSchoolId7626()||"")
+  });
+}
+
+function qrResetAssetAdminCache769829_(){
+  qrAssetAdminCache769829_.clear();
+  qrAssetAdminInFlight769829_.clear();
+}
+
 function assetApi760(action,payload={}){
   if(!systemSession?.systemSessionToken){
     return Promise.reject(new Error(
@@ -8680,9 +8703,11 @@ function assetProviderPayload7610(){
 }
 
 
-async function loadAssets760(){
+async function loadAssets760(options={}){
   const loadSeq=++qrAssetLoadSeq7650;
   const requestedSchoolId=selectedSchoolId7626();
+  const force=!!options.force;
+  const key=qrAssetAdminCacheKey769829_();
 
   if($("assetScopeStatus")){
     $("assetScopeStatus").textContent=
@@ -8691,7 +8716,68 @@ async function loadAssets760(){
         :"Carregando ativos do Colégio / Unidade selecionado...";
   }
 
-  const r=await assetApi760("listassets760");
+  let r=null;
+
+  if(!force){
+    const cached=qrAssetAdminCache769829_.get(key);
+
+    if(
+      cached &&
+      cached.data &&
+      Date.now()<cached.expires
+    ){
+      const localPerfStart769829_=performance.now();
+
+      r=cached.data;
+
+      qrRecordLocalCachePerformance769827_(
+        "listassets760",
+        localPerfStart769829_,
+        "cache-local"
+      );
+    }
+  }
+
+  if(!r){
+    if(
+      !force &&
+      qrAssetAdminInFlight769829_.has(key)
+    ){
+      r=await qrAssetAdminInFlight769829_.get(key);
+    }else{
+      const request=assetApi760(
+        "listassets760",
+        {
+          __perfSource:String(options.reason||"abrir-tela")
+        }
+      );
+
+      if(!force){
+        qrAssetAdminInFlight769829_.set(key,request);
+      }
+
+      try{
+        r=await request;
+      }finally{
+        if(
+          !force &&
+          qrAssetAdminInFlight769829_.get(key)===request
+        ){
+          qrAssetAdminInFlight769829_.delete(key);
+        }
+      }
+
+      if(r?.ok){
+        qrAssetAdminCache769829_.set(
+          key,
+          {
+            expires:Date.now()+QR_ASSET_ADMIN_CACHE_TTL_769829,
+            data:r
+          }
+        );
+      }
+    }
+  }
 
   if(loadSeq!==qrAssetLoadSeq7650)return;
 
@@ -8703,7 +8789,10 @@ async function loadAssets760(){
     systemSession?.perfil==="MASTER" &&
     String(requestedSchoolId||"")!==String(selectedSchoolId7626()||"")
   ){
-    return loadAssets760();
+    return loadAssets760({
+      force:true,
+      reason:"mudanca-escopo"
+    });
   }
 
   const responseScope=String(r.scopeSchoolId||"").trim();
@@ -8971,7 +9060,13 @@ async function saveAsset760(){
 
     $("assetSaveMessage").className="message success";
     $("assetSaveMessage").textContent=(qrLanguage==="en-US"?"Asset saved: ":"Ativo salvo: ")+r.id;
-    await loadAssets760();
+
+    qrResetAssetAdminCache769829_();
+
+    await loadAssets760({
+      force:true,
+      reason:"apos-salvar"
+    });
     setTimeout(()=>{$("assetEditModal").style.display="none";},450);
   }catch(e){
     $("assetSaveMessage").className="message error";
@@ -9019,7 +9114,12 @@ async function toggleAsset760(row,isActive,button){
     const r=await assetApi760("setassetactive760",{row,active:willActivate});
     if(!r.ok)throw new Error(r.detail||r.error||"Erro ao atualizar ativo.");
 
-    await loadAssets760();
+    qrResetAssetAdminCache769829_();
+
+    await loadAssets760({
+      force:true,
+      reason:"apos-status"
+    });
 
     if($("assetScopeStatus")){
       $("assetScopeStatus").innerHTML+=willActivate
@@ -9044,7 +9144,9 @@ function openAssetManagement760(){
   clearTabs();
   $("tabAssetManagement").classList.add("active");
   showOnly("assetManagementPanel");
-  loadAssets760().catch(e=>alert(e.message));
+  loadAssets760({
+    reason:"abrir-tela"
+  }).catch(e=>alert(e.message));
 }
 
 
@@ -14912,6 +15014,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.26 - Problem Assets uses 45s scoped browser cache and in-flight dedupe; manual refresh forces backend; occurrence changes invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.27 - Performance logs LOCAL cache hits; fixes automatic School/Unit scope propagation after diagnostic tagging introduced in 8.22. -->
   <!-- QRManut USA 7.6.9.8.28 - Preventive Checklist admin uses 45s scoped browser cache and in-flight dedupe; save/status changes force fresh reload. -->
+  <!-- QRManut USA 7.6.9.8.29 - Asset Management uses 45s scoped browser cache and in-flight dedupe; save/status/scope/session changes invalidate cache. -->
 </body>
 </html>
 
