@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.31</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.32</div>
 </div>
 <script>
 /* ============================================================
@@ -3698,6 +3698,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetUserAdminCache769831_==="function"){
     qrResetUserAdminCache769831_();
+  }
+  if(typeof qrResetProviderContactsCache769832_==="function"){
+    qrResetProviderContactsCache769832_();
   }
 
   try{
@@ -7552,6 +7555,21 @@ function editProviderFromContact7674(){
 }
 
 
+const QR_PROVIDER_CONTACTS_CACHE_TTL_769832=45000;
+const qrProviderContactsCache769832_=new Map();
+const qrProviderContactsInFlight769832_=new Map();
+
+function qrProviderContactsCacheKey769832_(){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||"")
+  });
+}
+
+function qrResetProviderContactsCache769832_(){
+  qrProviderContactsCache769832_.clear();
+  qrProviderContactsInFlight769832_.clear();
+}
+
 async function showProvidersAdminTab(){
   if(!systemSession){
     return requireSystemLogin(showProvidersAdminTab);
@@ -7570,13 +7588,77 @@ async function showProvidersAdminTab(){
       ?"Service provider and contact consultation. Administrative actions follow Role Permissions."
       :"Consulta de prestadores e contatos. As ações administrativas seguem as Permissões de Perfis.";
 
-  await loadProvidersAdmin();
+  await loadProvidersAdmin({
+    reason:"abrir-tela"
+  });
 }
-async function loadProvidersAdmin(){
+
+async function loadProvidersAdmin(options={}){
   const t=qrT7612;
 
   try{
-    const r=await menuApi({action:"providercontacts"});
+    const force=!!options.force;
+    const key=qrProviderContactsCacheKey769832_();
+    let r=null;
+
+    if(!force){
+      const cached=qrProviderContactsCache769832_.get(key);
+
+      if(
+        cached &&
+        cached.data &&
+        Date.now()<cached.expires
+      ){
+        const localPerfStart769832_=performance.now();
+
+        r=cached.data;
+
+        qrRecordLocalCachePerformance769827_(
+          "providercontacts",
+          localPerfStart769832_,
+          "cache-local"
+        );
+      }
+    }
+
+    if(!r){
+      if(
+        !force &&
+        qrProviderContactsInFlight769832_.has(key)
+      ){
+        r=await qrProviderContactsInFlight769832_.get(key);
+      }else{
+        const request=menuApi({
+          action:"providercontacts",
+          __perfSource:String(options.reason||"abrir-tela")
+        });
+
+        if(!force){
+          qrProviderContactsInFlight769832_.set(key,request);
+        }
+
+        try{
+          r=await request;
+        }finally{
+          if(
+            !force &&
+            qrProviderContactsInFlight769832_.get(key)===request
+          ){
+            qrProviderContactsInFlight769832_.delete(key);
+          }
+        }
+
+        if(r?.ok){
+          qrProviderContactsCache769832_.set(
+            key,
+            {
+              expires:Date.now()+QR_PROVIDER_CONTACTS_CACHE_TTL_769832,
+              data:r
+            }
+          );
+        }
+      }
+    }
 
     if(!r.ok){
       throw new Error(
@@ -7741,10 +7823,16 @@ async function saveProviderAdmin(){
     if(typeof qrResetUserAdminCache769831_==="function"){
       qrResetUserAdminCache769831_();
     }
+    if(typeof qrResetProviderContactsCache769832_==="function"){
+      qrResetProviderContactsCache769832_();
+    }
 
     setTimeout(async()=>{
       $("providerModal").style.display="none";
-      await loadProvidersAdmin();
+      await loadProvidersAdmin({
+        force:true,
+        reason:"apos-salvar"
+      });
     },600);
   }catch(e){
     $("providerMessage").className="message error";
@@ -15271,6 +15359,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.29 - Asset Management uses 45s scoped browser cache and in-flight dedupe; save/status/scope/session changes invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.30 - School/Unit Management uses 45s browser cache and in-flight dedupe; save/status/session changes invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.31 - User Management caches users/providers/access requests for 45s with in-flight dedupe; mutations invalidate and force fresh reload. -->
+  <!-- QRManut USA 7.6.9.8.32 - Provider Contacts uses 45s browser cache and in-flight dedupe; provider saves/session changes invalidate cache. -->
 </body>
 </html>
 
