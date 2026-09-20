@@ -2032,7 +2032,7 @@ button.dashboard-kpi-card:hover{
       </div>
       <h2 style="margin-bottom:5px">⏱ Diagnóstico de Performance</h2>
       <div class="muted">
-        Mede o tempo total das chamadas entre o navegador e a API. Use esta tela para identificar quais rotinas estão demorando mais antes de otimizar o sistema.
+        Mede chamadas à API e reaproveitamentos por cache local. Registros LOCAL indicam telas atendidas no próprio navegador, sem nova chamada ao Apps Script.
       </div>
 
       <div id="performanceSummary76989" class="status-summary" style="margin-top:14px"></div>
@@ -2061,7 +2061,7 @@ button.dashboard-kpi-card:hover{
       </div>
 
       <div class="muted" style="margin-top:10px">
-        * Backend aparece quando a própria rotina informa <code>performanceMs</code>. O tempo total inclui rede, Apps Script e processamento da resposta no navegador.
+        * Backend aparece quando a própria rotina informa <code>performanceMs</code>. Método LOCAL significa que o resultado veio do cache do navegador e não houve nova chamada ao Apps Script.
       </div>
     </div>
   </div>
@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.26</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.27</div>
 </div>
 <script>
 /* ============================================================
@@ -3439,6 +3439,22 @@ function qrRecordPerformance76989_(method,req,elapsed,data,error){
   }
 }
 
+function qrRecordLocalCachePerformance769827_(action,startedAt,source){
+  qrRecordPerformance76989_(
+    "LOCAL",
+    {
+      action:String(action||"cache"),
+      __perfSource:String(source||"cache-local")
+    },
+    Math.max(0,performance.now()-Number(startedAt||performance.now())),
+    {
+      ok:true,
+      performanceMs:0
+    },
+    null
+  );
+}
+
 function renderPerformance76989_(){
   const rows=$("performanceRows76989");
   const summary=$("performanceSummary76989");
@@ -3514,8 +3530,6 @@ function showPerformanceTab76989_(){
 
 async function api(params){
   const req={...params};
-  const wireReq={...req};
-  delete wireReq.__perfSource;
 
   const perfStart76989_=performance.now();
   let perfData76989_=null;
@@ -3529,6 +3543,11 @@ async function api(params){
     ){
       req.schoolId=selectedSchoolId7626();
     }
+
+    // Metadado de diagnóstico fica somente no navegador.
+    // O School/Unit precisa ser copiado DEPOIS de ser injetado em req.
+    const wireReq={...req};
+    delete wireReq.__perfSource;
 
     const r=await fetch(
       API_URL+"?"+new URLSearchParams(wireReq)
@@ -3567,8 +3586,6 @@ async function api(params){
 
 async function apiPost(params){
   const req={...params};
-  const wireReq={...req};
-  delete wireReq.__perfSource;
 
   const perfStart76989_=performance.now();
   let perfData76989_=null;
@@ -3582,6 +3599,11 @@ async function apiPost(params){
     ){
       req.schoolId=selectedSchoolId7626();
     }
+
+    // Metadado de diagnóstico fica somente no navegador.
+    // O School/Unit precisa ser copiado DEPOIS de ser injetado em req.
+    const wireReq={...req};
+    delete wireReq.__perfSource;
 
     const body=new URLSearchParams(wireReq);
     const r=await fetch(API_URL,{
@@ -4366,6 +4388,12 @@ function showOnly(a){
     qrDocumentsViewState769820_.rendered &&
     Date.now()<qrDocumentsViewState769820_.expires
   ){
+    const localPerfStart769827_=performance.now();
+    qrRecordLocalCachePerformance769827_(
+      "documents",
+      localPerfStart769827_,
+      "cache-local"
+    );
     return;
   }
 
@@ -5073,8 +5101,16 @@ async function loadPending(options={}){
         cached.data &&
         Date.now()<cached.expires
       ){
+        const localPerfStart769827_=performance.now();
+
         d=cached.data;
         usedLocalCache769825_=true;
+
+        qrRecordLocalCachePerformance769827_(
+          "pending",
+          localPerfStart769827_,
+          "cache-local"
+        );
       }
     }
 
@@ -5236,8 +5272,16 @@ async function loadPreventiveControl(options={}){
       cached.data &&
       Date.now()<cached.expires
     ){
+      const localPerfStart769827_=performance.now();
+
       preventiveControlData=cached.data;
       renderPreventiveControl();
+
+      qrRecordLocalCachePerformance769827_(
+        "preventivecontrol",
+        localPerfStart769827_,
+        "cache-local"
+      );
       return;
     }
 
@@ -11698,8 +11742,16 @@ async function loadProblemAssets7662(forceRefresh){
       cached.data &&
       Date.now()<cached.expires
     ){
+      const localPerfStart769827_=performance.now();
+
       problemAssetsData7662=cached.data;
       renderProblemAssets7662();
+
+      qrRecordLocalCachePerformance769827_(
+        "problemassetscore",
+        localPerfStart769827_,
+        "cache-local"
+      );
 
       $("problemAssetsStatus").textContent=
         problemT7662(
@@ -12484,10 +12536,18 @@ async function loadExecutiveDashboard7661(forceRefresh){
       qrGetExecutiveDashboardBrowserCache769817_(params);
 
     if(localCache769817_){
+      const localPerfStart769827_=performance.now();
+
       executiveDashboardData7661=
         localCache769817_.data;
 
       renderExecutiveDashboard7661();
+
+      qrRecordLocalCachePerformance769827_(
+        "executivedashboardcore",
+        localPerfStart769827_,
+        "cache-local"
+      );
 
       const generated=
         executiveDashboardData7661?.generatedAt;
@@ -12933,10 +12993,20 @@ async function openExecutiveDashboardDetail7661(kind,priority){
   $("executiveDashboardDetailModal").style.display="flex";
 
   try{
+    const localDetailPerfStart769827_=performance.now();
+
     let d=
       qrGetExecutiveDashboardDetailsCache769818_(kind);
 
     let usedLocalCache769818_=!!d;
+
+    if(usedLocalCache769818_){
+      qrRecordLocalCachePerformance769827_(
+        "executivedashboarddetails",
+        localDetailPerfStart769827_,
+        "cache-local"
+      );
+    }
 
     if(!d){
       const r=await menuApi({
@@ -14741,6 +14811,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.24 - Status das Preventivas uses 45s scoped browser cache and in-flight dedupe; manual refresh forces backend; register/delete invalidates cache. -->
   <!-- QRManut USA 7.6.9.8.25 - OCs Pendentes uses 45s scoped browser cache and in-flight dedupe; filter actions force refresh; occurrence mutations invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.26 - Problem Assets uses 45s scoped browser cache and in-flight dedupe; manual refresh forces backend; occurrence changes invalidate cache. -->
+  <!-- QRManut USA 7.6.9.8.27 - Performance logs LOCAL cache hits; fixes automatic School/Unit scope propagation after diagnostic tagging introduced in 8.22. -->
 </body>
 </html>
 
