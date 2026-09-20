@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.36</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.37</div>
 </div>
 <script>
 /* ============================================================
@@ -3579,6 +3579,13 @@ async function api(params){
       qrResetAuditCache769835_();
     }
 
+    if(
+      data?.ok &&
+      typeof qrResetMaintenancePendingCache769837_==="function"
+    ){
+      qrResetMaintenancePendingCache769837_();
+    }
+
     return data;
   }catch(e){
     perfError76989_=e;
@@ -3720,6 +3727,9 @@ function clearSystemSession(){
   }
   if(typeof qrInvalidateOccurrenceCatalog769836_==="function"){
     qrInvalidateOccurrenceCatalog769836_();
+  }
+  if(typeof qrResetMaintenancePendingCache769837_==="function"){
+    qrResetMaintenancePendingCache769837_();
   }
 
   try{
@@ -3978,6 +3988,9 @@ function resetSchoolScopedData7622(){
   if(typeof qrResetAuditCache769835_==="function"){
     qrResetAuditCache769835_();
   }
+  if(typeof qrResetMaintenancePendingCache769837_==="function"){
+    qrResetMaintenancePendingCache769837_();
+  }
   if(typeof documentUploadMetaLoaded!=="undefined")documentUploadMetaLoaded=false;
   $("occReportSummary").innerHTML="";
   $("occCategorySummary").innerHTML="";
@@ -4020,7 +4033,12 @@ async function refreshCurrentSchoolScopedView7622(){
     return;
   }
   if(!$("maintenancePendingArea").classList.contains("hidden")){
-    await loadMaintenancePending();
+    qrResetMaintenancePendingCache769837_();
+
+    await loadMaintenancePending({
+      force:true,
+      reason:"mudanca-escopo"
+    });
     return;
   }
   if(!$("assetManagementPanel").classList.contains("hidden")){
@@ -8771,16 +8789,43 @@ async function moveCatalogComponent(id,direction){
 }
 
 
+const QR_MAINTENANCE_PENDING_CACHE_TTL_769837=45000;
+const qrMaintenancePendingCache769837_=new Map();
+const qrMaintenancePendingInFlight769837_=new Map();
+
+function qrMaintenancePendingParams769837_(){
+  return {
+    status:$("maintenancePendingStatusFilter").value,
+    prioridade:$("maintenancePendingPriorityFilter").value,
+    q:$("maintenancePendingSearch").value.trim()
+  };
+}
+
+function qrMaintenancePendingCacheKey769837_(){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    schoolId:String(selectedSchoolId7626()||""),
+    params:qrMaintenancePendingParams769837_()
+  });
+}
+
+function qrResetMaintenancePendingCache769837_(){
+  qrMaintenancePendingCache769837_.clear();
+  qrMaintenancePendingInFlight769837_.clear();
+}
+
 async function showMaintenancePendingTab(){
   requireSystemLogin(async ()=>{
     clearTabs();
     $("tabMaintenancePending").classList.add("active");
     showOnly("maintenancePendingArea");
-    await loadMaintenancePending();
+    await loadMaintenancePending({
+      reason:"abrir-tela"
+    });
   });
 }
 
-async function loadMaintenancePending(){
+async function loadMaintenancePending(options={}){
   const btn=$("maintenancePendingRefresh");
   btn.disabled=true;
   btn.textContent=qrLanguage==="en-US"?"Updating...":"Atualizando...";
@@ -8788,12 +8833,72 @@ async function loadMaintenancePending(){
   $("maintenancePendingStatusText").textContent=qrLanguage==="en-US"?"Loading pending actions...":"Carregando pendências...";
 
   try{
-    const r=await menuApi({
-      action:"maintenancepending",
-      status:$("maintenancePendingStatusFilter").value,
-      prioridade:$("maintenancePendingPriorityFilter").value,
-      q:$("maintenancePendingSearch").value.trim()
-    });
+    const force=!!options.force;
+    const key=qrMaintenancePendingCacheKey769837_();
+    const params=qrMaintenancePendingParams769837_();
+    let r=null;
+    let usedLocalCache769837_=false;
+
+    if(!force){
+      const cached=qrMaintenancePendingCache769837_.get(key);
+
+      if(
+        cached &&
+        cached.data &&
+        Date.now()<cached.expires
+      ){
+        const localPerfStart769837_=performance.now();
+
+        r=cached.data;
+        usedLocalCache769837_=true;
+
+        qrRecordLocalCachePerformance769827_(
+          "maintenancepending",
+          localPerfStart769837_,
+          "cache-local"
+        );
+      }
+    }
+
+    if(!r){
+      if(
+        !force &&
+        qrMaintenancePendingInFlight769837_.has(key)
+      ){
+        r=await qrMaintenancePendingInFlight769837_.get(key);
+      }else{
+        const request=menuApi({
+          action:"maintenancepending",
+          __perfSource:String(options.reason||"abrir-tela"),
+          ...params
+        });
+
+        if(!force){
+          qrMaintenancePendingInFlight769837_.set(key,request);
+        }
+
+        try{
+          r=await request;
+        }finally{
+          if(
+            !force &&
+            qrMaintenancePendingInFlight769837_.get(key)===request
+          ){
+            qrMaintenancePendingInFlight769837_.delete(key);
+          }
+        }
+
+        if(r?.ok){
+          qrMaintenancePendingCache769837_.set(
+            key,
+            {
+              expires:Date.now()+QR_MAINTENANCE_PENDING_CACHE_TTL_769837,
+              data:r
+            }
+          );
+        }
+      }
+    }
 
     if(!r.ok)throw new Error(r.detail||"Erro ao consultar pendências.");
 
@@ -8814,9 +8919,13 @@ async function loadMaintenancePending(){
       `<div class="pending-summary-card"><strong>🟢 ${counts.resolved}</strong>${qrLanguage==="en-US"?"Resolved":"Resolvidas"}</div>`+
       `<div class="pending-summary-card"><strong>🚨 ${counts.critical}</strong>${qrLanguage==="en-US"?"Critical open":"Críticas abertas"}</div>`;
 
-    $("maintenancePendingStatusText").textContent=qrLanguage==="en-US"
-      ?`${items.length} record(s) displayed.`
-      :`${items.length} registro(s) exibido(s).`;
+    $("maintenancePendingStatusText").textContent=
+      (qrLanguage==="en-US"
+        ?`${items.length} record(s) displayed.`
+        :`${items.length} registro(s) exibido(s).`)+
+      (usedLocalCache769837_
+        ?` • ${qrLanguage==="en-US"?"local cache":"cache local"}`
+        :"");
 
     if(!items.length){
       $("maintenancePendingResults").innerHTML=`<div class="document-empty">${qrLanguage==="en-US"?"No pending actions found.":"Nenhuma pendência encontrada."}</div>`;
@@ -8877,7 +8986,13 @@ async function setMaintenancePendingStatus(id,status,solution=""){
       maintenancePendingSolution:solution
     });
     if(!r.ok)throw new Error(r.detail||"Erro ao atualizar.");
-    await loadMaintenancePending();
+
+    qrResetMaintenancePendingCache769837_();
+
+    await loadMaintenancePending({
+      force:true,
+      reason:"apos-status"
+    });
   }catch(e){
     alert(e.message);
   }
@@ -8906,8 +9021,15 @@ async function generateOccurrenceFromMaintenancePending(id){
       maintenancePendingId:id
     });
     if(!r.ok)throw new Error(r.detail||"Erro ao gerar OC.");
+
     alert((qrLanguage==="en-US"?"Work order generated: ":"OC gerada: ")+(r.ocorrencia||""));
-    await loadMaintenancePending();
+
+    qrResetMaintenancePendingCache769837_();
+
+    await loadMaintenancePending({
+      force:true,
+      reason:"apos-gerar-oc"
+    });
   }catch(e){
     alert(e.message);
   }
@@ -8917,7 +9039,11 @@ function clearMaintenancePendingFilters(){
   $("maintenancePendingStatusFilter").value="";
   $("maintenancePendingPriorityFilter").value="";
   $("maintenancePendingSearch").value="";
-  loadMaintenancePending();
+
+  loadMaintenancePending({
+    force:true,
+    reason:"limpar-filtros"
+  });
 }
 
 function togglePreventiveActionFields(){
@@ -14302,7 +14428,7 @@ function renderExecutiveDashboardDetails7661(kind,items){
 }
 
 
-$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=()=>loadPending({force:true,reason:"aplicar-filtros"});$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=loadMaintenancePending;$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending()}};$("maintenancePendingStatusFilter").onchange=loadMaintenancePending;$("maintenancePendingPriorityFilter").onchange=loadMaintenancePending;$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"buscar-manual"})};$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"enter-busca"})}};$("documentTypeFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-tipo"})};$("documentDisciplineFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-disciplina"})};$("documentFloorFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-pavimento"})};$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=()=>loadPending({force:true,reason:"aplicar-filtros"});$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=()=>loadMaintenancePending({force:true,reason:"atualizar"});$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending({force:true,reason:"enter-busca"})}};$("maintenancePendingStatusFilter").onchange=()=>loadMaintenancePending({force:true,reason:"filtro-status"});$("maintenancePendingPriorityFilter").onchange=()=>loadMaintenancePending({force:true,reason:"filtro-prioridade"});$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"buscar-manual"})};$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"enter-busca"})}};$("documentTypeFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-tipo"})};$("documentDisciplineFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-disciplina"})};$("documentFloorFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-pavimento"})};$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=qrOpenAssetAccess76957_;
 $("backAssetButton").onclick=async function(){
   const id=getOriginAsset();
@@ -15933,6 +16059,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.34 - Role Permissions uses 45s browser cache and in-flight dedupe; save/restore refresh the local cache; session changes invalidate it. -->
   <!-- QRManut USA 7.6.9.8.35 - Audit uses 45s scoped browser cache/in-flight dedupe; explicit searches force refresh; any successful POST invalidates audit cache to preserve evidence freshness. -->
   <!-- QRManut USA 7.6.9.8.36 - Categories/Components admin uses 45s browser cache and in-flight dedupe; catalog mutations invalidate admin/public catalog and force fresh reload. -->
+  <!-- QRManut USA 7.6.9.8.37 - Maintenance Pending uses 45s scoped browser cache and in-flight dedupe; filters/mutations/scope/session changes force or invalidate fresh reads. -->
 </body>
 </html>
 
