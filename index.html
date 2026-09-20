@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.33</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.34</div>
 </div>
 <script>
 /* ============================================================
@@ -3704,6 +3704,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetCompanyConfigCache769833_==="function"){
     qrResetCompanyConfigCache769833_();
+  }
+  if(typeof qrResetRolePermissionsCache769834_==="function"){
+    qrResetRolePermissionsCache769834_();
   }
 
   try{
@@ -7113,6 +7116,31 @@ async function loadAudit(){
 async function clearAuditFilters(){$("auditAction").value="";$("auditResult").value="";$("auditUser").value="";$("auditSearch").value="";$("auditStart").value="";$("auditEnd").value="";setDefaultAuditDates();await loadAudit()}
 
 async function loadPublicAppConfig(){try{const r=await api({action:"appconfig"});if(!r.ok||!r.app)return;const a=r.app;document.title=a.nomeSistema||"QRManut";const meta=document.querySelector('meta[name="theme-color"]');if(meta&&a.corPrincipal)meta.setAttribute("content",a.corPrincipal);const t=document.querySelector(".search-title");if(t&&a.nomeSistema)t.textContent=a.nomeSistema;const sub=document.getElementById("qrAppSubtitle");if(sub)sub.textContent=qrLanguage==="en-US"?"Quick Maintenance Management":"Gestão rápida de manutenção"}catch(e){}}
+const QR_ROLE_PERMISSIONS_CACHE_TTL_769834=45000;
+let qrRolePermissionsCache769834_={
+  token:"",
+  expires:0,
+  data:null
+};
+let qrRolePermissionsInFlight769834_=null;
+
+function qrResetRolePermissionsCache769834_(){
+  qrRolePermissionsCache769834_={
+    token:"",
+    expires:0,
+    data:null
+  };
+  qrRolePermissionsInFlight769834_=null;
+}
+
+function qrSetRolePermissionsCache769834_(response){
+  qrRolePermissionsCache769834_={
+    token:String(systemSession?.systemSessionToken||""),
+    expires:Date.now()+QR_ROLE_PERMISSIONS_CACHE_TTL_769834,
+    data:response||null
+  };
+}
+
 async function showRolePermissions7690(){
   if(!systemSession){
     return requireSystemLogin(showRolePermissions7690);
@@ -7126,10 +7154,12 @@ async function showRolePermissions7690(){
   clearTabs();
   $("tabRolePermissions7690").classList.add("active");
   showOnly("rolePermissionsArea7690");
-  await loadRolePermissions7690();
+  await loadRolePermissions7690({
+    reason:"abrir-tela"
+  });
 }
 
-async function loadRolePermissions7690(){
+async function loadRolePermissions7690(options={}){
   if(!requireUiPermission7690("USER_RESET_PASSWORD"))return;
 
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
@@ -7138,7 +7168,57 @@ async function loadRolePermissions7690(){
   $("rolePermissionsMessage7690").textContent="";
 
   try{
-    const r=await menuApi({action:"rolepermissions"});
+    const token=String(systemSession?.systemSessionToken||"");
+    const force=!!options.force;
+    let r=null;
+
+    if(
+      !force &&
+      qrRolePermissionsCache769834_.data &&
+      qrRolePermissionsCache769834_.token===token &&
+      Date.now()<qrRolePermissionsCache769834_.expires
+    ){
+      const localPerfStart769834_=performance.now();
+
+      r=qrRolePermissionsCache769834_.data;
+
+      qrRecordLocalCachePerformance769827_(
+        "rolepermissions",
+        localPerfStart769834_,
+        "cache-local"
+      );
+    }
+
+    if(!r){
+      if(!force && qrRolePermissionsInFlight769834_){
+        r=await qrRolePermissionsInFlight769834_;
+      }else{
+        const request=menuApi({
+          action:"rolepermissions",
+          __perfSource:String(options.reason||"abrir-tela")
+        });
+
+        if(!force){
+          qrRolePermissionsInFlight769834_=request;
+        }
+
+        try{
+          r=await request;
+        }finally{
+          if(
+            !force &&
+            qrRolePermissionsInFlight769834_===request
+          ){
+            qrRolePermissionsInFlight769834_=null;
+          }
+        }
+
+        if(r?.ok){
+          qrSetRolePermissionsCache769834_(r);
+        }
+      }
+    }
+
     if(!r.ok)throw new Error(r.detail||t(
       "Erro ao carregar permissões.",
       "Error loading permissions."
@@ -7323,6 +7403,8 @@ async function saveRolePermissions7690(){
     rolePermissionsAdminData7690=r.data;
     renderRolePermissions7690();
 
+    qrSetRolePermissionsCache769834_(r);
+
     $("rolePermissionsMessage7690").className="message success";
     $("rolePermissionsMessage7690").textContent=t("Permissões atualizadas com sucesso.","Permissions updated successfully.");
 
@@ -7364,6 +7446,9 @@ async function restoreRolePermissions7690(){
 
     rolePermissionsAdminData7690=r.data;
     renderRolePermissions7690();
+
+    qrSetRolePermissionsCache769834_(r);
+
     $("rolePermissionsMessage7690").className="message success";
     $("rolePermissionsMessage7690").textContent=t("Permissões padrão restauradas.","Default permissions restored.");
   }catch(e){
@@ -15486,6 +15571,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.31 - User Management caches users/providers/access requests for 45s with in-flight dedupe; mutations invalidate and force fresh reload. -->
   <!-- QRManut USA 7.6.9.8.32 - Provider Contacts uses 45s browser cache and in-flight dedupe; provider saves/session changes invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.33 - Company Configuration uses 45s browser cache and in-flight dedupe; save/session changes invalidate cache. -->
+  <!-- QRManut USA 7.6.9.8.34 - Role Permissions uses 45s browser cache and in-flight dedupe; save/restore refresh the local cache; session changes invalidate it. -->
 </body>
 </html>
 
