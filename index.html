@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.27</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.28</div>
 </div>
 <script>
 /* ============================================================
@@ -3336,6 +3336,9 @@ function qrForceSystemLogout76952_(message){
   if(typeof qrResetProblemAssetsCache769826_==="function"){
     qrResetProblemAssetsCache769826_();
   }
+  if(typeof qrResetPreventiveChecklistAdminCache769828_==="function"){
+    qrResetPreventiveChecklistAdminCache769828_();
+  }
   pendingFiltersLoaded=false;
 
   reportPosting=false;
@@ -3683,6 +3686,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetProblemAssetsCache769826_==="function"){
     qrResetProblemAssetsCache769826_();
+  }
+  if(typeof qrResetPreventiveChecklistAdminCache769828_==="function"){
+    qrResetPreventiveChecklistAdminCache769828_();
   }
 
   try{
@@ -13597,6 +13603,22 @@ function checklistHistoryHtml7640(c){
 
 /* ---------------- ADMIN ---------------- */
 
+const QR_PREVENTIVE_CHECKLIST_ADMIN_CACHE_TTL_769828=45000;
+const qrPreventiveChecklistAdminCache769828_=new Map();
+const qrPreventiveChecklistAdminInFlight769828_=new Map();
+
+function qrPreventiveChecklistAdminKey769828_(){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    schoolId:String(selectedSchoolId7626()||"")
+  });
+}
+
+function qrResetPreventiveChecklistAdminCache769828_(){
+  qrPreventiveChecklistAdminCache769828_.clear();
+  qrPreventiveChecklistAdminInFlight769828_.clear();
+}
+
 async function showPreventiveChecklistAdminTab7640(){
   if(!["MASTER","GESTOR"].includes(systemSession?.perfil)){
     return alert(checklistT7640(
@@ -13609,14 +13631,75 @@ async function showPreventiveChecklistAdminTab7640(){
   $("tabPreventiveChecklists").classList.add("active");
   showOnly("preventiveChecklistAdminArea");
 
-  await loadPreventiveChecklistsAdmin7640();
+  await loadPreventiveChecklistsAdmin7640({
+    reason:"abrir-tela"
+  });
 }
 
-async function loadPreventiveChecklistsAdmin7640(){
+async function loadPreventiveChecklistsAdmin7640(options={}){
   $("preventiveChecklistAdminStatus").textContent=
     checklistT7640("Carregando checklists...","Loading checklists...");
 
-  const r=await menuApi({action:"preventivechecklistsadmin"});
+  const force=!!options.force;
+  const key=qrPreventiveChecklistAdminKey769828_();
+
+  if(!force){
+    const cached=qrPreventiveChecklistAdminCache769828_.get(key);
+
+    if(
+      cached &&
+      cached.data &&
+      Date.now()<cached.expires
+    ){
+      const localPerfStart769828_=performance.now();
+
+      preventiveChecklistAdminData7640=cached.data;
+      renderPreventiveChecklistAdmin7640();
+
+      qrRecordLocalCachePerformance769827_(
+        "preventivechecklistsadmin",
+        localPerfStart769828_,
+        "cache-local"
+      );
+      return;
+    }
+
+    if(qrPreventiveChecklistAdminInFlight769828_.has(key)){
+      const shared=await qrPreventiveChecklistAdminInFlight769828_.get(key);
+
+      if(shared?.ok){
+        preventiveChecklistAdminData7640=shared.data||{
+          checklists:[],
+          schools:[],
+          suggestions:{types:[],areas:[]}
+        };
+        renderPreventiveChecklistAdmin7640();
+      }
+      return;
+    }
+  }
+
+  const request=menuApi({
+    action:"preventivechecklistsadmin",
+    __perfSource:String(options.reason||"nao-informado")
+  });
+
+  if(!force){
+    qrPreventiveChecklistAdminInFlight769828_.set(key,request);
+  }
+
+  let r;
+
+  try{
+    r=await request;
+  }finally{
+    if(
+      !force &&
+      qrPreventiveChecklistAdminInFlight769828_.get(key)===request
+    ){
+      qrPreventiveChecklistAdminInFlight769828_.delete(key);
+    }
+  }
 
   if(!r.ok){
     $("preventiveChecklistAdminStatus").textContent=r.detail||r.error||"";
@@ -13628,6 +13711,14 @@ async function loadPreventiveChecklistsAdmin7640(){
     schools:[],
     suggestions:{types:[],areas:[]}
   };
+
+  qrPreventiveChecklistAdminCache769828_.set(
+    key,
+    {
+      expires:Date.now()+QR_PREVENTIVE_CHECKLIST_ADMIN_CACHE_TTL_769828,
+      data:preventiveChecklistAdminData7640
+    }
+  );
 
   renderPreventiveChecklistAdmin7640();
 }
@@ -13940,7 +14031,11 @@ async function savePreventiveChecklistAdmin7640(){
 
     setTimeout(async()=>{
       $("preventiveChecklistAdminModal").style.display="none";
-      await loadPreventiveChecklistsAdmin7640();
+      qrResetPreventiveChecklistAdminCache769828_();
+      await loadPreventiveChecklistsAdmin7640({
+        force:true,
+        reason:"apos-salvar"
+      });
     },600);
 
   }catch(e){
@@ -13968,7 +14063,11 @@ async function togglePreventiveChecklist7640(id,active){
 
     if(!r.ok)throw new Error(r.detail||r.error||"");
 
-    await loadPreventiveChecklistsAdmin7640();
+    qrResetPreventiveChecklistAdminCache769828_();
+    await loadPreventiveChecklistsAdmin7640({
+      force:true,
+      reason:"apos-status"
+    });
   }catch(e){
     alert(e.message);
   }
@@ -14812,6 +14911,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.25 - OCs Pendentes uses 45s scoped browser cache and in-flight dedupe; filter actions force refresh; occurrence mutations invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.26 - Problem Assets uses 45s scoped browser cache and in-flight dedupe; manual refresh forces backend; occurrence changes invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.27 - Performance logs LOCAL cache hits; fixes automatic School/Unit scope propagation after diagnostic tagging introduced in 8.22. -->
+  <!-- QRManut USA 7.6.9.8.28 - Preventive Checklist admin uses 45s scoped browser cache and in-flight dedupe; save/status changes force fresh reload. -->
 </body>
 </html>
 
