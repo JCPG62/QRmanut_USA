@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.32</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.33</div>
 </div>
 <script>
 /* ============================================================
@@ -3701,6 +3701,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetProviderContactsCache769832_==="function"){
     qrResetProviderContactsCache769832_();
+  }
+  if(typeof qrResetCompanyConfigCache769833_==="function"){
+    qrResetCompanyConfigCache769833_();
   }
 
   try{
@@ -7373,8 +7376,126 @@ async function restoreRolePermissions7690(){
 }
 
 
-async function showCompanyTab(){if(!requireUiPermission7690("COMPANY_CONFIG"))return;clearTabs();$("tabCompany").classList.add("active");showOnly("companyArea");await loadCompanyConfig()}
-async function loadCompanyConfig(){try{const r=await menuApi({action:"companyconfig"});if(!r.ok)throw new Error(r.detail||"Erro ao carregar configuração.");const c=r.config||{};$("companyId").value=c.idEmpresa||"SCH-0001";$("companyName").value=c.nomeEmpresa||"";$("companyTradeName").value=c.nomeFantasia||"";$("companyCnpj").value=c.cnpj||"";$("companyMaintenanceEmail").value=c.emailManutencao||"";$("companyAdminEmail").value=c.emailAdministrativo||"";$("companyLogo").value=c.logo||"";$("companyPrimaryColor").value=/^#[0-9a-f]{6}$/i.test(c.corPrincipal||"")?c.corPrincipal:"#0b315e";$("companyTimezone").value=c.fusoHorario||"America/New_York";$("companySystemName").value=c.nomeSistema||"QRManut USA";$("companyActive").checked=!!c.empresaAtiva;$("companyMainUrl").value=c.urlPrincipal||"";$("companyReportsEmail").value=c.emailRelatorios||"";$("companyWoSlaDays").value=Number(c.slaOcDias||7)||7;$("companyNotes").value=c.observacoes||"";updateCompanyPreview()}catch(e){$("companyMessage").className="message error";$("companyMessage").textContent=e.message}}
+const QR_COMPANY_CONFIG_CACHE_TTL_769833=45000;
+let qrCompanyConfigCache769833_={
+  token:"",
+  expires:0,
+  data:null
+};
+let qrCompanyConfigInFlight769833_=null;
+
+function qrResetCompanyConfigCache769833_(){
+  qrCompanyConfigCache769833_={
+    token:"",
+    expires:0,
+    data:null
+  };
+  qrCompanyConfigInFlight769833_=null;
+}
+
+async function showCompanyTab(){
+  if(!requireUiPermission7690("COMPANY_CONFIG"))return;
+
+  clearTabs();
+  $("tabCompany").classList.add("active");
+  showOnly("companyArea");
+
+  await loadCompanyConfig({
+    reason:"abrir-tela"
+  });
+}
+
+async function loadCompanyConfig(options={}){
+  try{
+    const token=String(systemSession?.systemSessionToken||"");
+    const force=!!options.force;
+    let r=null;
+
+    if(
+      !force &&
+      qrCompanyConfigCache769833_.data &&
+      qrCompanyConfigCache769833_.token===token &&
+      Date.now()<qrCompanyConfigCache769833_.expires
+    ){
+      const localPerfStart769833_=performance.now();
+
+      r=qrCompanyConfigCache769833_.data;
+
+      qrRecordLocalCachePerformance769827_(
+        "companyconfig",
+        localPerfStart769833_,
+        "cache-local"
+      );
+    }
+
+    if(!r){
+      if(!force && qrCompanyConfigInFlight769833_){
+        r=await qrCompanyConfigInFlight769833_;
+      }else{
+        const request=menuApi({
+          action:"companyconfig",
+          __perfSource:String(options.reason||"abrir-tela")
+        });
+
+        if(!force){
+          qrCompanyConfigInFlight769833_=request;
+        }
+
+        try{
+          r=await request;
+        }finally{
+          if(
+            !force &&
+            qrCompanyConfigInFlight769833_===request
+          ){
+            qrCompanyConfigInFlight769833_=null;
+          }
+        }
+
+        if(r?.ok){
+          qrCompanyConfigCache769833_={
+            token:token,
+            expires:Date.now()+QR_COMPANY_CONFIG_CACHE_TTL_769833,
+            data:r
+          };
+        }
+      }
+    }
+
+    if(!r.ok){
+      throw new Error(
+        r.detail||
+        "Erro ao carregar configuração."
+      );
+    }
+
+    const c=r.config||{};
+
+    $("companyId").value=c.idEmpresa||"SCH-0001";
+    $("companyName").value=c.nomeEmpresa||"";
+    $("companyTradeName").value=c.nomeFantasia||"";
+    $("companyCnpj").value=c.cnpj||"";
+    $("companyMaintenanceEmail").value=c.emailManutencao||"";
+    $("companyAdminEmail").value=c.emailAdministrativo||"";
+    $("companyLogo").value=c.logo||"";
+    $("companyPrimaryColor").value=/^#[0-9a-f]{6}$/i.test(c.corPrincipal||"")
+      ?c.corPrincipal
+      :"#0b315e";
+    $("companyTimezone").value=c.fusoHorario||"America/New_York";
+    $("companySystemName").value=c.nomeSistema||"QRManut USA";
+    $("companyActive").checked=!!c.empresaAtiva;
+    $("companyMainUrl").value=c.urlPrincipal||"";
+    $("companyReportsEmail").value=c.emailRelatorios||"";
+    $("companyWoSlaDays").value=Number(c.slaOcDias||7)||7;
+    $("companyNotes").value=c.observacoes||"";
+
+    updateCompanyPreview();
+
+  }catch(e){
+    $("companyMessage").className="message error";
+    $("companyMessage").textContent=e.message;
+  }
+}
 function updateCompanyPreview(){$("companyPreviewName").textContent=($("companySystemName").value||"QRManut")+" • "+($("companyTradeName").value||$("companyName").value||"");const l=$("companyLogo").value.trim();if(l){$("companyLogoPreview").src=l;show("companyLogoPreview")}else hide("companyLogoPreview")}
 async function saveCompanyConfig(){
   const b=$("saveCompanyConfig");
@@ -7404,8 +7525,12 @@ async function saveCompanyConfig(){
       companyNotes:$("companyNotes").value.trim()
     });
     if(!r.ok)throw new Error(r.detail||"Erro ao salvar.");
+
+    qrResetCompanyConfigCache769833_();
+
     $("companyMessage").className="message success";
     $("companyMessage").textContent="✅ Configuração atualizada.";
+
     await loadPublicAppConfig();
   }catch(e){
     $("companyMessage").className="message error";
@@ -15360,6 +15485,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.30 - School/Unit Management uses 45s browser cache and in-flight dedupe; save/status/session changes invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.31 - User Management caches users/providers/access requests for 45s with in-flight dedupe; mutations invalidate and force fresh reload. -->
   <!-- QRManut USA 7.6.9.8.32 - Provider Contacts uses 45s browser cache and in-flight dedupe; provider saves/session changes invalidate cache. -->
+  <!-- QRManut USA 7.6.9.8.33 - Company Configuration uses 45s browser cache and in-flight dedupe; save/session changes invalidate cache. -->
 </body>
 </html>
 
