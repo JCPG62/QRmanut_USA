@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.30</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.31</div>
 </div>
 <script>
 /* ============================================================
@@ -3696,6 +3696,9 @@ function clearSystemSession(){
   if(typeof qrResetSchoolsAdminCache769830_==="function"){
     qrResetSchoolsAdminCache769830_();
   }
+  if(typeof qrResetUserAdminCache769831_==="function"){
+    qrResetUserAdminCache769831_();
+  }
 
   try{
     localStorage.removeItem(SYSTEM_SESSION_KEY);
@@ -4414,7 +4417,116 @@ function showOnly(a){
   }
 
   await searchDocuments({reason:"abrir-tela"});
-}async function showUsersTab(){clearTabs();$("tabUsers").classList.add("active");showOnly("usersArea");await loadUsers()}
+}
+
+const QR_USER_ADMIN_CACHE_TTL_769831=45000;
+const qrUserAdminCache769831_={
+  users:new Map(),
+  providers:new Map(),
+  userrequests:new Map()
+};
+const qrUserAdminInFlight769831_={
+  users:new Map(),
+  providers:new Map(),
+  userrequests:new Map()
+};
+
+function qrUserAdminCacheKey769831_(action){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    action:String(action||"")
+  });
+}
+
+function qrResetUserAdminCache769831_(){
+  Object.keys(qrUserAdminCache769831_).forEach(k=>{
+    qrUserAdminCache769831_[k].clear();
+  });
+  Object.keys(qrUserAdminInFlight769831_).forEach(k=>{
+    qrUserAdminInFlight769831_[k].clear();
+  });
+}
+
+async function qrUserAdminGet769831_(action,options={}){
+  const cache=qrUserAdminCache769831_[action];
+  const inflight=qrUserAdminInFlight769831_[action];
+  const force=!!options.force;
+  const key=qrUserAdminCacheKey769831_(action);
+
+  if(!cache||!inflight){
+    return menuApi({
+      action:action,
+      __perfSource:String(options.reason||"nao-informado")
+    });
+  }
+
+  if(!force){
+    const cached=cache.get(key);
+
+    if(
+      cached &&
+      cached.data &&
+      Date.now()<cached.expires
+    ){
+      const localPerfStart769831_=performance.now();
+
+      qrRecordLocalCachePerformance769827_(
+        action,
+        localPerfStart769831_,
+        "cache-local"
+      );
+
+      return cached.data;
+    }
+
+    if(inflight.has(key)){
+      return await inflight.get(key);
+    }
+  }
+
+  const request=menuApi({
+    action:action,
+    __perfSource:String(options.reason||"nao-informado")
+  });
+
+  if(!force){
+    inflight.set(key,request);
+  }
+
+  let r;
+
+  try{
+    r=await request;
+  }finally{
+    if(
+      !force &&
+      inflight.get(key)===request
+    ){
+      inflight.delete(key);
+    }
+  }
+
+  if(r?.ok){
+    cache.set(
+      key,
+      {
+        expires:Date.now()+QR_USER_ADMIN_CACHE_TTL_769831,
+        data:r
+      }
+    );
+  }
+
+  return r;
+}
+
+async function showUsersTab(){
+  clearTabs();
+  $("tabUsers").classList.add("active");
+  showOnly("usersArea");
+  await loadUsers({
+    reason:"abrir-tela"
+  });
+}
 async function showAuditTab(){if(systemSession?.perfil!=="MASTER"){alert("Somente MASTER pode consultar a auditoria.");return}clearTabs();$("tabAudit").classList.add("active");showOnly("auditArea");setDefaultAuditDates();await loadAuditFilters();await loadAudit()}
 
 function isoDateLocal(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -7625,6 +7737,11 @@ async function saveProviderAdmin(){
     if(!r.ok)throw new Error(r.detail||"Erro ao salvar prestador.");
     $("providerMessage").className="message success";
     $("providerMessage").textContent="✅ Prestador salvo.";
+
+    if(typeof qrResetUserAdminCache769831_==="function"){
+      qrResetUserAdminCache769831_();
+    }
+
     setTimeout(async()=>{
       $("providerModal").style.display="none";
       await loadProvidersAdmin();
@@ -9444,12 +9561,15 @@ function userSchoolDisplay76935_(u,t){
   return t("Sem vínculo específico de colégio/unidade","No specific School / Unit assignment");
 }
 
-async function loadUsers(){
+async function loadUsers(options={}){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
+  const reason=String(options.reason||"abrir-tela");
+  const force=!!options.force;
+
   try{
     const [u,p,sr]=await Promise.all([
-      menuApi({action:"users"}),
-      menuApi({action:"providers"}),
+      qrUserAdminGet769831_("users",{reason:reason,force:force}),
+      qrUserAdminGet769831_("providers",{reason:reason,force:force}),
       qrGetSchoolsCached769813_()
     ]);
     if(!u.ok)throw new Error(u.detail||t("Erro ao carregar usuários.","Error loading users."));
@@ -9522,7 +9642,10 @@ async function loadUsers(){
 
     if(systemSession?.perfil==="MASTER"){
       show("userRequestsAdmin7680");
-      await loadUserRequests7680();
+      await loadUserRequests7680({
+        reason:reason,
+        force:force
+      });
     }else{
       hide("userRequestsAdmin7680");
     }
@@ -9536,7 +9659,7 @@ async function loadUsers(){
 
 let userRequestsData7680=[];
 
-async function loadUserRequests7680(){
+async function loadUserRequests7680(options={}){
   if(systemSession?.perfil!=="MASTER"){
     hide("userRequestsAdmin7680");
     return;
@@ -9547,7 +9670,13 @@ async function loadUserRequests7680(){
   try{
     $("userRequestsStatus7680").textContent=t("Carregando...","Loading...");
 
-    const r=await menuApi({action:"userrequests"});
+    const r=await qrUserAdminGet769831_(
+      "userrequests",
+      {
+        reason:String(options.reason||"abrir-tela"),
+        force:!!options.force
+      }
+    );
     if(!r.ok)throw new Error(r.detail||t(
       "Erro ao carregar solicitações.",
       "Error loading requests."
@@ -9674,7 +9803,13 @@ async function confirmRejectUserRequest7680(){
     ));
 
     $("rejectUserRequestModal7680").style.display="none";
-    await loadUserRequests7680();
+
+    qrResetUserAdminCache769831_();
+
+    await loadUserRequests7680({
+      force:true,
+      reason:"apos-recusa"
+    });
 
   }catch(e){
     $("rejectUserRequestMessage7680").className="message error";
@@ -9742,7 +9877,12 @@ async function saveAdminUserPassword7680(){
     $("adminUserPasswordMessage7680").className="message success";
     $("adminUserPasswordMessage7680").textContent=r.message;
 
-    await loadUsers();
+    qrResetUserAdminCache769831_();
+
+    await loadUsers({
+      force:true,
+      reason:"apos-senha"
+    });
 
     setTimeout(()=>{
       $("adminUserPasswordModal7680").style.display="none";
@@ -9969,7 +10109,12 @@ async function saveEditUserContact7674(){
         )
         :t("✅ Usuário atualizado.","✅ User updated.");
 
-    await loadUsers();
+    qrResetUserAdminCache769831_();
+
+    await loadUsers({
+      force:true,
+      reason:"apos-editar"
+    });
 
     setTimeout(()=>{
       closeEditUserContact7674();
@@ -10090,7 +10235,15 @@ async function saveUser(){
     if(!r.ok)throw new Error(r.detail||t("Não foi possível criar o usuário.","Unable to create user."));
     $("userMessage").className="message success";
     $("userMessage").textContent=r.message;
-    setTimeout(async()=>{$("userModal").style.display="none";await loadUsers();if(systemSession?.perfil==="MASTER")await loadUserRequests7680()},900);
+    qrResetUserAdminCache769831_();
+
+    setTimeout(async()=>{
+      $("userModal").style.display="none";
+      await loadUsers({
+        force:true,
+        reason:"apos-criar"
+      });
+    },900);
   }catch(e){
     $("userMessage").className="message error";$("userMessage").textContent=e.message;
   }finally{
@@ -10191,7 +10344,12 @@ async function applyUserStatus76953(){
         ?t("✅ Usuário reativado com sucesso.","✅ User reactivated successfully.")
         :t("✅ Usuário inativado com sucesso.","✅ User deactivated successfully.");
 
-    await loadUsers();
+    qrResetUserAdminCache769831_();
+
+    await loadUsers({
+      force:true,
+      reason:"apos-status"
+    });
 
     setTimeout(()=>{
       $("userStatusConfirmModal76953").style.display="none";
@@ -11650,7 +11808,10 @@ $("tabPerformance76989").onclick=showPerformanceTab76989_;
 $("performanceBackMenu76989").onclick=showSearchTab;
 $("performanceRefresh76989").onclick=renderPerformance76989_;
 $("performanceClear76989").onclick=clearPerformance76989_;
-$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("requestAccessButton7680").onclick=()=>openAccessRequest7680($("systemUsername").value.trim());$("recoveryRequestAccess7680").onclick=()=>openAccessRequest7680($("recoveryIdentifier").value.trim());$("accessRequestCancel7680").onclick=()=>{$("accessRequestModal7680").style.display="none";$("systemLoginModal").style.display="flex"};$("accessRequestSend7680").onclick=sendAccessRequest7680;$("accessRequestReturn7680").onclick=returnAccessRequestToLogin7680;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("userRequestsRefresh7680").onclick=loadUserRequests7680;$("rejectUserRequestCancel7680").onclick=()=>{$("rejectUserRequestModal7680").style.display="none"};$("rejectUserRequestConfirm7680").onclick=confirmRejectUserRequest7680;$("adminUserPasswordCancel7680").onclick=()=>{$("adminUserPasswordModal7680").style.display="none"};$("adminUserPasswordSave7680").onclick=saveAdminUserPassword7680;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("userContactEditProfile7674").onchange=()=>{const id=$("userContactEditId7674").value;const u=usersAdminData7674.find(x=>String(x.idUsuario||"")===String(id||""));syncEditUserAccessFields76950_(u||null)};$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession){const ctx=qrLoginResumeContext76956_;qrLoginResumeContext76956_="";qrShowLoggedOutContext76956_(ctx)}};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
+$("openSystemLoginButton").onclick=()=>requireSystemLogin(openMainMenu);$("forgotPasswordButton").onclick=openForgotPassword;$("requestAccessButton7680").onclick=()=>openAccessRequest7680($("systemUsername").value.trim());$("recoveryRequestAccess7680").onclick=()=>openAccessRequest7680($("recoveryIdentifier").value.trim());$("accessRequestCancel7680").onclick=()=>{$("accessRequestModal7680").style.display="none";$("systemLoginModal").style.display="flex"};$("accessRequestSend7680").onclick=sendAccessRequest7680;$("accessRequestReturn7680").onclick=returnAccessRequestToLogin7680;$("cancelRecovery").onclick=()=>{$("forgotPasswordModal").style.display="none";$("systemLoginModal").style.display="flex"};$("sendRecovery").onclick=sendRecovery;$("saveNewPassword").onclick=savePasswordFromToken;$("tabUsers").onclick=showUsersTab;$("newUserButton").onclick=openNewUser;$("tabAudit").onclick=showAuditTab;$("tabProvidersAdmin").onclick=showProvidersAdminTab;$("tabCompany").onclick=showCompanyTab;$("companyBackMenu").onclick=showSearchTab;$("providersBackMenu").onclick=showSearchTab;$("newProviderButton").onclick=()=>openProviderModal(null);$("cancelProvider").onclick=()=>{$("providerModal").style.display="none"};$("saveProvider").onclick=saveProviderAdmin;$("providerContactClose7672").onclick=closeProviderContact7672;$("providerContactEdit7674").onclick=editProviderFromContact7674;$("cancelUserContactEdit7674").onclick=closeEditUserContact7674;$("saveUserContactEdit7674").onclick=saveEditUserContact7674;$("userRequestsRefresh7680").onclick=()=>loadUserRequests7680({
+  force:true,
+  reason:"atualizar"
+});$("rejectUserRequestCancel7680").onclick=()=>{$("rejectUserRequestModal7680").style.display="none"};$("rejectUserRequestConfirm7680").onclick=confirmRejectUserRequest7680;$("adminUserPasswordCancel7680").onclick=()=>{$("adminUserPasswordModal7680").style.display="none"};$("adminUserPasswordSave7680").onclick=saveAdminUserPassword7680;$("saveCompanyConfig").onclick=saveCompanyConfig;["companyName","companyTradeName","companySystemName","companyLogo"].forEach(id=>$(id).oninput=updateCompanyPreview);$("auditRefresh").onclick=loadAudit;$("auditClear").onclick=clearAuditFilters;$("auditSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadAudit()}};$("cancelUser").onclick=()=>{$("userModal").style.display="none"};$("saveUser").onclick=saveUser;$("userProfile").onchange=syncUserSchoolField7620;$("userContactEditProfile7674").onchange=()=>{const id=$("userContactEditId7674").value;const u=usersAdminData7674.find(x=>String(x.idUsuario||"")===String(id||""));syncEditUserAccessFields76950_(u||null)};$("sendSystemLogin").onclick=doSystemLogin;$("systemPassword").onkeydown=e=>{if(e.key==="Enter")doSystemLogin()};$("cancelSystemLogin").onclick=()=>{systemLoginNextAction=null;$("systemLoginModal").style.display="none";if(!systemSession){const ctx=qrLoginResumeContext76956_;qrLoginResumeContext76956_="";qrShowLoggedOutContext76956_(ctx)}};$("systemLogoutButton").onclick=logoutSystemMenu;$("globalSchoolSelect").oninput=function(){
   captureSchoolSelection7626(this);
 };
 
@@ -15109,6 +15270,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.28 - Preventive Checklist admin uses 45s scoped browser cache and in-flight dedupe; save/status changes force fresh reload. -->
   <!-- QRManut USA 7.6.9.8.29 - Asset Management uses 45s scoped browser cache and in-flight dedupe; save/status/scope/session changes invalidate cache. -->
   <!-- QRManut USA 7.6.9.8.30 - School/Unit Management uses 45s browser cache and in-flight dedupe; save/status/session changes invalidate cache. -->
+  <!-- QRManut USA 7.6.9.8.31 - User Management caches users/providers/access requests for 45s with in-flight dedupe; mutations invalidate and force fresh reload. -->
 </body>
 </html>
 
