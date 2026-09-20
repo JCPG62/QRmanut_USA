@@ -2947,7 +2947,7 @@ button.dashboard-kpi-card:hover{
 
 <form id="manageForm" method="POST" target="manageFrame" style="display:none"><input name="action" value="updateOccurrence"><input name="systemSessionToken" id="m_system_session"><input name="token" id="m_token"><input name="ocorrencia" id="m_occurrence"><input name="status" id="m_status"><input name="responsavel" id="m_responsible"><input name="solucao" id="m_solution"><input name="alteradoPor" id="m_changedBy"><input name="descricaoOcorrencia" id="m_description"><input name="categoriaOcorrenciaEdit" id="m_category"><input name="componenteAfetadoEdit" id="m_component"><input name="fotoOcorrenciaBase64" id="m_occurrencePhoto"><input name="fotoOcorrenciaNome" id="m_occurrencePhotoName"><input name="fotoOcorrenciaMime" id="m_occurrencePhotoMime"><input name="fotoConclusaoBase64" id="m_photo"><input name="fotoConclusaoNome" id="m_photoName"><input name="fotoConclusaoMime" id="m_photoMime"></form>
 <iframe id="manageFrame" name="manageFrame"></iframe>
-<div class="footer">QRManut USA • Version 7.6.9.8.37</div>
+<div class="footer">QRManut USA • Version 7.6.9.8.38</div>
 </div>
 <script>
 /* ============================================================
@@ -3586,6 +3586,13 @@ async function api(params){
       qrResetMaintenancePendingCache769837_();
     }
 
+    if(
+      data?.ok &&
+      typeof qrResetSearchAssetsCache769838_==="function"
+    ){
+      qrResetSearchAssetsCache769838_();
+    }
+
     return data;
   }catch(e){
     perfError76989_=e;
@@ -3730,6 +3737,9 @@ function clearSystemSession(){
   }
   if(typeof qrResetMaintenancePendingCache769837_==="function"){
     qrResetMaintenancePendingCache769837_();
+  }
+  if(typeof qrResetSearchAssetsCache769838_==="function"){
+    qrResetSearchAssetsCache769838_();
   }
 
   try{
@@ -3990,6 +4000,9 @@ function resetSchoolScopedData7622(){
   }
   if(typeof qrResetMaintenancePendingCache769837_==="function"){
     qrResetMaintenancePendingCache769837_();
+  }
+  if(typeof qrResetSearchAssetsCache769838_==="function"){
+    qrResetSearchAssetsCache769838_();
   }
   if(typeof documentUploadMetaLoaded!=="undefined")documentUploadMetaLoaded=false;
   $("occReportSummary").innerHTML="";
@@ -5123,7 +5136,89 @@ async function searchDocuments(options={}){
   }
 }
 
-async function searchAssets(){
+const QR_SEARCH_ASSETS_CACHE_TTL_769838=45000;
+const qrSearchAssetsCache769838_=new Map();
+const qrSearchAssetsInFlight769838_=new Map();
+
+function qrSearchAssetsCacheKey769838_(q,schoolId){
+  return JSON.stringify({
+    token:String(systemSession?.systemSessionToken||""),
+    schoolId:String(schoolId||""),
+    q:String(q||"").trim().toUpperCase()
+  });
+}
+
+function qrResetSearchAssetsCache769838_(){
+  qrSearchAssetsCache769838_.clear();
+  qrSearchAssetsInFlight769838_.clear();
+}
+
+async function qrSearchAssetsRequest769838_(q,schoolId,options={}){
+  const force=!!options.force;
+  const key=qrSearchAssetsCacheKey769838_(q,schoolId);
+
+  if(!force){
+    const cached=qrSearchAssetsCache769838_.get(key);
+
+    if(
+      cached &&
+      cached.data &&
+      Date.now()<cached.expires
+    ){
+      const localPerfStart769838_=performance.now();
+
+      qrRecordLocalCachePerformance769827_(
+        "searchschool",
+        localPerfStart769838_,
+        "cache-local"
+      );
+
+      return cached.data;
+    }
+
+    if(qrSearchAssetsInFlight769838_.has(key)){
+      return await qrSearchAssetsInFlight769838_.get(key);
+    }
+  }
+
+  const request=menuApi({
+    action:"searchschool",
+    q:q,
+    schoolId:schoolId,
+    __perfSource:String(options.reason||"buscar-manual")
+  });
+
+  if(!force){
+    qrSearchAssetsInFlight769838_.set(key,request);
+  }
+
+  let d;
+
+  try{
+    d=await request;
+  }finally{
+    if(
+      !force &&
+      qrSearchAssetsInFlight769838_.get(key)===request
+    ){
+      qrSearchAssetsInFlight769838_.delete(key);
+    }
+  }
+
+  if(d?.ok){
+    qrSearchAssetsCache769838_.set(
+      key,
+      {
+        expires:Date.now()+QR_SEARCH_ASSETS_CACHE_TTL_769838,
+        data:d
+      }
+    );
+  }
+
+  return d;
+}
+
+async function searchAssets(options={}){
   const t=(pt,en)=>qrLanguage==="en-US"?en:pt;
 
   // 7.6.2.5 - garante que a mudança de School / Unit terminou
@@ -5149,11 +5244,14 @@ async function searchAssets(){
         ?selectedSchoolId7626()
         :activeSchoolId7622();
 
-    const d=await menuApi({
-      action:"searchschool",
+    const d=await qrSearchAssetsRequest769838_(
       q,
-      schoolId:selectedSchoolId
-    });
+      selectedSchoolId,
+      {
+        force:!!options.force,
+        reason:String(options.reason||"buscar-manual")
+      }
+    );
 
     if(!d.ok)throw new Error(d.detail||t("Erro ao realizar busca.","Unable to search assets."));
 
@@ -14428,7 +14526,7 @@ function renderExecutiveDashboardDetails7661(kind,items){
 }
 
 
-$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=()=>loadPending({force:true,reason:"aplicar-filtros"});$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=()=>loadMaintenancePending({force:true,reason:"atualizar"});$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending({force:true,reason:"enter-busca"})}};$("maintenancePendingStatusFilter").onchange=()=>loadMaintenancePending({force:true,reason:"filtro-status"});$("maintenancePendingPriorityFilter").onchange=()=>loadMaintenancePending({force:true,reason:"filtro-prioridade"});$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=searchAssets;$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets()}};$("documentSearchButton").onclick=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"buscar-manual"})};$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"enter-busca"})}};$("documentTypeFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-tipo"})};$("documentDisciplineFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-disciplina"})};$("documentFloorFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-pavimento"})};$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
+$("installAppButton").onclick=installQRManut;$("tabSearch").onclick=showSearchTab;$("tabExecutiveDashboard").onclick=showExecutiveDashboardTab7661;$("tabProblemAssets").onclick=showProblemAssetsTab7662;$("executiveDashboardBackMenu").onclick=showSearchTab;$("executiveDashboardProblemAssets").onclick=showProblemAssetsTab7662;$("problemAssetsBackMenu").onclick=showSearchTab;$("problemAssetsRefresh").onclick=()=>loadProblemAssets7662(true);$("problemAssetsPeriod").onchange=()=>{toggleProblemCustomDates7662();loadProblemAssets7662(false)};$("problemAssetsStart").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsEnd").onchange=()=>{if($("problemAssetsPeriod").value==="custom")loadProblemAssets7662(false)};$("problemAssetsLevel").onchange=renderProblemAssets7662;$("problemAssetsSearch").oninput=renderProblemAssets7662;$("problemAssetDetailClose").onclick=closeProblemAssetDetail7662;$("problemAssetDetailCloseTop").onclick=closeProblemAssetDetail7662;$("problemAssetOpenAsset").onclick=openCurrentProblemAsset7662;$("executiveDashboardRefresh").onclick=()=>loadExecutiveDashboard7661(true);$("executiveDashboardPeriod").onchange=()=>{toggleDashboardCustomDates7661();loadExecutiveDashboard7661(false)};$("executiveDashboardStart").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardEnd").onchange=()=>{if($("executiveDashboardPeriod").value==="custom")loadExecutiveDashboard7661(false)};$("executiveDashboardDetailClose").onclick=closeExecutiveDashboardDetail7661;$("executiveDashboardDetailCloseTop").onclick=closeExecutiveDashboardDetail7661;$("tabPending").onclick=showPendingTab;$("pendingApplyFilters").onclick=()=>loadPending({force:true,reason:"aplicar-filtros"});$("pendingClearFilters").onclick=clearPendingFilters;$("tabOccurrenceReport").onclick=showOccurrenceReportTab;$("tabPreventive").onclick=showPreventiveTab;$("tabPreventiveChecklists").onclick=showPreventiveChecklistAdminTab7640;$("tabDocuments").onclick=showDocumentsTab;$("tabMaintenancePending").onclick=showMaintenancePendingTab;$("maintenancePendingBackMenu").onclick=showSearchTab;$("maintenancePendingRefresh").onclick=()=>loadMaintenancePending({force:true,reason:"atualizar"});$("maintenancePendingClear").onclick=clearMaintenancePendingFilters;$("maintenancePendingSearch").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();loadMaintenancePending({force:true,reason:"enter-busca"})}};$("maintenancePendingStatusFilter").onchange=()=>loadMaintenancePending({force:true,reason:"filtro-status"});$("maintenancePendingPriorityFilter").onchange=()=>loadMaintenancePending({force:true,reason:"filtro-prioridade"});$("preventiveNeedsAction").onchange=togglePreventiveActionFields;$("tabOccurrenceCatalog").onclick=showOccurrenceCatalogTab;$("occurrenceCatalogBackMenu").onclick=showSearchTab;$("saveCatalogCategory").onclick=saveCatalogCategory;$("clearCatalogCategory").onclick=clearCatalogCategoryForm;$("saveCatalogComponent").onclick=saveCatalogComponent;$("clearCatalogComponent").onclick=clearCatalogComponentForm;$("category").onchange=()=>populateOccurrenceComponentSelect();$("manageCategory").onchange=()=>populateManageCatalog($("manageCategory").value,"");$("tabDocumentUpload").onclick=showDocumentUploadTab;$("documentUploadBackMenu").onclick=cancelDocumentUpload;$("uploadDocumentChooseFileButton").onclick=()=>$("uploadDocumentFile").click();$("uploadDocumentFile").onchange=prepareDocumentUploadFile;$("sendDocumentUpload").onclick=sendDocumentUpload;$("clearDocumentUpload").onclick=clearDocumentUploadForm;$("searchButton").onclick=()=>searchAssets({reason:"buscar-manual"});$("searchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();searchAssets({reason:"enter-busca"})}};$("documentSearchButton").onclick=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"buscar-manual"})};$("documentSearchInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"enter-busca"})}};$("documentTypeFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-tipo"})};$("documentDisciplineFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-disciplina"})};$("documentFloorFilter").onchange=()=>{qrResetDocumentsViewState769820_();searchDocuments({force:true,reason:"filtro-pavimento"})};$("reportButton").onclick=openReport;$("preventiveButton").onclick=requestPreventive;
 $("searchAssetsButton").onclick=qrOpenAssetAccess76957_;
 $("backAssetButton").onclick=async function(){
   const id=getOriginAsset();
@@ -16060,6 +16158,7 @@ if(document.readyState==="loading"){
   <!-- QRManut USA 7.6.9.8.35 - Audit uses 45s scoped browser cache/in-flight dedupe; explicit searches force refresh; any successful POST invalidates audit cache to preserve evidence freshness. -->
   <!-- QRManut USA 7.6.9.8.36 - Categories/Components admin uses 45s browser cache and in-flight dedupe; catalog mutations invalidate admin/public catalog and force fresh reload. -->
   <!-- QRManut USA 7.6.9.8.37 - Maintenance Pending uses 45s scoped browser cache and in-flight dedupe; filters/mutations/scope/session changes force or invalidate fresh reads. -->
+  <!-- QRManut USA 7.6.9.8.38 - Asset Search uses 45s scoped query cache and in-flight dedupe; scope/session/successful writes invalidate cached results. -->
 </body>
 </html>
 
